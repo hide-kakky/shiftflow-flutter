@@ -553,7 +553,10 @@ using (
   bucket_id = 'profiles' and auth.role() = 'authenticated'
 )
 with check (
-  bucket_id = 'profiles' and auth.role() = 'authenticated'
+  bucket_id = 'profiles'
+  and auth.role() = 'authenticated'
+  and coalesce(metadata->>'mimetype', '') in ('image/png', 'image/jpeg', 'image/webp')
+  and coalesce((nullif(metadata->>'size', ''))::bigint, 0) <= 2097152
 );
 
 create policy attachments_rw on storage.objects
@@ -562,5 +565,16 @@ using (
   bucket_id = 'attachments' and auth.role() = 'authenticated'
 )
 with check (
-  bucket_id = 'attachments' and auth.role() = 'authenticated'
+  bucket_id = 'attachments'
+  and auth.role() = 'authenticated'
+  and coalesce(metadata->>'mimetype', '') in (
+    'application/pdf',
+    'application/zip',
+    'text/plain',
+    'text/csv',
+    'image/png',
+    'image/jpeg',
+    'image/webp'
+  )
+  and coalesce((nullif(metadata->>'size', ''))::bigint, 0) <= 10485760
 );
