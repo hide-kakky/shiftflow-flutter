@@ -4,6 +4,7 @@
 - [ ] `main` で直接作業しない
 - [ ] `feat/*` または `fix/*` ブランチで実装
 - [ ] CIグリーン確認後にPR作成
+- [x] GitHub Public リポジトリ `hide-kakky/shiftflow-flutter` 作成済み
 
 ## Phase 1: 基盤
 - [x] Flutterプロジェクト初期化（iOS/Android/Web）

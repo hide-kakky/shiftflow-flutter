@@ -2,6 +2,8 @@
 
 ShiftFlow PWA を Flutter + Supabase に移行するための統合リポジトリです。
 
+GitHub: `https://github.com/hide-kakky/shiftflow-flutter`
+
 ## 構成
 - Flutter アプリ: `lib/`（iOS/Android/Web 共通）
 - Supabase: `supabase/`（migrations/functions/seed/tests）

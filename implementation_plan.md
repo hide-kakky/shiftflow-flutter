@@ -11,6 +11,7 @@
 - Supabase 初期マイグレーション + RLS + Storage policy
 - Edge Function `api` と通知系Functions
 - docs一式 + CI定義 + DBテスト雛形
+- GitHub Public repository: `https://github.com/hide-kakky/shiftflow-flutter`
 
 ## 3. 次の実装対象
 1. Tasks画面のフォーム拡張（優先度/期限/担当者/添付）
@@ -28,5 +29,4 @@ supabase db lint --local --fail-on error
 ```
 
 ## 5. リスク
-- `gh auth login` 未実施のため GitHub Public repo 作成が未完了になる可能性。
 - Supabase Local が Docker依存のため、ローカル環境差異に注意。
