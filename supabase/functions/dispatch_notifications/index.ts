@@ -1,0 +1,102 @@
+import { createServiceClient } from '../_shared/supabase.ts';
+import { corsHeaders, decodeJwtPayload, jsonResponse, readBearerToken } from '../_shared/cors.ts';
+
+function asString(value: unknown): string {
+  return typeof value === 'string' ? value.trim() : '';
+}
+
+function asList(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.map((v) => asString(v)).filter((v) => v.length > 0)
+    : [];
+}
+
+async function resolveActor(request: Request) {
+  const token = readBearerToken(request);
+  const payload = decodeJwtPayload(token);
+  const authUserId = asString(payload.sub);
+  if (!authUserId) return null;
+
+  const service = createServiceClient();
+  const { data: user } = await service
+    .from('users')
+    .select('id,email')
+    .eq('auth_user_id', authUserId)
+    .maybeSingle();
+  if (!user) return null;
+
+  const { data: membership } = await service
+    .from('memberships')
+    .select('id,organization_id,role,status')
+    .eq('user_id', user.id)
+    .eq('status', 'active')
+    .order('created_at', { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (!membership) return null;
+  return {
+    userId: user.id,
+    email: user.email,
+    role: membership.role,
+    orgId: membership.organization_id,
+  };
+}
+
+Deno.serve(async (request) => {
+  if (request.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
+  }
+
+  try {
+    if (request.method !== 'POST') {
+      return jsonResponse(405, { ok: false, code: 'method_not_allowed', reason: 'POST required' });
+    }
+
+    const actor = await resolveActor(request);
+    if (!actor || (actor.role !== 'admin' && actor.role !== 'manager')) {
+      return jsonResponse(403, { ok: false, code: 'forbidden', reason: 'manager role required' });
+    }
+
+    const service = createServiceClient();
+    const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
+
+    const eventType = asString(body.eventType) || 'new_message';
+    const sourceId = asString(body.sourceId) || crypto.randomUUID();
+    const targetUserIds = asList(body.targetUserIds);
+
+    if (targetUserIds.length === 0) {
+      return jsonResponse(400, { ok: false, code: 'target_required', reason: 'targetUserIds required' });
+    }
+
+    const rows = [];
+    for (const userId of targetUserIds) {
+      const { data: exists } = await service
+        .from('notification_dispatch_logs')
+        .select('id')
+        .eq('event_type', eventType)
+        .eq('source_id', sourceId)
+        .eq('target_user_id', userId)
+        .maybeSingle();
+      if (exists) continue;
+      const { data: inserted, error } = await service
+        .from('notification_dispatch_logs')
+        .insert({
+          event_type: eventType,
+          organization_id: actor.orgId,
+          target_user_id: userId,
+          source_id: sourceId,
+          status: 'queued',
+        })
+        .select('*')
+        .single();
+      if (error) throw error;
+      rows.push(inserted);
+    }
+
+    return jsonResponse(200, { ok: true, result: { queued: rows.length, rows } });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return jsonResponse(500, { ok: false, code: 'dispatch_failed', reason: message });
+  }
+});

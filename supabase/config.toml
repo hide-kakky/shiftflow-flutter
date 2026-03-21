@@ -1,0 +1,47 @@
+project_id = "shiftflow_flutter"
+
+[api]
+enabled = true
+port = 55421
+schemas = ["public", "storage", "graphql_public"]
+extra_search_path = ["public", "extensions", "app"]
+max_rows = 1000
+
+[db]
+port = 55422
+shadow_port = 55420
+major_version = 17
+
+[db.seed]
+enabled = true
+sql_paths = ["./seed.sql"]
+
+[studio]
+enabled = true
+port = 55423
+
+[inbucket]
+enabled = true
+port = 55424
+
+[storage]
+enabled = true
+file_size_limit = "10MiB"
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = [
+  "shiftflow://login-callback",
+  "http://localhost:3000",
+  "http://localhost:8080"
+]
+
+[functions.api]
+verify_jwt = true
+
+[functions.dispatch_notifications]
+verify_jwt = true
+
+[functions.notify_due_tasks]
+verify_jwt = false
