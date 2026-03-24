@@ -16,12 +16,12 @@
 
 ## Phase 2: 機能同等化
 - [ ] Auth導線の実機検証
-- [ ] Authテスト運用の再設計（本番UIを維持しつつ QA 可能にする）
-- [ ] `Test Login` などテスト専用文言をログイン画面に常設しない設計へ統一
-- [ ] QA専用導線をビルドフラグで制御（Debug/QAのみ有効、本番は無効）
-- [ ] テストユーザー作成/更新スクリプトを `scripts/` に追加
-- [ ] `docs/SHIFTFLOW_setup_guide.md` に test users 構築手順を追加
-- [ ] `docs/SHIFTFLOW_testing_plan.md` に「本番UI同等テスト」観点を追加
+- [x] Authテスト運用の再設計（本番UIを維持しつつ QA 可能にする）
+- [x] `Test Login` などテスト専用文言をログイン画面に常設しない設計へ統一
+- [x] QA専用導線をビルドフラグで制御（Debug/QAのみ有効、本番は無効）
+- [x] テストユーザー作成/更新スクリプトを `scripts/` に追加
+- [x] `docs/SHIFTFLOW_setup_guide.md` に test users 構築手順を追加
+- [x] `docs/SHIFTFLOW_testing_plan.md` に「本番UI同等テスト」観点を追加
 - [x] Tasks 詳細UI（担当者・期限・優先度）
 - [x] Tasks 添付ファイル対応（アップロード/紐付け/表示）
 - [ ] Messages 詳細UI（既読状態・コメント一覧・ピン）
@@ -33,6 +33,7 @@
 - [ ] API 正常系/異常系テスト拡充
 - [ ] Integrationテスト（主要CUJ）
 - [ ] 通知失敗リトライ処理の実装
+- [x] DB migration 運用を stateless 化（`scripts/db_push.sh` + `--db-url`）
 
 ## 次セッションで最初にやること
 - [ ] [docs/NEXT_SESSION_CHECKLIST.md](./docs/NEXT_SESSION_CHECKLIST.md) を上から実行

@@ -43,12 +43,31 @@ supabase db reset --local --yes
 supabase db lint --local --fail-on error
 ```
 
+### 3.0 UI テスト起動（推奨）
+```bash
+./scripts/run_web_dev.sh
+```
+
+QA補助導線を有効化して確認する場合:
+
+```bash
+./scripts/run_web_qa.sh
+```
+
 ### 3.1 認証テスト準備コマンド
 ```bash
 set -a
 source supabase/.env
 set +a
 deno run --allow-env --allow-net scripts/create_test_users.ts
+```
+
+### 3.2 DB Migration 適用（stateless）
+```bash
+./scripts/db_push.sh dev --dry-run
+./scripts/db_push.sh dev
+./scripts/db_push.sh prod --dry-run
+./scripts/db_push.sh prod
 ```
 
 `supabase/.env` が無い場合:

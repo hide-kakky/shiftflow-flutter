@@ -14,11 +14,14 @@
 - GitHub Public repository: `https://github.com/hide-kakky/shiftflow-flutter`
 - Tasks 作成UIの拡張（優先度・期限・担当者選択）と API `addNewTask` の priority 保存対応
 - Tasks 添付ファイル対応（Storageアップロード・`attachments`/`task_attachments` 紐付け・一覧表示）
+- Supabase 環境分離（dev/prod）と stateless migration 運用（`scripts/db_push.sh`）を整備
 
 ## 3. 次の実装対象
 1. Messages画面の既読一覧・コメント詳細・ピン操作
 2. Admin画面のユーザー状態更新・組織設定更新
-3. 認証テスト運用の再設計（本番投入可能なUI維持）
+3. Auth導線の実機検証（admin/manager/member のロール別確認）
+4. `docs/SHIFTFLOW_e2e_scenarios.md` の実施結果記録
+5. CI の migration 実行を `--db-url` ベースに移行（dev/prod 誤適用防止）
 
 ## 4. 認証テスト運用の再設計方針（TASUKI 参考）
 1. ログイン画面は「通常ユーザー向けUI」を維持し、`Test Login` のような文言を常設しない。
@@ -27,12 +30,12 @@
 4. 検証は「実運用と同じ操作」で行う（メール入力・Magic Link / Password 送信・通常遷移）。
 5. `TASUKI` 同様、ローカル環境で複数ロールのテストアカウントを再生成できるスクリプトを用意する。
 
-## 5. 認証テスト運用タスク（追加）
-1. `lib/core/config` に `AppFlavor` / `enableQaTools` 設定を追加し、ビルド時に QA 機能の有効/無効を制御する。
-2. Auth画面には露出せず、開発時のみ到達できる QA 導線（例: 長押しで開く hidden panel）を実装する。
-3. QA 導線は「アカウント候補入力補助」までに留め、UI文言は一般向けに統一する。
-4. `scripts/` に test users 作成/更新スクリプトを追加し、`docs/SHIFTFLOW_setup_guide.md` に手順を追記する。
-5. `docs/SHIFTFLOW_testing_plan.md` に「本番UI同等テスト」の観点を追加する。
+## 5. 認証テスト運用タスク（完了済み）
+1. `lib/core/config` の `AppFlavor` / `enableQaTools` で、ビルド時に QA 機能の有効/無効を制御可能にした。
+2. Auth画面は通常UIを維持しつつ、開発時のみ到達可能な QA 補助導線（長押し）を実装した。
+3. QA 導線は「アカウント候補入力補助」のみに限定し、一般向け文言に統一した。
+4. `scripts/create_test_users.ts` と `docs/SHIFTFLOW_setup_guide.md` を整備した。
+5. `docs/SHIFTFLOW_testing_plan.md` に「本番UI同等テスト」を追加した。
 
 ## 6. 検証手順
 ```bash

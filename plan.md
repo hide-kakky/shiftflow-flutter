@@ -15,7 +15,7 @@
   - ✅ CI と DBテスト土台
   - ✅ GitHub Public リポジトリ作成・`main` 初回 push 完了
   - ▶ Flutter画面の機能同等化（Tasks 詳細入力 + 添付対応まで完了）
-  - ▶ 認証テスト運用の再設計（本番UIを崩さないテスト導線の設計着手）
+  - ✅ 認証テスト運用の再設計（本番UIを崩さない QA 導線 + ドキュメント反映）
 
 ## 2. マイルストーン
 | # | マイルストーン | 状態 | Exit条件 |
@@ -29,5 +29,5 @@
 - ACTION-1: `flutter analyze` と `flutter test` を常時グリーン維持。
 - ACTION-2: Messages/Admin の詳細UI・入力バリデーションを拡張。
 - ACTION-3: `docs/SHIFTFLOW_e2e_scenarios.md` に沿って実機E2Eを実施し、結果を記録。
-- ACTION-4: Auth のテストログイン導線を「通常ログインUIのまま検証できる設計」に更新する（`TASUKI` の test users 運用を参考に、画面露出なしの QA 導線を定義）。
-- ACTION-5: テスト環境分離を明文化する（`--dart-define` / flavor / ローカル Supabase テストユーザー生成手順）。
+- ACTION-4: Auth導線の実機検証を実施し、ロール別（admin/manager/member）の結果を記録する。
+- ACTION-5: DB migration を `scripts/db_push.sh`（`--db-url` stateless 実行）へ統一し、`link` 切替依存をなくす。

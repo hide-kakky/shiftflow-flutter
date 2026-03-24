@@ -109,3 +109,6 @@ deno run --allow-env --allow-net scripts/create_test_users.ts
 ## 8. 関連
 - [SHIFTFLOW_testing_plan.md](./SHIFTFLOW_testing_plan.md)
 - [SHIFTFLOW_deployment_guide.md](./SHIFTFLOW_deployment_guide.md)
+- [SHIFTFLOW_codex_supabase_mcp_troubleshooting.md](./SHIFTFLOW_codex_supabase_mcp_troubleshooting.md)
+- [SHIFTFLOW_development_flow.md](./SHIFTFLOW_development_flow.md)
+- `scripts/db_push.sh`（`--db-url` ベースの stateless migration 実行）
