@@ -21,7 +21,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get email => 'Email';
 
   @override
+  String get password => 'Password';
+
+  @override
   String get sendMagicLink => 'Send magic link';
+
+  @override
+  String get signInWithPassword => 'Sign in with password';
+
+  @override
+  String get emailPasswordRequired => 'Email and password are required.';
+
+  @override
+  String get authRequestCompleted => 'Authentication request sent.';
+
+  @override
+  String get qaPanelTitle => 'QA Input Helper';
+
+  @override
+  String get qaPanelDescription =>
+      'Select an account email to autofill the login form.';
 
   @override
   String get signOut => 'Sign out';

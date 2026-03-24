@@ -122,11 +122,47 @@ abstract class AppLocalizations {
   /// **'Email'**
   String get email;
 
+  /// No description provided for @password.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get password;
+
   /// No description provided for @sendMagicLink.
   ///
   /// In en, this message translates to:
   /// **'Send magic link'**
   String get sendMagicLink;
+
+  /// No description provided for @signInWithPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with password'**
+  String get signInWithPassword;
+
+  /// No description provided for @emailPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Email and password are required.'**
+  String get emailPasswordRequired;
+
+  /// No description provided for @authRequestCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication request sent.'**
+  String get authRequestCompleted;
+
+  /// No description provided for @qaPanelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'QA Input Helper'**
+  String get qaPanelTitle;
+
+  /// No description provided for @qaPanelDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Select an account email to autofill the login form.'**
+  String get qaPanelDescription;
 
   /// No description provided for @signOut.
   ///

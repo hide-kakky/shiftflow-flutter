@@ -21,7 +21,25 @@ class AppLocalizationsJa extends AppLocalizations {
   String get email => 'メールアドレス';
 
   @override
+  String get password => 'パスワード';
+
+  @override
   String get sendMagicLink => 'マジックリンク送信';
+
+  @override
+  String get signInWithPassword => 'パスワードでログイン';
+
+  @override
+  String get emailPasswordRequired => 'メールアドレスとパスワードを入力してください。';
+
+  @override
+  String get authRequestCompleted => '認証リクエストを送信しました。';
+
+  @override
+  String get qaPanelTitle => 'QA入力補助';
+
+  @override
+  String get qaPanelDescription => '検証用メールアドレスを選ぶと入力欄に反映されます。';
 
   @override
   String get signOut => 'ログアウト';

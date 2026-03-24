@@ -5,8 +5,8 @@ import '../../../core/providers/core_providers.dart';
 
 final authControllerProvider =
     StateNotifierProvider<AuthController, AsyncValue<void>>((ref) {
-  return AuthController(ref.watch(supabaseClientProvider));
-});
+      return AuthController(ref.watch(supabaseClientProvider));
+    });
 
 class AuthController extends StateNotifier<AsyncValue<void>> {
   AuthController(this._client) : super(const AsyncValue.data(null));
@@ -20,6 +20,16 @@ class AuthController extends StateNotifier<AsyncValue<void>> {
         email: email,
         emailRedirectTo: 'shiftflow://login-callback',
       );
+    });
+  }
+
+  Future<void> signInWithPassword({
+    required String email,
+    required String password,
+  }) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      await _client.auth.signInWithPassword(email: email, password: password);
     });
   }
 

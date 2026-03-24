@@ -29,12 +29,35 @@
 ### 2.5 クロスプラットフォーム
 - iOS/Android/Web で同一CUJをスモーク実行
 
+### 2.6 認証テスト運用（本番UI同等）
+- ログイン画面には `Test Login` などテスト専用文言を常設しない。
+- QA補助導線は Debug かつ `ENABLE_QA_TOOLS=true` の場合のみ有効にする。
+- 検証は通常導線（メール入力 / Magic Link / パスワードログイン）で実施する。
+- ロール切替はアプリUIを増やさず、`scripts/create_test_users.ts` で用意したアカウントを使って実施する。
+
 ## 3. 実行コマンド
 ```bash
 flutter analyze
 flutter test
 supabase db reset --local --yes
 supabase db lint --local --fail-on error
+```
+
+### 3.1 認証テスト準備コマンド
+```bash
+set -a
+source supabase/.env
+set +a
+deno run --allow-env --allow-net scripts/create_test_users.ts
+```
+
+`supabase/.env` が無い場合:
+
+```bash
+SUPABASE_URL=http://127.0.0.1:55421 \
+SUPABASE_SERVICE_ROLE_KEY=<YOUR_SECRET_KEY> \
+TEST_USER_PASSWORD=TestPass123! \
+deno run --allow-env --allow-net scripts/create_test_users.ts
 ```
 
 ## 4. 完了基準
