@@ -112,6 +112,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noAssigneesFound => 'No assignees found';
 
   @override
+  String get taskAttachments => 'Attachments';
+
+  @override
+  String get pickAttachments => 'Select attachments';
+
+  @override
+  String get taskAttachmentUploadSuccess => 'Attachments uploaded';
+
+  @override
+  String get taskAttachmentPartialUpload => 'Some attachments failed to upload';
+
+  @override
   String get taskTitleRequired => 'Title is required';
 
   @override

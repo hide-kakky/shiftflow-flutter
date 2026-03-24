@@ -23,37 +23,51 @@ supabase db lint --local --fail-on error
 ```
 
 ## 4. Flutter 実行
-`SUPABASE_URL` と `SUPABASE_ANON_KEY` は `--dart-define` で渡す。
+`SUPABASE_URL` と `SUPABASE_ANON_KEY` は `--dart-define` / `--dart-define-from-file` で渡す。
+毎回の手入力を避けるため、`env/*.json` を使う手順を推奨する。
 
-### Web
+### 4-1. 一度だけ設定ファイルを作る
 ```bash
-flutter run -d chrome \
-  --dart-define=SUPABASE_URL=http://127.0.0.1:55421 \
-  --dart-define=SUPABASE_ANON_KEY=<YOUR_ANON_KEY>
+cp env/dev.json.example env/dev.json
+cp env/qa.json.example env/qa.json
+cp env/android.json.example env/android.json
+```
+
+`env/dev.json` と `env/qa.json` の `SUPABASE_ANON_KEY` を、自分の環境の値に置き換える。
+
+> `env/*.json` は `.gitignore` 済みで、リポジトリには含まれない。
+
+### 4-2. スクリプトで起動（推奨）
+
+### Web（通常）
+```bash
+./scripts/run_web_dev.sh
 ```
 
 ### Web（QA補助導線を有効化）
 ```bash
-flutter run -d chrome \
-  --dart-define=SUPABASE_URL=http://127.0.0.1:55421 \
-  --dart-define=SUPABASE_ANON_KEY=<YOUR_ANON_KEY> \
-  --dart-define=APP_FLAVOR=qa \
-  --dart-define=ENABLE_QA_TOOLS=true \
-  --dart-define=QA_DEFAULT_PASSWORD=TestPass123!
+./scripts/run_web_qa.sh
+```
+
+### Web
+```bash
+flutter run -d chrome --dart-define-from-file=env/dev.json
+```
+
+### Web（QA補助導線を有効化）
+```bash
+flutter run -d chrome --dart-define-from-file=env/qa.json
 ```
 
 ### iOS
 ```bash
 flutter run -d ios \
-  --dart-define=SUPABASE_URL=http://127.0.0.1:55421 \
-  --dart-define=SUPABASE_ANON_KEY=<YOUR_ANON_KEY>
+  --dart-define-from-file=env/dev.json
 ```
 
 ### Android
 ```bash
-flutter run -d android \
-  --dart-define=SUPABASE_URL=http://10.0.2.2:55421 \
-  --dart-define=SUPABASE_ANON_KEY=<YOUR_ANON_KEY>
+flutter run -d android --dart-define-from-file=env/android.json
 ```
 
 ## 5. Magic Link テスト
@@ -84,7 +98,7 @@ deno run --allow-env --allow-net scripts/create_test_users.ts
 
 ## 7. よくあるエラー
 - `SUPABASE_URL and SUPABASE_ANON_KEY are required`
-  - `--dart-define` の未指定。
+  - `--dart-define` / `--dart-define-from-file` の未指定。
 - `docker is not running`
   - Docker Desktop を起動してから `supabase start`。
 - `route_not_implemented`

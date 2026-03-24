@@ -13,12 +13,12 @@
 - docs一式 + CI定義 + DBテスト雛形
 - GitHub Public repository: `https://github.com/hide-kakky/shiftflow-flutter`
 - Tasks 作成UIの拡張（優先度・期限・担当者選択）と API `addNewTask` の priority 保存対応
+- Tasks 添付ファイル対応（Storageアップロード・`attachments`/`task_attachments` 紐付け・一覧表示）
 
 ## 3. 次の実装対象
-1. Tasks画面の添付ファイル対応（Storageアップロード・task_attachments 紐付け）
-2. Messages画面の既読一覧・コメント詳細・ピン操作
-3. Admin画面のユーザー状態更新・組織設定更新
-4. 認証テスト運用の再設計（本番投入可能なUI維持）
+1. Messages画面の既読一覧・コメント詳細・ピン操作
+2. Admin画面のユーザー状態更新・組織設定更新
+3. 認証テスト運用の再設計（本番投入可能なUI維持）
 
 ## 4. 認証テスト運用の再設計方針（TASUKI 参考）
 1. ログイン画面は「通常ユーザー向けUI」を維持し、`Test Login` のような文言を常設しない。

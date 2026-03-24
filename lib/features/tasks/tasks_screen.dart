@@ -1,6 +1,8 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/providers/core_providers.dart';
 import '../../l10n/generated/app_localizations.dart';
@@ -50,6 +52,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     DateTime? dueDate;
     var priority = 'medium';
     final selectedAssignees = <String>{};
+    final selectedFiles = <PlatformFile>[];
 
     final draft = await showDialog<_TaskDraft>(
       context: context,
@@ -169,6 +172,44 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                             },
                           ),
                         ),
+                      const SizedBox(height: 12),
+                      Text(l10n.taskAttachments, style: Theme.of(context).textTheme.labelLarge),
+                      const SizedBox(height: 8),
+                      OutlinedButton.icon(
+                        onPressed: () async {
+                          final picked = await FilePicker.platform.pickFiles(
+                            allowMultiple: true,
+                            withData: true,
+                          );
+                          if (picked == null) return;
+                          final files = picked.files.where((f) => f.bytes != null).toList(growable: false);
+                          setDialogState(() {
+                            selectedFiles
+                              ..clear()
+                              ..addAll(files);
+                          });
+                        },
+                        icon: const Icon(Icons.attach_file),
+                        label: Text(l10n.pickAttachments),
+                      ),
+                      if (selectedFiles.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            for (final file in selectedFiles)
+                              InputChip(
+                                label: Text(file.name),
+                                onDeleted: () {
+                                  setDialogState(() {
+                                    selectedFiles.remove(file);
+                                  });
+                                },
+                              ),
+                          ],
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -189,6 +230,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                               dueDate: dueDate,
                               priority: priority,
                               assigneeUserIds: selectedAssignees.toList(growable: false),
+                              attachments: List<PlatformFile>.from(selectedFiles),
                             ),
                           );
                         },
@@ -218,13 +260,38 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     }
 
     try {
-      await repository.addNewTask(
+      final createdTask = await repository.addNewTask(
         title: draft.title,
         description: draft.description,
         dueAt: draft.dueDate,
         priority: draft.priority,
         assigneeUserIds: draft.assigneeUserIds,
       );
+      if (draft.attachments.isNotEmpty) {
+        final taskId = createdTask['id']?.toString() ?? '';
+        final orgId = createdTask['organization_id']?.toString() ?? '';
+        if (taskId.isNotEmpty && orgId.isNotEmpty) {
+          final result = await _uploadTaskAttachments(
+            taskId: taskId,
+            organizationId: orgId,
+            files: draft.attachments,
+          );
+          if (!mounted) return;
+          if (result.failedCount > 0) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  '${l10n.taskAttachmentPartialUpload}: ${result.successCount}/${draft.attachments.length}',
+                ),
+              ),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(l10n.taskAttachmentUploadSuccess)),
+            );
+          }
+        }
+      }
       await _refresh();
     } catch (err) {
       if (!mounted) return;
@@ -233,6 +300,115 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       titleController.dispose();
       bodyController.dispose();
     }
+  }
+
+  Future<_UploadResult> _uploadTaskAttachments({
+    required String taskId,
+    required String organizationId,
+    required List<PlatformFile> files,
+  }) async {
+    final supabase = ref.read(supabaseClientProvider);
+    var successCount = 0;
+    var failedCount = 0;
+
+    for (final file in files) {
+      final bytes = file.bytes;
+      if (bytes == null || bytes.isEmpty) {
+        failedCount++;
+        continue;
+      }
+
+      final safeFileName = _sanitizeFileName(file.name);
+      final objectPath =
+          'orgs/$organizationId/tasks/$taskId/${DateTime.now().millisecondsSinceEpoch}_$safeFileName';
+      final storagePath = 'attachments/$objectPath';
+
+      try {
+        await supabase.storage.from('attachments').uploadBinary(
+              objectPath,
+              bytes,
+              fileOptions: FileOptions(
+                upsert: false,
+                contentType: _guessContentType(file),
+              ),
+            );
+
+        final inserted = await supabase
+            .from('attachments')
+            .insert({
+              'organization_id': organizationId,
+              'file_name': file.name,
+              'content_type': _guessContentType(file),
+              'size_bytes': file.size,
+              'storage_path': storagePath,
+            })
+            .select('id')
+            .single();
+
+        final attachmentId = inserted['id']?.toString() ?? '';
+        if (attachmentId.isEmpty) {
+          failedCount++;
+          continue;
+        }
+
+        await supabase.from('task_attachments').insert({
+          'task_id': taskId,
+          'attachment_id': attachmentId,
+        });
+        successCount++;
+      } catch (_) {
+        failedCount++;
+      }
+    }
+
+    return _UploadResult(successCount: successCount, failedCount: failedCount);
+  }
+
+  String _guessContentType(PlatformFile file) {
+    final extension = file.extension?.toLowerCase() ?? '';
+    if (extension == 'png') return 'image/png';
+    if (extension == 'jpg' || extension == 'jpeg') return 'image/jpeg';
+    if (extension == 'gif') return 'image/gif';
+    if (extension == 'webp') return 'image/webp';
+    if (extension == 'pdf') return 'application/pdf';
+    if (extension == 'csv') return 'text/csv';
+    if (extension == 'txt') return 'text/plain';
+    if (extension == 'json') return 'application/json';
+    if (extension == 'zip') return 'application/zip';
+    if (extension == 'xlsx') {
+      return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    }
+    if (extension == 'docx') {
+      return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    }
+    if (extension == 'pptx') {
+      return 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+    }
+    return 'application/octet-stream';
+  }
+
+  String _sanitizeFileName(String value) {
+    final sanitized = value.replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_');
+    if (sanitized.isEmpty) return 'file.bin';
+    return sanitized;
+  }
+
+  List<String> _extractAttachmentNames(Map<String, dynamic> task) {
+    final rows = task['task_attachments'];
+    if (rows is! List) return const [];
+
+    return rows
+        .whereType<Map>()
+        .map((row) {
+          final attachment = row['attachments'];
+          if (attachment is Map) {
+            final name = attachment['file_name']?.toString() ?? '';
+            return name;
+          }
+          return '';
+        })
+        .where((name) => name.isNotEmpty)
+        .toList(growable: false);
   }
 
   Color _priorityColor(BuildContext context, String priority) {
@@ -306,6 +482,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                     ? '-'
                     : DateFormat.yMd(Localizations.localeOf(context).toLanguageTag()).format(dueAt);
                 final description = task['description']?.toString() ?? '';
+                final attachmentNames = _extractAttachmentNames(task);
 
                 return Card(
                   child: ListTile(
@@ -315,6 +492,12 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                       children: [
                         if (description.isNotEmpty) Text(description),
                         Text('${l10n.taskDueDate}: $dueText'),
+                        if (attachmentNames.isNotEmpty)
+                          Text(
+                            '${l10n.taskAttachments}: ${attachmentNames.join(', ')}',
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                       ],
                     ),
                     trailing: Wrap(
@@ -361,6 +544,7 @@ class _TaskDraft {
     required this.dueDate,
     required this.priority,
     required this.assigneeUserIds,
+    required this.attachments,
   });
 
   final String title;
@@ -368,4 +552,15 @@ class _TaskDraft {
   final DateTime? dueDate;
   final String priority;
   final List<String> assigneeUserIds;
+  final List<PlatformFile> attachments;
+}
+
+class _UploadResult {
+  const _UploadResult({
+    required this.successCount,
+    required this.failedCount,
+  });
+
+  final int successCount;
+  final int failedCount;
 }
