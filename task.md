@@ -25,8 +25,8 @@
 - [x] Tasks 詳細UI（担当者・期限・優先度）
 - [x] Tasks 添付ファイル対応（アップロード/紐付け/表示）
 - [x] Messages 詳細UI（既読状態・コメント一覧・ピン）
-- [ ] Folders/Templates 管理画面の拡充
-- [ ] Admin 画面（Users/Organizations/Audit）の操作導線
+- [x] Folders/Templates 管理画面の拡充
+- [x] Admin 画面（Users/Organizations/Audit）の操作導線
 
 ## Phase 3: 品質
 - [ ] DB/RLS 自動テスト拡充

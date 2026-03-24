@@ -488,6 +488,156 @@ abstract class AppLocalizations {
   /// **'Audit logs'**
   String get auditLogs;
 
+  /// No description provided for @adminEditUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit user'**
+  String get adminEditUser;
+
+  /// No description provided for @adminUserStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get adminUserStatus;
+
+  /// No description provided for @adminUserUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'User updated.'**
+  String get adminUserUpdated;
+
+  /// No description provided for @adminEditOrganization.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit organization'**
+  String get adminEditOrganization;
+
+  /// No description provided for @adminOrganizationUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Organization updated.'**
+  String get adminOrganizationUpdated;
+
+  /// No description provided for @adminOrgShortName.
+  ///
+  /// In en, this message translates to:
+  /// **'Short name'**
+  String get adminOrgShortName;
+
+  /// No description provided for @adminOrgColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Display color'**
+  String get adminOrgColor;
+
+  /// No description provided for @adminOrgTimezone.
+  ///
+  /// In en, this message translates to:
+  /// **'Timezone'**
+  String get adminOrgTimezone;
+
+  /// No description provided for @adminCreateFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Create folder'**
+  String get adminCreateFolder;
+
+  /// No description provided for @adminEditFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit folder'**
+  String get adminEditFolder;
+
+  /// No description provided for @adminArchiveFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive folder'**
+  String get adminArchiveFolder;
+
+  /// No description provided for @adminFolderName.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder name'**
+  String get adminFolderName;
+
+  /// No description provided for @adminFolderColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder color'**
+  String get adminFolderColor;
+
+  /// No description provided for @adminIsPublic.
+  ///
+  /// In en, this message translates to:
+  /// **'Public'**
+  String get adminIsPublic;
+
+  /// No description provided for @adminIsActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get adminIsActive;
+
+  /// No description provided for @adminFolderCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder created.'**
+  String get adminFolderCreated;
+
+  /// No description provided for @adminFolderUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder updated.'**
+  String get adminFolderUpdated;
+
+  /// No description provided for @adminFolderArchived.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder archived.'**
+  String get adminFolderArchived;
+
+  /// No description provided for @adminSelectFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder'**
+  String get adminSelectFolder;
+
+  /// No description provided for @adminCreateTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create template'**
+  String get adminCreateTemplate;
+
+  /// No description provided for @adminTemplateName.
+  ///
+  /// In en, this message translates to:
+  /// **'Template name'**
+  String get adminTemplateName;
+
+  /// No description provided for @adminTitleFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Title format'**
+  String get adminTitleFormat;
+
+  /// No description provided for @adminBodyFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Body format'**
+  String get adminBodyFormat;
+
+  /// No description provided for @adminTemplateCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Template created.'**
+  String get adminTemplateCreated;
+
+  /// No description provided for @adminNoFoldersForTemplates.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a folder first.'**
+  String get adminNoFoldersForTemplates;
+
   /// No description provided for @magicLinkSent.
   ///
   /// In en, this message translates to:

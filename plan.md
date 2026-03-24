@@ -14,7 +14,7 @@
   - ✅ 要件〜運用文書の整備
   - ✅ CI と DBテスト土台
   - ✅ GitHub Public リポジトリ作成・`main` 初回 push 完了
-  - ▶ Flutter画面の機能同等化（Tasks 詳細入力 + 添付 + Messages 詳細対応まで完了）
+  - ▶ Flutter画面の機能同等化（Tasks/Messages/Admin/Folders-Templates の主要操作導線まで完了）
   - ✅ 認証テスト運用の再設計（本番UIを崩さない QA 導線 + ドキュメント反映）
 
 ## 2. マイルストーン
@@ -27,7 +27,7 @@
 
 ## 3. ACTION
 - ACTION-1: `flutter analyze` と `flutter test` を常時グリーン維持。
-- ACTION-2: Messages/Admin の詳細UI・入力バリデーションを拡張。
+- ACTION-2: Auth導線の実機検証と、管理系UIの実操作テストを拡張。
 - ACTION-3: `docs/SHIFTFLOW_e2e_scenarios.md` に沿って実機E2Eを実施し、結果を記録。
 - ACTION-4: Auth導線の実機検証を実施し、ロール別（admin/manager/member）の結果を記録する。
 - ACTION-5: DB migration を `scripts/db_push.sh`（`--db-url` stateless 実行）へ統一し、`link` 切替依存をなくす。
