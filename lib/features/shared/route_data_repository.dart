@@ -141,16 +141,19 @@ class RouteDataRepository {
     return _asMap(result);
   }
 
-  Future<void> toggleMemoRead(String messageId) async {
-    await _apiClient.invokeRoute('toggleMemoRead', args: [messageId]);
+  Future<Map<String, dynamic>> toggleMemoRead(String messageId) async {
+    final result = await _apiClient.invokeRoute('toggleMemoRead', args: [messageId]);
+    return _asMap(result);
   }
 
-  Future<void> markMemoAsRead(String messageId) async {
-    await _apiClient.invokeRoute('markMemoAsRead', args: [messageId]);
+  Future<Map<String, dynamic>> markMemoAsRead(String messageId) async {
+    final result = await _apiClient.invokeRoute('markMemoAsRead', args: [messageId]);
+    return _asMap(result);
   }
 
-  Future<void> markMemosReadBulk(List<String> messageIds) async {
-    await _apiClient.invokeRoute('markMemosReadBulk', args: [messageIds]);
+  Future<Map<String, dynamic>> markMemosReadBulk(List<String> messageIds) async {
+    final result = await _apiClient.invokeRoute('markMemosReadBulk', args: [messageIds]);
+    return _asMap(result);
   }
 
   Future<List<Map<String, dynamic>>> listActiveFolders() async {

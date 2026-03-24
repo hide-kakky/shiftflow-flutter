@@ -146,6 +146,24 @@ abstract class AppLocalizations {
   /// **'Email and password are required.'**
   String get emailPasswordRequired;
 
+  /// No description provided for @authInvalidCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Email or password is incorrect.'**
+  String get authInvalidCredentials;
+
+  /// No description provided for @authInvalidCredentialsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your input and reset your password if needed.'**
+  String get authInvalidCredentialsHint;
+
+  /// No description provided for @authGenericError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to sign in'**
+  String get authGenericError;
+
   /// No description provided for @authRequestCompleted.
   ///
   /// In en, this message translates to:
@@ -223,6 +241,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Create message'**
   String get createMessage;
+
+  /// No description provided for @toggleRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle read'**
+  String get toggleRead;
+
+  /// No description provided for @pinMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle pin'**
+  String get pinMessage;
+
+  /// No description provided for @pinActionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Only managers can pin messages.'**
+  String get pinActionDenied;
+
+  /// No description provided for @readStateUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Read state updated.'**
+  String get readStateUpdated;
+
+  /// No description provided for @readStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Read status'**
+  String get readStatus;
+
+  /// No description provided for @readStatusLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Read status list is available for authorized users only.'**
+  String get readStatusLimited;
+
+  /// No description provided for @load.
+  ///
+  /// In en, this message translates to:
+  /// **'Load'**
+  String get load;
+
+  /// No description provided for @comments.
+  ///
+  /// In en, this message translates to:
+  /// **'Comments'**
+  String get comments;
+
+  /// No description provided for @addComment.
+  ///
+  /// In en, this message translates to:
+  /// **'Add comment'**
+  String get addComment;
+
+  /// No description provided for @noComments.
+  ///
+  /// In en, this message translates to:
+  /// **'No comments yet'**
+  String get noComments;
+
+  /// No description provided for @readUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Read users'**
+  String get readUsers;
+
+  /// No description provided for @unreadUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Unread users'**
+  String get unreadUsers;
 
   /// No description provided for @title.
   ///
