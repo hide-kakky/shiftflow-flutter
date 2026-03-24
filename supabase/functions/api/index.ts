@@ -246,7 +246,9 @@ Deno.serve(async (request) => {
     if (route === 'listMyTasks') {
       const { data } = await service
         .from('tasks')
-        .select('id,title,description,status,priority,due_at,created_at,updated_at')
+        .select(
+          'id,title,description,status,priority,due_at,created_at,updated_at,task_attachments(attachment_id,attachments(id,file_name,content_type,size_bytes))',
+        )
         .eq('organization_id', ctx.orgId)
         .order('created_at', { ascending: false });
       return jsonResponse(200, { ok: true, result: data ?? [] });
@@ -255,7 +257,9 @@ Deno.serve(async (request) => {
     if (route === 'listCreatedTasks') {
       const { data } = await service
         .from('tasks')
-        .select('id,title,description,status,priority,due_at,created_at,updated_at')
+        .select(
+          'id,title,description,status,priority,due_at,created_at,updated_at,task_attachments(attachment_id,attachments(id,file_name,content_type,size_bytes))',
+        )
         .eq('organization_id', ctx.orgId)
         .eq('created_by_user_id', ctx.userId)
         .order('created_at', { ascending: false });
@@ -266,7 +270,9 @@ Deno.serve(async (request) => {
       ensureManager(ctx);
       const { data } = await service
         .from('tasks')
-        .select('id,title,description,status,priority,due_at,created_at,updated_at')
+        .select(
+          'id,title,description,status,priority,due_at,created_at,updated_at,task_attachments(attachment_id,attachments(id,file_name,content_type,size_bytes))',
+        )
         .eq('organization_id', ctx.orgId)
         .order('created_at', { ascending: false });
       return jsonResponse(200, { ok: true, result: data ?? [] });

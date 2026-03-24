@@ -111,6 +111,18 @@ class AppLocalizationsJa extends AppLocalizations {
   String get noAssigneesFound => '担当者候補が見つかりません';
 
   @override
+  String get taskAttachments => '添付ファイル';
+
+  @override
+  String get pickAttachments => '添付ファイルを選択';
+
+  @override
+  String get taskAttachmentUploadSuccess => '添付ファイルをアップロードしました';
+
+  @override
+  String get taskAttachmentPartialUpload => '一部の添付アップロードに失敗しました';
+
+  @override
   String get taskTitleRequired => 'タイトルは必須です';
 
   @override

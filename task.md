@@ -23,7 +23,7 @@
 - [ ] `docs/SHIFTFLOW_setup_guide.md` に test users 構築手順を追加
 - [ ] `docs/SHIFTFLOW_testing_plan.md` に「本番UI同等テスト」観点を追加
 - [x] Tasks 詳細UI（担当者・期限・優先度）
-- [ ] Tasks 添付ファイル対応（アップロード/紐付け/表示）
+- [x] Tasks 添付ファイル対応（アップロード/紐付け/表示）
 - [ ] Messages 詳細UI（既読状態・コメント一覧・ピン）
 - [ ] Folders/Templates 管理画面の拡充
 - [ ] Admin 画面（Users/Organizations/Audit）の操作導線

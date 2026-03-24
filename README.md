@@ -17,9 +17,9 @@ flutter pub get
 flutter gen-l10n
 supabase start
 supabase db reset --local --yes
-flutter run -d chrome \
-  --dart-define=SUPABASE_URL=http://127.0.0.1:55421 \
-  --dart-define=SUPABASE_ANON_KEY=<YOUR_ANON_KEY>
+cp env/dev.json.example env/dev.json
+# env/dev.json の SUPABASE_ANON_KEY を自分の値に更新
+./scripts/run_web_dev.sh
 ```
 
 ## 主な設計ドキュメント

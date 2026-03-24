@@ -302,6 +302,30 @@ abstract class AppLocalizations {
   /// **'No assignees found'**
   String get noAssigneesFound;
 
+  /// No description provided for @taskAttachments.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachments'**
+  String get taskAttachments;
+
+  /// No description provided for @pickAttachments.
+  ///
+  /// In en, this message translates to:
+  /// **'Select attachments'**
+  String get pickAttachments;
+
+  /// No description provided for @taskAttachmentUploadSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachments uploaded'**
+  String get taskAttachmentUploadSuccess;
+
+  /// No description provided for @taskAttachmentPartialUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Some attachments failed to upload'**
+  String get taskAttachmentPartialUpload;
+
   /// No description provided for @taskTitleRequired.
   ///
   /// In en, this message translates to:
