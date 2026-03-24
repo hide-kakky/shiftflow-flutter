@@ -22,6 +22,23 @@ cp env/dev.json.example env/dev.json
 ./scripts/run_web_dev.sh
 ```
 
+## DB Migration 運用（推奨）
+`db push` は `--db-url` + 環境別ラッパで実行し、`supabase link` の切替に依存しない運用を採用する。
+
+```bash
+# 1) テンプレートを作成
+cp env/db_push.dev.env.example env/db_push.dev.env
+cp env/db_push.prod.env.example env/db_push.prod.env
+
+# 2) 各ファイルに PAT と DB URL を設定
+
+# 3) 実行
+./scripts/db_push.sh dev --dry-run
+./scripts/db_push.sh dev
+./scripts/db_push.sh prod --dry-run
+./scripts/db_push.sh prod
+```
+
 ## 主な設計ドキュメント
 - [要件定義](./docs/SHIFTFLOW_requirements_v1.0.md)
 - [実装ガイド](./docs/SHIFTFLOW_implementation_guide_v1.0.md)
@@ -29,6 +46,9 @@ cp env/dev.json.example env/dev.json
 - [API定義](./docs/SHIFTFLOW_api_definition.md)
 - [DBスキーマ](./docs/SHIFTFLOW_database_schema.md)
 - [テスト計画](./docs/SHIFTFLOW_testing_plan.md)
+- [開発フロー](./docs/SHIFTFLOW_development_flow.md)
+- [Supabase キーローテーション手順](./docs/SHIFTFLOW_supabase_key_rotation_runbook.md)
+- [Codex × Supabase MCP トラブルシュート](./docs/SHIFTFLOW_codex_supabase_mcp_troubleshooting.md)
 
 ## Git運用ルール
 - `main` 直コミット禁止

@@ -19,16 +19,20 @@
 - [ ] `flutter gen-l10n`
 - [ ] `supabase start`
 - [ ] `supabase db reset --local --yes`
+- [ ] `./scripts/run_web_dev.sh`（環境変数ファイル運用で起動できることを確認）
+- [ ] `./scripts/db_push.sh dev --dry-run`（migration の stateless 実行確認）
 
 ## 4. 実装（優先順）
-- [ ] Tasks 詳細UI（担当者・期限・添付）
 - [ ] Messages 詳細UI（既読状態・コメント一覧・ピン）
 - [ ] Admin 画面（Users/Organizations/Audit）
+- [ ] Auth導線の実機検証（admin/manager/member）
 
 ## 5. 実装後検証
 - [ ] `flutter analyze`
 - [ ] `flutter test`
 - [ ] `supabase db lint --local --fail-on error`
+- [ ] 必要なら `./scripts/db_push.sh dev` で migration を dev へ反映
+- [ ] `docs/SHIFTFLOW_e2e_scenarios.md` の対象ケース実施ログを更新
 
 ## 6. 反映前
 - [ ] `plan.md` / `task.md` / `implementation_plan.md` を更新
