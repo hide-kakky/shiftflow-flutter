@@ -69,6 +69,33 @@ class AppLocalizationsJa extends AppLocalizations {
   String get taskDueDate => '期限';
 
   @override
+  String get selectDueDate => '期限を選択';
+
+  @override
+  String get clearDueDate => '期限をクリア';
+
+  @override
+  String get taskPriority => '優先度';
+
+  @override
+  String get priorityLow => '低';
+
+  @override
+  String get priorityMedium => '中';
+
+  @override
+  String get priorityHigh => '高';
+
+  @override
+  String get taskAssignees => '担当者';
+
+  @override
+  String get noAssigneesFound => '担当者候補が見つかりません';
+
+  @override
+  String get taskTitleRequired => 'タイトルは必須です';
+
+  @override
   String get markComplete => '完了にする';
 
   @override

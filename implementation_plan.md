@@ -12,9 +12,10 @@
 - Edge Function `api` と通知系Functions
 - docs一式 + CI定義 + DBテスト雛形
 - GitHub Public repository: `https://github.com/hide-kakky/shiftflow-flutter`
+- Tasks 作成UIの拡張（優先度・期限・担当者選択）と API `addNewTask` の priority 保存対応
 
 ## 3. 次の実装対象
-1. Tasks画面のフォーム拡張（優先度/期限/担当者/添付）
+1. Tasks画面の添付ファイル対応（Storageアップロード・task_attachments 紐付け）
 2. Messages画面の既読一覧・コメント詳細・ピン操作
 3. Admin画面のユーザー状態更新・組織設定更新
 

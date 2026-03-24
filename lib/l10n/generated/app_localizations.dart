@@ -218,6 +218,60 @@ abstract class AppLocalizations {
   /// **'Due date'**
   String get taskDueDate;
 
+  /// No description provided for @selectDueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select due date'**
+  String get selectDueDate;
+
+  /// No description provided for @clearDueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear due date'**
+  String get clearDueDate;
+
+  /// No description provided for @taskPriority.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority'**
+  String get taskPriority;
+
+  /// No description provided for @priorityLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get priorityLow;
+
+  /// No description provided for @priorityMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get priorityMedium;
+
+  /// No description provided for @priorityHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get priorityHigh;
+
+  /// No description provided for @taskAssignees.
+  ///
+  /// In en, this message translates to:
+  /// **'Assignees'**
+  String get taskAssignees;
+
+  /// No description provided for @noAssigneesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No assignees found'**
+  String get noAssigneesFound;
+
+  /// No description provided for @taskTitleRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Title is required'**
+  String get taskTitleRequired;
+
   /// No description provided for @markComplete.
   ///
   /// In en, this message translates to:
