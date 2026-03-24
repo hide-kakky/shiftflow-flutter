@@ -69,6 +69,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get taskDueDate => 'Due date';
 
   @override
+  String get selectDueDate => 'Select due date';
+
+  @override
+  String get clearDueDate => 'Clear due date';
+
+  @override
+  String get taskPriority => 'Priority';
+
+  @override
+  String get priorityLow => 'Low';
+
+  @override
+  String get priorityMedium => 'Medium';
+
+  @override
+  String get priorityHigh => 'High';
+
+  @override
+  String get taskAssignees => 'Assignees';
+
+  @override
+  String get noAssigneesFound => 'No assignees found';
+
+  @override
+  String get taskTitleRequired => 'Title is required';
+
+  @override
   String get markComplete => 'Mark complete';
 
   @override

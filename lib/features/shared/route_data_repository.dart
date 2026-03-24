@@ -39,6 +39,8 @@ class RouteDataRepository {
     required String title,
     String? description,
     DateTime? dueAt,
+    String? priority,
+    List<String>? assigneeUserIds,
   }) async {
     final result = await _apiClient.invokeRoute(
       'addNewTask',
@@ -47,6 +49,8 @@ class RouteDataRepository {
           'title': title,
           'description': description,
           'dueAtMs': dueAt?.millisecondsSinceEpoch,
+          'priority': priority,
+          'assigneeUserIds': assigneeUserIds,
         }
       ],
     );

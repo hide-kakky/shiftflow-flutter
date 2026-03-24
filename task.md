@@ -16,7 +16,8 @@
 
 ## Phase 2: 機能同等化
 - [ ] Auth導線の実機検証
-- [ ] Tasks 詳細UI（担当者・期限・添付）
+- [x] Tasks 詳細UI（担当者・期限・優先度）
+- [ ] Tasks 添付ファイル対応（アップロード/紐付け/表示）
 - [ ] Messages 詳細UI（既読状態・コメント一覧・ピン）
 - [ ] Folders/Templates 管理画面の拡充
 - [ ] Admin 画面（Users/Organizations/Audit）の操作導線

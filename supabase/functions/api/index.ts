@@ -282,6 +282,8 @@ Deno.serve(async (request) => {
       const payload = asMap(args[0]);
       const title = asString(payload.title);
       if (!title) return jsonResponse(400, { ok: false, code: 'title_required', reason: 'title required' });
+      const priority = asString(payload.priority);
+      const safePriority = priority === 'low' || priority === 'high' ? priority : 'medium';
 
       const dueAtMs = Number(payload.dueAtMs ?? 0);
       const { data: inserted, error } = await service
@@ -291,6 +293,7 @@ Deno.serve(async (request) => {
           title,
           description: asString(payload.description),
           created_by_user_id: ctx.userId,
+          priority: safePriority,
           due_at: Number.isFinite(dueAtMs) && dueAtMs > 0 ? new Date(dueAtMs).toISOString() : null,
         })
         .select('*')
