@@ -207,6 +207,81 @@ class AppLocalizationsEn extends AppLocalizations {
   String get auditLogs => 'Audit logs';
 
   @override
+  String get adminEditUser => 'Edit user';
+
+  @override
+  String get adminUserStatus => 'Status';
+
+  @override
+  String get adminUserUpdated => 'User updated.';
+
+  @override
+  String get adminEditOrganization => 'Edit organization';
+
+  @override
+  String get adminOrganizationUpdated => 'Organization updated.';
+
+  @override
+  String get adminOrgShortName => 'Short name';
+
+  @override
+  String get adminOrgColor => 'Display color';
+
+  @override
+  String get adminOrgTimezone => 'Timezone';
+
+  @override
+  String get adminCreateFolder => 'Create folder';
+
+  @override
+  String get adminEditFolder => 'Edit folder';
+
+  @override
+  String get adminArchiveFolder => 'Archive folder';
+
+  @override
+  String get adminFolderName => 'Folder name';
+
+  @override
+  String get adminFolderColor => 'Folder color';
+
+  @override
+  String get adminIsPublic => 'Public';
+
+  @override
+  String get adminIsActive => 'Active';
+
+  @override
+  String get adminFolderCreated => 'Folder created.';
+
+  @override
+  String get adminFolderUpdated => 'Folder updated.';
+
+  @override
+  String get adminFolderArchived => 'Folder archived.';
+
+  @override
+  String get adminSelectFolder => 'Folder';
+
+  @override
+  String get adminCreateTemplate => 'Create template';
+
+  @override
+  String get adminTemplateName => 'Template name';
+
+  @override
+  String get adminTitleFormat => 'Title format';
+
+  @override
+  String get adminBodyFormat => 'Body format';
+
+  @override
+  String get adminTemplateCreated => 'Template created.';
+
+  @override
+  String get adminNoFoldersForTemplates => 'Create a folder first.';
+
+  @override
   String get magicLinkSent => 'Magic link sent.';
 
   @override

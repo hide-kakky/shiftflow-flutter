@@ -84,6 +84,16 @@ deno run --allow-env --allow-net scripts/create_test_users.ts
 - E2Eシナリオ全件完了
 - 重要不具合（P1/P2）が未残存
 
+## 4.1 最新検証ログ（2026-03-25, Local Supabase）
+- 認証（Password Login）
+  - `admin@shiftflow.local` / `TestPass123!`: pass
+  - `manager@shiftflow.local` / `TestPass123!`: pass
+  - `member@shiftflow.local` / `TestPass123!`: pass
+- ロール別アクセス制御（`route=adminListUsers`）
+  - admin: `ok=true`（rows=3）
+  - manager: `ok=true`（rows=3）
+  - member: `ok=false`, `code=forbidden`
+
 ## 5. テストケースリンク
 - [SHIFTFLOW_e2e_scenarios.md](./SHIFTFLOW_e2e_scenarios.md)
 - `supabase/tests/rls_access_matrix.sql`

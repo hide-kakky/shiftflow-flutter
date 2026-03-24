@@ -50,3 +50,14 @@
 ## 3. 完了判定
 - 全シナリオ `pass`
 - 重大不具合なし
+
+## 4. 実施ログ（2026-03-25, Local Supabase, Web）
+- E2E-01 Magic Link ログイン: 未実施（次回）
+- E2E-02 タスク作成〜完了: 未実施（次回）
+- E2E-03 メッセージ投稿〜既読〜コメント: 未実施（次回）
+- E2E-04 フォルダ・テンプレート運用: 実装済み（UI導線追加済み）、手動E2E未実施
+- E2E-05 設定変更: 未実施（次回）
+- E2E-06 管理者機能: 部分実施
+  - `adminListUsers` を admin/manager/member で呼び分け
+  - 結果: admin/manager は成功、member は `forbidden`
+- E2E-07 通知: 未実施（次回）

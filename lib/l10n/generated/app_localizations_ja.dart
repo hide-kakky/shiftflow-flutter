@@ -204,6 +204,81 @@ class AppLocalizationsJa extends AppLocalizations {
   String get auditLogs => '監査ログ';
 
   @override
+  String get adminEditUser => 'ユーザー編集';
+
+  @override
+  String get adminUserStatus => 'ステータス';
+
+  @override
+  String get adminUserUpdated => 'ユーザー情報を更新しました。';
+
+  @override
+  String get adminEditOrganization => '組織編集';
+
+  @override
+  String get adminOrganizationUpdated => '組織情報を更新しました。';
+
+  @override
+  String get adminOrgShortName => '短縮名';
+
+  @override
+  String get adminOrgColor => '表示カラー';
+
+  @override
+  String get adminOrgTimezone => 'タイムゾーン';
+
+  @override
+  String get adminCreateFolder => 'フォルダ作成';
+
+  @override
+  String get adminEditFolder => 'フォルダ編集';
+
+  @override
+  String get adminArchiveFolder => 'フォルダをアーカイブ';
+
+  @override
+  String get adminFolderName => 'フォルダ名';
+
+  @override
+  String get adminFolderColor => 'フォルダカラー';
+
+  @override
+  String get adminIsPublic => '公開';
+
+  @override
+  String get adminIsActive => '有効';
+
+  @override
+  String get adminFolderCreated => 'フォルダを作成しました。';
+
+  @override
+  String get adminFolderUpdated => 'フォルダを更新しました。';
+
+  @override
+  String get adminFolderArchived => 'フォルダをアーカイブしました。';
+
+  @override
+  String get adminSelectFolder => '対象フォルダ';
+
+  @override
+  String get adminCreateTemplate => 'テンプレート作成';
+
+  @override
+  String get adminTemplateName => 'テンプレート名';
+
+  @override
+  String get adminTitleFormat => 'タイトル書式';
+
+  @override
+  String get adminBodyFormat => '本文書式';
+
+  @override
+  String get adminTemplateCreated => 'テンプレートを作成しました。';
+
+  @override
+  String get adminNoFoldersForTemplates => '先にフォルダを作成してください。';
+
+  @override
   String get magicLinkSent => 'マジックリンクを送信しました。';
 
   @override
