@@ -33,6 +33,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emailPasswordRequired => 'Email and password are required.';
 
   @override
+  String get authInvalidCredentials => 'Email or password is incorrect.';
+
+  @override
+  String get authInvalidCredentialsHint =>
+      'Check your input and reset your password if needed.';
+
+  @override
+  String get authGenericError => 'Failed to sign in';
+
+  @override
   String get authRequestCompleted => 'Authentication request sent.';
 
   @override
@@ -71,6 +81,43 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get createMessage => 'Create message';
+
+  @override
+  String get toggleRead => 'Toggle read';
+
+  @override
+  String get pinMessage => 'Toggle pin';
+
+  @override
+  String get pinActionDenied => 'Only managers can pin messages.';
+
+  @override
+  String get readStateUpdated => 'Read state updated.';
+
+  @override
+  String get readStatus => 'Read status';
+
+  @override
+  String get readStatusLimited =>
+      'Read status list is available for authorized users only.';
+
+  @override
+  String get load => 'Load';
+
+  @override
+  String get comments => 'Comments';
+
+  @override
+  String get addComment => 'Add comment';
+
+  @override
+  String get noComments => 'No comments yet';
+
+  @override
+  String get readUsers => 'Read users';
+
+  @override
+  String get unreadUsers => 'Unread users';
 
   @override
   String get title => 'Title';

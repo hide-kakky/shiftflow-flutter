@@ -29,11 +29,12 @@ supabase db lint --local --fail-on error
 ### 4-1. 一度だけ設定ファイルを作る
 ```bash
 cp env/dev.json.example env/dev.json
-cp env/qa.json.example env/qa.json
+cp env/qa.json env/qa.local.json
+cp env/qa.cloud.json.example env/qa.cloud.json
 cp env/android.json.example env/android.json
 ```
 
-`env/dev.json` と `env/qa.json` の `SUPABASE_ANON_KEY` を、自分の環境の値に置き換える。
+`env/dev.json` / `env/qa.local.json` / `env/qa.cloud.json` の `SUPABASE_ANON_KEY` を、自分の環境の値に置き換える。
 
 > `env/*.json` は `.gitignore` 済みで、リポジトリには含まれない。
 
@@ -44,9 +45,14 @@ cp env/android.json.example env/android.json
 ./scripts/run_web_dev.sh
 ```
 
-### Web（QA補助導線を有効化）
+### Web（QA補助導線 + ローカルSupabase）
 ```bash
-./scripts/run_web_qa.sh
+./scripts/run_web_qa_local.sh
+```
+
+### Web（QA補助導線 + クラウドSupabase）
+```bash
+./scripts/run_web_qa_cloud.sh
 ```
 
 ### Web
@@ -54,9 +60,14 @@ cp env/android.json.example env/android.json
 flutter run -d chrome --dart-define-from-file=env/dev.json
 ```
 
-### Web（QA補助導線を有効化）
+### Web（QA補助導線を有効化 / ローカル）
 ```bash
-flutter run -d chrome --dart-define-from-file=env/qa.json
+flutter run -d chrome --dart-define-from-file=env/qa.local.json
+```
+
+### Web（QA補助導線を有効化 / クラウド）
+```bash
+flutter run -d chrome --dart-define-from-file=env/qa.cloud.json
 ```
 
 ### iOS
@@ -103,6 +114,8 @@ deno run --allow-env --allow-net scripts/create_test_users.ts
   - Docker Desktop を起動してから `supabase start`。
 - `route_not_implemented`
   - `route` 名の誤字、または未実装。
+- `Failed to fetch ... /functions/v1/api`
+  - 接続先の Supabase URL が想定と不一致、または対象環境へ `api` 関数が未デプロイ。
 - `deno: command not found`
   - Deno をインストールしてから再実行。
 

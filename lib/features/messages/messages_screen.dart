@@ -13,6 +13,7 @@ class MessagesScreen extends ConsumerStatefulWidget {
 
 class _MessagesScreenState extends ConsumerState<MessagesScreen> {
   late Future<List<Map<String, dynamic>>> _future;
+  final Map<String, bool> _readOverrides = <String, bool>{};
 
   @override
   void initState() {
@@ -76,6 +77,34 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
     }
   }
 
+  Future<void> _toggleRead(String messageId) async {
+    final result = await ref.read(routeDataRepositoryProvider).toggleMemoRead(messageId);
+    if (!mounted) return;
+    setState(() {
+      _readOverrides[messageId] = result['isRead'] == true;
+    });
+  }
+
+  Future<void> _openDetails({
+    required String messageId,
+    required String title,
+  }) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return FractionallySizedBox(
+          heightFactor: 0.92,
+          child: _MessageDetailSheet(
+            messageId: messageId,
+            fallbackTitle: title,
+          ),
+        );
+      },
+    );
+    await _refresh();
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -114,27 +143,42 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
               separatorBuilder: (context, index) => const SizedBox(height: 8),
               itemBuilder: (context, index) {
                 final message = rows[index];
-                final isRead = message['isRead'] == true;
                 final messageId = message['id']?.toString() ?? '';
+                final fallbackRead = message['isRead'] == true;
+                final isRead = _readOverrides[messageId] ?? fallbackRead;
+                final isPinned = message['is_pinned'] == true;
+                final title = message['title']?.toString() ?? '-';
+                final body = message['body']?.toString() ?? '';
+
                 return Card(
                   child: ListTile(
-                    title: Text(message['title']?.toString() ?? '-'),
-                    subtitle: Text(message['body']?.toString() ?? ''),
+                    onTap: messageId.isEmpty
+                        ? null
+                        : () => _openDetails(messageId: messageId, title: title),
+                    title: Row(
+                      children: [
+                        Expanded(child: Text(title)),
+                        if (isPinned)
+                          const Padding(
+                            padding: EdgeInsets.only(left: 8),
+                            child: Icon(Icons.push_pin, size: 18),
+                          ),
+                      ],
+                    ),
+                    subtitle: Text(
+                      body,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     leading: Icon(
                       isRead
                           ? Icons.mark_email_read_outlined
                           : Icons.mark_email_unread_outlined,
                     ),
                     trailing: IconButton(
+                      tooltip: l10n.toggleRead,
                       icon: const Icon(Icons.done_all),
-                      onPressed: messageId.isEmpty
-                          ? null
-                          : () async {
-                              await ref
-                                  .read(routeDataRepositoryProvider)
-                                  .toggleMemoRead(messageId);
-                              await _refresh();
-                            },
+                      onPressed: messageId.isEmpty ? null : () => _toggleRead(messageId),
                     ),
                   ),
                 );
@@ -147,6 +191,266 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
         onPressed: _createMessage,
         icon: const Icon(Icons.add),
         label: Text(l10n.createMessage),
+      ),
+    );
+  }
+}
+
+class _MessageDetailSheet extends ConsumerStatefulWidget {
+  const _MessageDetailSheet({
+    required this.messageId,
+    required this.fallbackTitle,
+  });
+
+  final String messageId;
+  final String fallbackTitle;
+
+  @override
+  ConsumerState<_MessageDetailSheet> createState() => _MessageDetailSheetState();
+}
+
+class _MessageDetailSheetState extends ConsumerState<_MessageDetailSheet> {
+  late Future<Map<String, dynamic>> _detailFuture;
+  Future<Map<String, dynamic>>? _readStatusFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _detailFuture = _loadDetail();
+  }
+
+  Future<Map<String, dynamic>> _loadDetail() {
+    return ref.read(routeDataRepositoryProvider).getMessageById(widget.messageId);
+  }
+
+  Future<void> _refreshDetail() async {
+    setState(() {
+      _detailFuture = _loadDetail();
+    });
+    await _detailFuture;
+  }
+
+  Future<void> _togglePin() async {
+    final l10n = AppLocalizations.of(context);
+    try {
+      await ref.read(routeDataRepositoryProvider).pinMessage(widget.messageId);
+      await _refreshDetail();
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.pinActionDenied)),
+      );
+    }
+  }
+
+  Future<void> _toggleRead() async {
+    await ref.read(routeDataRepositoryProvider).toggleMemoRead(widget.messageId);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(AppLocalizations.of(context).readStateUpdated)),
+    );
+  }
+
+  Future<void> _loadReadStatus() async {
+    setState(() {
+      _readStatusFuture = ref.read(routeDataRepositoryProvider).messageReadStatus(widget.messageId);
+    });
+  }
+
+  Future<void> _openCommentDialog() async {
+    final l10n = AppLocalizations.of(context);
+    final controller = TextEditingController();
+    final shouldSave = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.addComment),
+        content: TextField(
+          controller: controller,
+          minLines: 3,
+          maxLines: 6,
+          decoration: InputDecoration(labelText: l10n.body),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.save),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldSave != true) return;
+    final body = controller.text.trim();
+    if (body.isEmpty) return;
+
+    await ref.read(routeDataRepositoryProvider).addNewComment(
+          messageId: widget.messageId,
+          body: body,
+        );
+    await _refreshDetail();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
+    return SafeArea(
+      child: FutureBuilder<Map<String, dynamic>>(
+        future: _detailFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState != ConnectionState.done) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('${l10n.apiError}: ${snapshot.error}'));
+          }
+
+          final message = snapshot.data ?? const <String, dynamic>{};
+          final title = message['title']?.toString() ?? widget.fallbackTitle;
+          final body = message['body']?.toString() ?? '';
+          final isPinned = message['is_pinned'] == true;
+          final comments = (message['comments'] is List)
+              ? (message['comments'] as List).whereType<Map>().toList(growable: false)
+              : const <Map>[];
+
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: l10n.pinMessage,
+                      onPressed: _togglePin,
+                      icon: Icon(isPinned ? Icons.push_pin : Icons.push_pin_outlined),
+                    ),
+                    IconButton(
+                      tooltip: l10n.toggleRead,
+                      onPressed: _toggleRead,
+                      icon: const Icon(Icons.done_all),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(body),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Text(
+                      l10n.readStatus,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(width: 8),
+                    OutlinedButton(
+                      onPressed: _loadReadStatus,
+                      child: Text(l10n.load),
+                    ),
+                  ],
+                ),
+                if (_readStatusFuture != null)
+                  FutureBuilder<Map<String, dynamic>>(
+                    future: _readStatusFuture,
+                    builder: (context, readSnapshot) {
+                      if (readSnapshot.connectionState != ConnectionState.done) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8),
+                          child: LinearProgressIndicator(),
+                        );
+                      }
+                      if (readSnapshot.hasError) {
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text(l10n.readStatusLimited),
+                        );
+                      }
+                      final status = readSnapshot.data ?? const <String, dynamic>{};
+                      final readUsers = (status['readUsers'] as List?) ?? const [];
+                      final unreadUsers = (status['unreadUsers'] as List?) ?? const [];
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('${l10n.readUsers} (${readUsers.length})'),
+                            Wrap(
+                              spacing: 6,
+                              children: readUsers.map((entry) {
+                                final map = entry as Map;
+                                final name = (map['displayName'] ?? map['email'] ?? '-').toString();
+                                return Chip(label: Text(name));
+                              }).toList(growable: false),
+                            ),
+                            const SizedBox(height: 4),
+                            Text('${l10n.unreadUsers} (${unreadUsers.length})'),
+                            Wrap(
+                              spacing: 6,
+                              children: unreadUsers.map((entry) {
+                                final map = entry as Map;
+                                final name = (map['displayName'] ?? map['email'] ?? '-').toString();
+                                return Chip(label: Text(name));
+                              }).toList(growable: false),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        l10n.comments,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                    FilledButton.icon(
+                      onPressed: _openCommentDialog,
+                      icon: const Icon(Icons.add_comment_outlined),
+                      label: Text(l10n.addComment),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Expanded(
+                  child: comments.isEmpty
+                      ? Center(child: Text(l10n.noComments))
+                      : ListView.separated(
+                          itemCount: comments.length,
+                          separatorBuilder: (context, index) =>
+                              const Divider(height: 12),
+                          itemBuilder: (context, index) {
+                            final comment = comments[index];
+                            final author = comment['author_display_name']?.toString();
+                            final fallback = comment['author_email']?.toString() ?? '-';
+                            final createdAt = comment['created_at']?.toString() ?? '';
+                            return ListTile(
+                              contentPadding: EdgeInsets.zero,
+                              title: Text(author?.isNotEmpty == true ? author! : fallback),
+                              subtitle: Text(comment['body']?.toString() ?? ''),
+                              trailing: Text(
+                                createdAt.length >= 16 ? createdAt.substring(0, 16) : createdAt,
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            );
+                          },
+                        ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

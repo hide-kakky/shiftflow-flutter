@@ -20,7 +20,15 @@ supabase db reset --local --yes
 cp env/dev.json.example env/dev.json
 # env/dev.json の SUPABASE_ANON_KEY を自分の値に更新
 ./scripts/run_web_dev.sh
+
+# QA(ローカルSupabase向け)
+./scripts/run_web_qa_local.sh
 ```
+
+## QA環境の使い分け（重要）
+- ローカルSupabaseを使う: `env/qa.local.json` + `./scripts/run_web_qa_local.sh`
+- クラウドSupabaseを使う: `env/qa.cloud.json` + `./scripts/run_web_qa_cloud.sh`
+- 互換スクリプト: `./scripts/run_web_qa.sh`（内部的には `qa.local.json` を使う）
 
 ## DB Migration 運用（推奨）
 `db push` は `--db-url` + 環境別ラッパで実行し、`supabase link` の切替に依存しない運用を採用する。

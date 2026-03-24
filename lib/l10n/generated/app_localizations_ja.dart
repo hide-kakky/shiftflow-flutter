@@ -33,6 +33,15 @@ class AppLocalizationsJa extends AppLocalizations {
   String get emailPasswordRequired => 'メールアドレスとパスワードを入力してください。';
 
   @override
+  String get authInvalidCredentials => 'メールアドレスまたはパスワードが正しくありません。';
+
+  @override
+  String get authInvalidCredentialsHint => '入力内容を確認し、必要ならパスワード再設定を行ってください。';
+
+  @override
+  String get authGenericError => 'ログインに失敗しました';
+
+  @override
   String get authRequestCompleted => '認証リクエストを送信しました。';
 
   @override
@@ -70,6 +79,42 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get createMessage => 'メッセージ作成';
+
+  @override
+  String get toggleRead => '既読切替';
+
+  @override
+  String get pinMessage => 'ピン留め切替';
+
+  @override
+  String get pinActionDenied => 'ピン操作は管理者のみ実行できます。';
+
+  @override
+  String get readStateUpdated => '既読状態を更新しました。';
+
+  @override
+  String get readStatus => '既読状況';
+
+  @override
+  String get readStatusLimited => '既読一覧は権限のあるユーザーのみ表示できます。';
+
+  @override
+  String get load => '読み込み';
+
+  @override
+  String get comments => 'コメント';
+
+  @override
+  String get addComment => 'コメント追加';
+
+  @override
+  String get noComments => 'コメントはまだありません';
+
+  @override
+  String get readUsers => '既読ユーザー';
+
+  @override
+  String get unreadUsers => '未読ユーザー';
 
   @override
   String get title => 'タイトル';

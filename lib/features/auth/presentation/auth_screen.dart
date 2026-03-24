@@ -99,6 +99,16 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     );
   }
 
+  String _toFriendlyAuthError(Object err, AppLocalizations l10n) {
+    final raw = err.toString();
+    final lower = raw.toLowerCase();
+    if (lower.contains('invalid_credentials') ||
+        lower.contains('invalid login credentials')) {
+      return '${l10n.authInvalidCredentials}\n${l10n.authInvalidCredentialsHint}';
+    }
+    return '${l10n.authGenericError}: $raw';
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -117,7 +127,12 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         error: (err, _) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(SnackBar(content: Text('$err')));
+          ).showSnackBar(
+            SnackBar(
+              content: Text(_toFriendlyAuthError(err, l10n)),
+              duration: const Duration(seconds: 4),
+            ),
+          );
         },
       );
     });
