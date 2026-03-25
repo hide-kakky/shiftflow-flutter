@@ -30,6 +30,7 @@ class _FakeRouteDataRepository extends RouteDataRepository {
     this.homeContent = const <String, dynamic>{},
     this.userSettings = const <String, dynamic>{
       'name': 'Tester',
+      'imageUrl': '',
       'role': 'member',
       'theme': 'system',
       'language': 'ja',
@@ -61,6 +62,7 @@ class _FakeRouteDataRepository extends RouteDataRepository {
   final List<String> savedLanguages = <String>[];
   final List<String> savedNames = <String>[];
   final List<String> savedThemes = <String>[];
+  final List<String> savedImageUrls = <String>[];
   final List<String> toggledMessageIds = <String>[];
   int listMyTasksCalls = 0;
   int listCreatedTasksCalls = 0;
@@ -77,6 +79,7 @@ class _FakeRouteDataRepository extends RouteDataRepository {
     String? name,
     String? theme,
     String? language,
+    String? imageUrl,
   }) async {
     if (language != null) {
       savedLanguages.add(language);
@@ -87,11 +90,15 @@ class _FakeRouteDataRepository extends RouteDataRepository {
     if (theme != null) {
       savedThemes.add(theme);
     }
+    if (imageUrl != null) {
+      savedImageUrls.add(imageUrl);
+    }
     return {
       ...userSettings,
       ...?name == null ? null : {'name': name},
       ...?theme == null ? null : {'theme': theme},
       ...?language == null ? null : {'language': language},
+      ...?imageUrl == null ? null : {'imageUrl': imageUrl},
     };
   }
 
@@ -314,6 +321,7 @@ void main() {
     final repo = _FakeRouteDataRepository(
       userSettings: const {
         'name': 'Tester',
+        'imageUrl': '',
         'role': 'member',
         'theme': 'system',
         'language': 'ja',

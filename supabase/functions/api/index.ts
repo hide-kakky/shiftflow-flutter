@@ -210,9 +210,11 @@ Deno.serve(async (request) => {
       const name = asString(payload.name);
       const theme = asString(payload.theme);
       const language = asString(payload.language);
+      const imageUrl = asString(payload.imageUrl);
       if (name) patch.display_name = name;
       if (theme) patch.theme = theme;
       if (language) patch.language = language;
+      if (imageUrl) patch.profile_image_url = imageUrl;
 
       if (Object.keys(patch).length > 0) {
         const { error } = await service.from('users').update(patch).eq('id', ctx.userId);

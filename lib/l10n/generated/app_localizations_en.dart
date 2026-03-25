@@ -198,6 +198,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get displayNameRequired => 'Display name is required.';
 
   @override
+  String get updateProfileImage => 'Update profile image';
+
+  @override
+  String get profileImageUpdated => 'Profile image updated.';
+
+  @override
+  String get profileImageTypeError =>
+      'Only PNG / JPG / WEBP images are supported.';
+
+  @override
+  String get profileImageSizeError => 'Image size must be 2MB or less.';
+
+  @override
   String get saveProfile => 'Save profile';
 
   @override

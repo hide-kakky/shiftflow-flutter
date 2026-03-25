@@ -29,7 +29,7 @@
 - [x] Folders/Templates 管理画面の拡充
 - [x] Admin 画面（Users/Organizations/Audit）の操作導線
 - [x] Settings の表示名編集
-- [ ] Settings のプロフィール画像対応
+- [x] Settings のプロフィール画像対応
 - [x] Tasks 一覧の `My / Created / All` 切替
 
 ## Phase 3: 品質

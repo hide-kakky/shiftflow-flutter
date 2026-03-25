@@ -470,6 +470,30 @@ abstract class AppLocalizations {
   /// **'Display name is required.'**
   String get displayNameRequired;
 
+  /// No description provided for @updateProfileImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Update profile image'**
+  String get updateProfileImage;
+
+  /// No description provided for @profileImageUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile image updated.'**
+  String get profileImageUpdated;
+
+  /// No description provided for @profileImageTypeError.
+  ///
+  /// In en, this message translates to:
+  /// **'Only PNG / JPG / WEBP images are supported.'**
+  String get profileImageTypeError;
+
+  /// No description provided for @profileImageSizeError.
+  ///
+  /// In en, this message translates to:
+  /// **'Image size must be 2MB or less.'**
+  String get profileImageSizeError;
+
   /// No description provided for @saveProfile.
   ///
   /// In en, this message translates to:

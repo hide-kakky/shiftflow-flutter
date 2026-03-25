@@ -1,5 +1,7 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/providers/core_providers.dart';
 import '../../l10n/generated/app_localizations.dart';
@@ -18,7 +20,10 @@ class SettingsScreen extends ConsumerStatefulWidget {
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   final _displayNameController = TextEditingController();
   String? _loadedName;
+  String? _loadedImageSource;
+  Future<String?>? _imageDisplayUrlFuture;
   bool _savingProfile = false;
+  bool _uploadingImage = false;
 
   @override
   void dispose() {
@@ -56,6 +61,106 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
+  Future<String?> _resolveDisplayImageUrl(String source) async {
+    if (source.isEmpty) return null;
+    if (source.startsWith('https://') || source.startsWith('http://')) {
+      return source;
+    }
+
+    final supabase = ref.read(supabaseClientProvider);
+    try {
+      final signedUrl = await supabase.storage
+          .from('profiles')
+          .createSignedUrl(source, 60 * 60 * 24 * 7);
+      return signedUrl;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String _sanitizeFileName(String value) {
+    final sanitized = value.replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_');
+    if (sanitized.isEmpty) return 'profile.webp';
+    return sanitized;
+  }
+
+  String _guessImageContentType(PlatformFile file) {
+    final extension = file.extension?.toLowerCase() ?? '';
+    if (extension == 'png') return 'image/png';
+    if (extension == 'jpg' || extension == 'jpeg') return 'image/jpeg';
+    if (extension == 'webp') return 'image/webp';
+    return '';
+  }
+
+  Future<void> _pickAndUploadProfileImage() async {
+    final l10n = AppLocalizations.of(context);
+    final user = ref.read(currentUserProvider);
+    if (user == null) return;
+
+    setState(() => _uploadingImage = true);
+    try {
+      final picked = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: const ['png', 'jpg', 'jpeg', 'webp'],
+        withData: true,
+      );
+      if (picked == null || picked.files.isEmpty) return;
+      final file = picked.files.first;
+      final bytes = file.bytes;
+      if (bytes == null || bytes.isEmpty) return;
+
+      final contentType = _guessImageContentType(file);
+      if (contentType.isEmpty) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.profileImageTypeError)));
+        return;
+      }
+
+      if (bytes.length > 2 * 1024 * 1024) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.profileImageSizeError)));
+        return;
+      }
+
+      final objectPath =
+          'users/${user.id}/${DateTime.now().millisecondsSinceEpoch}_${_sanitizeFileName(file.name)}';
+      final supabase = ref.read(supabaseClientProvider);
+      await supabase.storage
+          .from('profiles')
+          .uploadBinary(
+            objectPath,
+            bytes,
+            fileOptions: FileOptions(upsert: true, contentType: contentType),
+          );
+
+      await ref
+          .read(routeDataRepositoryProvider)
+          .saveUserSettings(imageUrl: objectPath);
+      ref.invalidate(userSettingsProvider);
+      _loadedImageSource = objectPath;
+      _imageDisplayUrlFuture = _resolveDisplayImageUrl(objectPath);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.profileImageUpdated)));
+      setState(() {});
+    } catch (err) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('${l10n.apiError}: $err')));
+    } finally {
+      if (mounted) {
+        setState(() => _uploadingImage = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -63,12 +168,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final role = settings['role']?.toString() ?? 'guest';
     final email = settings['email']?.toString() ?? '';
     final displayName = settings['name']?.toString() ?? '';
+    final imageSource = settings['imageUrl']?.toString() ?? '';
     final locale = ref.watch(localeProvider);
     final themeMode = ref.watch(themeModeProvider);
 
     if (_loadedName != displayName) {
       _loadedName = displayName;
       _displayNameController.text = displayName;
+    }
+    if (_loadedImageSource != imageSource) {
+      _loadedImageSource = imageSource;
+      _imageDisplayUrlFuture = _resolveDisplayImageUrl(imageSource);
     }
 
     return ListView(
@@ -85,6 +195,43 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 8),
+                FutureBuilder<String?>(
+                  future: _imageDisplayUrlFuture,
+                  builder: (context, snapshot) {
+                    final imageUrl = snapshot.data;
+                    final imageProvider =
+                        (imageUrl != null && imageUrl.isNotEmpty)
+                        ? NetworkImage(imageUrl)
+                        : null;
+                    return Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 28,
+                          backgroundImage: imageProvider,
+                          child: imageProvider == null
+                              ? const Icon(Icons.person_outline)
+                              : null,
+                        ),
+                        const SizedBox(width: 12),
+                        FilledButton.icon(
+                          onPressed: _uploadingImage
+                              ? null
+                              : _pickAndUploadProfileImage,
+                          icon: _uploadingImage
+                              ? const SizedBox.square(
+                                  dimension: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(Icons.image_outlined),
+                          label: Text(l10n.updateProfileImage),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                const SizedBox(height: 12),
                 TextField(
                   controller: _displayNameController,
                   decoration: InputDecoration(
@@ -115,10 +262,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
         ),
         Card(
-          child: ListTile(
-            title: Text(l10n.role),
-            subtitle: Text(role),
-          ),
+          child: ListTile(title: Text(l10n.role), subtitle: Text(role)),
         ),
         Card(
           child: ListTile(
@@ -149,7 +293,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             trailing: DropdownButton<ThemeMode>(
               value: themeMode,
               items: const [
-                DropdownMenuItem(value: ThemeMode.system, child: Text('System')),
+                DropdownMenuItem(
+                  value: ThemeMode.system,
+                  child: Text('System'),
+                ),
                 DropdownMenuItem(value: ThemeMode.light, child: Text('Light')),
                 DropdownMenuItem(value: ThemeMode.dark, child: Text('Dark')),
               ],
