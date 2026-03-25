@@ -171,6 +171,21 @@ class AppLocalizationsJa extends AppLocalizations {
   String get taskTitleRequired => 'タイトルは必須です';
 
   @override
+  String get noFolderSelected => 'フォルダ未選択';
+
+  @override
+  String get noTemplateSelected => 'テンプレート未選択';
+
+  @override
+  String get messageTitleRequired => 'タイトルは必須です';
+
+  @override
+  String get messageAttachmentUploadSuccess => '添付ファイルをアップロードしました';
+
+  @override
+  String get messageAttachmentPartialUpload => '一部の添付アップロードに失敗しました';
+
+  @override
   String get taskScopeMy => 'My';
 
   @override

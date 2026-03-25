@@ -174,6 +174,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get taskTitleRequired => 'Title is required';
 
   @override
+  String get noFolderSelected => 'No folder';
+
+  @override
+  String get noTemplateSelected => 'No template';
+
+  @override
+  String get messageTitleRequired => 'Title is required';
+
+  @override
+  String get messageAttachmentUploadSuccess => 'Attachments uploaded';
+
+  @override
+  String get messageAttachmentPartialUpload =>
+      'Some attachments failed to upload';
+
+  @override
   String get taskScopeMy => 'My';
 
   @override

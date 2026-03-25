@@ -15,8 +15,8 @@
 ## 3. 現在の評価
 ### 3.1 実装済み
 - 認証: Magic Link / Password ログイン、QA補助導線、ロール別 API 制御
-- Tasks: 作成、優先度、期限、担当者、添付アップロード、完了
-- Messages: 一覧、詳細、コメント、ピン、既読切替、既読状況取得
+- Tasks: 作成、優先度、期限、担当者、添付アップロード、完了、`My / Created / All` 切替
+- Messages: 一覧、詳細、作成（フォルダ選択/テンプレート適用/添付）、コメント、ピン、既読切替、既読状況取得
 - Admin: Users / Folders / Templates / Organizations / Audit の基本導線
 - Settings: 表示名、テーマ、言語
 
@@ -24,33 +24,25 @@
 - Home
   - Flutter は概要カードのみ
   - PWA は Home 上の導線や情報量がより多い
-- Tasks
-  - API は `listCreatedTasks` / `listAllTasks` を持つ
-  - Flutter UI はまだ `listMyTasks` 中心
 - Messages
   - API / DB はフォルダ、テンプレート、添付、既読制御を持つ
-  - Flutter UI は詳細系は強化済みだが、作成時のフォルダ選択・テンプレート適用・添付追加が未反映
+  - Flutter UI は作成導線まで強化済み、一覧のフォルダフィルタ / 未読のみ表示が未反映
 - Settings
   - 表示名保存は Flutter 対応済み
   - PWA にあるプロフィール画像の編集は未反映
 
 ### 3.3 未着手または不足
 - Messages 一覧のフォルダフィルタ / 未読のみ表示
-- メッセージ作成時のフォルダ選択、テンプレート適用、添付追加
-- Tasks の「自分が作成したタスク」「全体タスク」タブ
 - プロフィール画像アップロード / 表示
 - Integration テストと手動 E2E 記録
 - 通知失敗リトライ
 
 ## 4. 優先順位
-1. Messages 作成導線の PWA 同等化
-   - フォルダ選択
-   - テンプレート適用
-   - 添付追加
-2. Tasks 一覧の PWA 同等化
-   - My / Created / All の切替
-3. Settings のプロフィール画像
-4. Integration テストと E2E 記録
+1. Messages 一覧の PWA 同等化
+   - フォルダフィルタ
+   - 未読のみ表示
+2. Settings のプロフィール画像
+3. Integration テストと E2E 記録
 
 ## 5. 判断メモ
 - いまの Flutter は「管理系」と「詳細系」は前進している。

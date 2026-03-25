@@ -24,8 +24,7 @@
 
 ## 4. 実装（優先順）
 - [ ] `docs/SHIFTFLOW_pwa_gap_analysis_2026-03-26.md` を確認
-- [ ] Messages 作成導線（フォルダ / テンプレート / 添付）
-- [ ] Settings プロフィール画像
+- [ ] Messages 一覧（フォルダフィルタ / 未読のみ表示）
 - [ ] Auth導線の実機検証（admin/manager/member）
 
 ## 5. 実装後検証

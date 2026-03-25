@@ -422,6 +422,36 @@ abstract class AppLocalizations {
   /// **'Title is required'**
   String get taskTitleRequired;
 
+  /// No description provided for @noFolderSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'No folder'**
+  String get noFolderSelected;
+
+  /// No description provided for @noTemplateSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'No template'**
+  String get noTemplateSelected;
+
+  /// No description provided for @messageTitleRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Title is required'**
+  String get messageTitleRequired;
+
+  /// No description provided for @messageAttachmentUploadSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachments uploaded'**
+  String get messageAttachmentUploadSuccess;
+
+  /// No description provided for @messageAttachmentPartialUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Some attachments failed to upload'**
+  String get messageAttachmentPartialUpload;
+
   /// No description provided for @taskScopeMy.
   ///
   /// In en, this message translates to:

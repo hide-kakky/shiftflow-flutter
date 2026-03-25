@@ -15,6 +15,7 @@
 - Tasks 作成UIの拡張（優先度・期限・担当者選択）と API `addNewTask` の priority 保存対応
 - Tasks 添付ファイル対応（Storageアップロード・`attachments`/`task_attachments` 紐付け・一覧表示）
 - Messages 詳細UIの拡張（コメント一覧/追加・ピン切替・既読/未読ユーザー表示）
+- Messages 作成導線の拡張（フォルダ選択・テンプレート適用・添付アップロード）
 - Admin 画面の操作導線拡張（Users更新/Organizations更新/Audit再読込）
 - Folders/Templates 管理導線の拡張（フォルダ作成・更新・アーカイブ、テンプレート作成）
 - Supabase 環境分離（dev/prod）と stateless migration 運用（`scripts/db_push.sh`）を整備
@@ -25,11 +26,10 @@
 - `ShiftFlow_PWA` 再精査と差分整理（`docs/SHIFTFLOW_pwa_gap_analysis_2026-03-26.md`）
 
 ## 3. 次の実装対象
-1. Messages 作成導線の PWA 差分回収（フォルダ/テンプレート/添付）
-2. Settings のプロフィール画像対応
-3. Auth導線の実機検証（admin/manager/member のロール別確認）
-4. `docs/SHIFTFLOW_e2e_scenarios.md` の実施結果記録
-5. Widgetテストを補完する Integrationテストの追加（主要CUJ）
+1. Messages 一覧のフォルダフィルタ / 未読のみ表示
+2. Auth導線の実機検証（admin/manager/member のロール別確認）
+3. `docs/SHIFTFLOW_e2e_scenarios.md` の実施結果記録
+4. Widgetテストを補完する Integrationテストの追加（主要CUJ）
 
 ## 4. 認証テスト運用の再設計方針（TASUKI 参考）
 1. ログイン画面は「通常ユーザー向けUI」を維持し、`Test Login` のような文言を常設しない。
