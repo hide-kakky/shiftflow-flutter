@@ -59,6 +59,8 @@
   "messageTitleRequired": "Title is required",
   "messageAttachmentUploadSuccess": "Attachments uploaded",
   "messageAttachmentPartialUpload": "Some attachments failed to upload",
+  "messageFolderFilter": "Folder",
+  "messageUnreadOnly": "Unread only",
   "taskScopeMy": "My",
   "taskScopeCreated": "Created",
   "taskScopeAll": "All",

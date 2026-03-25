@@ -190,6 +190,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'Some attachments failed to upload';
 
   @override
+  String get messageFolderFilter => 'Folder';
+
+  @override
+  String get messageUnreadOnly => 'Unread only';
+
+  @override
   String get taskScopeMy => 'My';
 
   @override

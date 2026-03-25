@@ -37,11 +37,13 @@ class _FakeRouteDataRepository extends RouteDataRepository {
     },
     this.bootstrapData = const <String, dynamic>{},
     List<Map<String, dynamic>>? messages,
+    List<Map<String, dynamic>>? folders,
     List<Map<String, dynamic>>? myTasks,
     List<Map<String, dynamic>>? createdTasks,
     List<Map<String, dynamic>>? allTasks,
     this.toggleReadResponse = const <String, dynamic>{'isRead': true},
   }) : _messages = List<Map<String, dynamic>>.from(messages ?? const []),
+       _folders = List<Map<String, dynamic>>.from(folders ?? const []),
        _myTasks = List<Map<String, dynamic>>.from(myTasks ?? const []),
        _createdTasks = List<Map<String, dynamic>>.from(
          createdTasks ?? const [],
@@ -54,6 +56,7 @@ class _FakeRouteDataRepository extends RouteDataRepository {
   final Map<String, dynamic> bootstrapData;
   final Map<String, dynamic> toggleReadResponse;
   final List<Map<String, dynamic>> _messages;
+  final List<Map<String, dynamic>> _folders;
   final List<Map<String, dynamic>> _myTasks;
   final List<Map<String, dynamic>> _createdTasks;
   final List<Map<String, dynamic>> _allTasks;
@@ -62,6 +65,8 @@ class _FakeRouteDataRepository extends RouteDataRepository {
   final List<String> savedNames = <String>[];
   final List<String> savedThemes = <String>[];
   final List<String> toggledMessageIds = <String>[];
+  final List<String?> requestedFolderIds = <String?>[];
+  final List<bool> requestedUnreadOnly = <bool>[];
   int listMyTasksCalls = 0;
   int listCreatedTasksCalls = 0;
   int listAllTasksCalls = 0;
@@ -96,8 +101,30 @@ class _FakeRouteDataRepository extends RouteDataRepository {
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getMessages({String? folderId}) async {
-    return List<Map<String, dynamic>>.from(_messages);
+  Future<List<Map<String, dynamic>>> getMessages({
+    String? folderId,
+    bool unreadOnly = false,
+  }) async {
+    requestedFolderIds.add(folderId);
+    requestedUnreadOnly.add(unreadOnly);
+    return _messages
+        .where((message) {
+          final messageFolderId = message['folder_id']?.toString();
+          final matchesFolder =
+              folderId == null ||
+              folderId.isEmpty ||
+              messageFolderId == folderId;
+          final isRead = message['isRead'] == true;
+          final matchesUnread = !unreadOnly || !isRead;
+          return matchesFolder && matchesUnread;
+        })
+        .map((row) => Map<String, dynamic>.from(row))
+        .toList(growable: false);
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> listActiveFolders() async {
+    return List<Map<String, dynamic>>.from(_folders);
   }
 
   @override
@@ -255,6 +282,70 @@ void main() {
 
     expect(repo.toggledMessageIds, ['message-1']);
     expect(find.byIcon(Icons.mark_email_read_outlined), findsOneWidget);
+  });
+
+  testWidgets('MessagesScreen filters by folder and unread only', (
+    tester,
+  ) async {
+    final repo = _FakeRouteDataRepository(
+      folders: const [
+        {'id': 'folder-1', 'name': '連絡'},
+        {'id': 'folder-2', 'name': '運用'},
+      ],
+      messages: const [
+        {
+          'id': 'message-1',
+          'title': '未読メッセージ',
+          'body': '未読',
+          'isRead': false,
+          'folder_id': 'folder-1',
+        },
+        {
+          'id': 'message-2',
+          'title': '既読メッセージ',
+          'body': '既読',
+          'isRead': true,
+          'folder_id': 'folder-1',
+        },
+        {
+          'id': 'message-3',
+          'title': '別フォルダ',
+          'body': '未読',
+          'isRead': false,
+          'folder_id': 'folder-2',
+        },
+      ],
+    );
+    final container = ProviderContainer(
+      overrides: [routeDataRepositoryProvider.overrideWithValue(repo)],
+    );
+    addTearDown(container.dispose);
+
+    await _pumpScreen(
+      tester,
+      container: container,
+      child: const MessagesScreen(),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('未読メッセージ'), findsOneWidget);
+    expect(find.text('既読メッセージ'), findsOneWidget);
+    expect(find.text('別フォルダ'), findsOneWidget);
+
+    await tester.tap(find.byType(DropdownButtonFormField<String?>).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('連絡').last);
+    await tester.pumpAndSettle();
+
+    expect(find.text('未読メッセージ'), findsOneWidget);
+    expect(find.text('既読メッセージ'), findsOneWidget);
+    expect(find.text('別フォルダ'), findsNothing);
+
+    await tester.tap(find.text('未読のみ'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('未読メッセージ'), findsOneWidget);
+    expect(find.text('既読メッセージ'), findsNothing);
   });
 
   testWidgets('TasksScreen switches scope between My, Created, All', (

@@ -51,7 +51,7 @@ class RouteDataRepository {
           'dueAtMs': dueAt?.millisecondsSinceEpoch,
           'priority': priority,
           'assigneeUserIds': assigneeUserIds,
-        }
+        },
       ],
     );
     return _asMap(result);
@@ -71,7 +71,7 @@ class RouteDataRepository {
           'title': title,
           'description': description,
           'status': status,
-        }
+        },
       ],
     );
     return _asMap(result);
@@ -86,20 +86,24 @@ class RouteDataRepository {
     await _apiClient.invokeRoute('deleteTaskById', args: [taskId]);
   }
 
-  Future<List<Map<String, dynamic>>> getMessages({String? folderId}) async {
+  Future<List<Map<String, dynamic>>> getMessages({
+    String? folderId,
+    bool unreadOnly = false,
+  }) async {
     final result = await _apiClient.invokeRoute(
       'getMessages',
       args: [
-        {
-          'folderId': folderId,
-        }
+        {'folderId': folderId, 'unreadOnly': unreadOnly},
       ],
     );
     return _asListOfMap(result);
   }
 
   Future<Map<String, dynamic>> getMessageById(String messageId) async {
-    final result = await _apiClient.invokeRoute('getMessageById', args: [messageId]);
+    final result = await _apiClient.invokeRoute(
+      'getMessageById',
+      args: [messageId],
+    );
     return _asMap(result);
   }
 
@@ -111,11 +115,7 @@ class RouteDataRepository {
     final result = await _apiClient.invokeRoute(
       'addNewMessage',
       args: [
-        {
-          'title': title,
-          'body': body,
-          'folderId': folderId,
-        }
+        {'title': title, 'body': body, 'folderId': folderId},
       ],
     );
     return _asMap(result);
@@ -132,27 +132,35 @@ class RouteDataRepository {
     final result = await _apiClient.invokeRoute(
       'addNewComment',
       args: [
-        {
-          'messageId': messageId,
-          'body': body,
-        }
+        {'messageId': messageId, 'body': body},
       ],
     );
     return _asMap(result);
   }
 
   Future<Map<String, dynamic>> toggleMemoRead(String messageId) async {
-    final result = await _apiClient.invokeRoute('toggleMemoRead', args: [messageId]);
+    final result = await _apiClient.invokeRoute(
+      'toggleMemoRead',
+      args: [messageId],
+    );
     return _asMap(result);
   }
 
   Future<Map<String, dynamic>> markMemoAsRead(String messageId) async {
-    final result = await _apiClient.invokeRoute('markMemoAsRead', args: [messageId]);
+    final result = await _apiClient.invokeRoute(
+      'markMemoAsRead',
+      args: [messageId],
+    );
     return _asMap(result);
   }
 
-  Future<Map<String, dynamic>> markMemosReadBulk(List<String> messageIds) async {
-    final result = await _apiClient.invokeRoute('markMemosReadBulk', args: [messageIds]);
+  Future<Map<String, dynamic>> markMemosReadBulk(
+    List<String> messageIds,
+  ) async {
+    final result = await _apiClient.invokeRoute(
+      'markMemosReadBulk',
+      args: [messageIds],
+    );
     return _asMap(result);
   }
 
@@ -254,7 +262,7 @@ class RouteDataRepository {
           ...?name == null ? null : {'name': name},
           ...?theme == null ? null : {'theme': theme},
           ...?language == null ? null : {'language': language},
-        }
+        },
       ],
     );
     return _asMap(result);
@@ -282,7 +290,7 @@ class RouteDataRepository {
           'email': email,
           ...?role == null ? null : {'role': role},
           ...?status == null ? null : {'status': status},
-        }
+        },
       ],
     );
     return _asMap(result);
@@ -299,7 +307,7 @@ class RouteDataRepository {
       args: [
         {
           ...?orgId == null ? null : {'orgId': orgId},
-        }
+        },
       ],
     );
     return _asMap(result);
@@ -320,8 +328,10 @@ class RouteDataRepository {
           ...?shortName == null ? null : {'shortName': shortName},
           ...?displayColor == null ? null : {'displayColor': displayColor},
           ...?timezone == null ? null : {'timezone': timezone},
-          ...?notificationEmail == null ? null : {'notificationEmail': notificationEmail},
-        }
+          ...?notificationEmail == null
+              ? null
+              : {'notificationEmail': notificationEmail},
+        },
       ],
     );
     return _asMap(result);
@@ -335,11 +345,7 @@ class RouteDataRepository {
     final result = await _apiClient.invokeRoute(
       'getAuditLogs',
       args: [
-        {
-          'range': range,
-          'eventType': eventType,
-          'limit': limit,
-        }
+        {'range': range, 'eventType': eventType, 'limit': limit},
       ],
     );
     return _asMap(result);
@@ -362,7 +368,10 @@ class RouteDataRepository {
   }
 
   Future<Map<String, dynamic>> downloadAttachment(String attachmentId) async {
-    final result = await _apiClient.invokeRoute('downloadAttachment', args: [attachmentId]);
+    final result = await _apiClient.invokeRoute(
+      'downloadAttachment',
+      args: [attachmentId],
+    );
     return _asMap(result);
   }
 

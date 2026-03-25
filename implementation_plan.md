@@ -16,6 +16,7 @@
 - Tasks 添付ファイル対応（Storageアップロード・`attachments`/`task_attachments` 紐付け・一覧表示）
 - Messages 詳細UIの拡張（コメント一覧/追加・ピン切替・既読/未読ユーザー表示）
 - Messages 作成導線の拡張（フォルダ選択・テンプレート適用・添付アップロード）
+- Messages 一覧の拡張（フォルダフィルタ・未読のみ表示）
 - Admin 画面の操作導線拡張（Users更新/Organizations更新/Audit再読込）
 - Folders/Templates 管理導線の拡張（フォルダ作成・更新・アーカイブ、テンプレート作成）
 - Supabase 環境分離（dev/prod）と stateless migration 運用（`scripts/db_push.sh`）を整備
@@ -26,7 +27,7 @@
 - `ShiftFlow_PWA` 再精査と差分整理（`docs/SHIFTFLOW_pwa_gap_analysis_2026-03-26.md`）
 
 ## 3. 次の実装対象
-1. Messages 一覧のフォルダフィルタ / 未読のみ表示
+1. Settings のプロフィール画像対応
 2. Auth導線の実機検証（admin/manager/member のロール別確認）
 3. `docs/SHIFTFLOW_e2e_scenarios.md` の実施結果記録
 4. Widgetテストを補完する Integrationテストの追加（主要CUJ）

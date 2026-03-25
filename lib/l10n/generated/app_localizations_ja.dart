@@ -186,6 +186,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get messageAttachmentPartialUpload => '一部の添付アップロードに失敗しました';
 
   @override
+  String get messageFolderFilter => 'フォルダ';
+
+  @override
+  String get messageUnreadOnly => '未読のみ';
+
+  @override
   String get taskScopeMy => 'My';
 
   @override

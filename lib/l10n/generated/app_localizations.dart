@@ -452,6 +452,18 @@ abstract class AppLocalizations {
   /// **'Some attachments failed to upload'**
   String get messageAttachmentPartialUpload;
 
+  /// No description provided for @messageFolderFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder'**
+  String get messageFolderFilter;
+
+  /// No description provided for @messageUnreadOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Unread only'**
+  String get messageUnreadOnly;
+
   /// No description provided for @taskScopeMy.
   ///
   /// In en, this message translates to:

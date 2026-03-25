@@ -33,6 +33,10 @@ function asList(value: unknown): unknown[] {
   return Array.isArray(value) ? value : [];
 }
 
+function asBool(value: unknown): boolean {
+  return value === true;
+}
+
 async function resolveAccessContext(request: Request): Promise<AccessContext> {
   const token = readBearerToken(request);
   const payload = decodeJwtPayload(token);
@@ -371,6 +375,7 @@ Deno.serve(async (request) => {
     if (route === 'getMessages') {
       const payload = asMap(args[0]);
       const folderId = asString(payload.folderId);
+      const unreadOnly = asBool(payload.unreadOnly);
       let query = service
         .from('messages')
         .select('id,title,body,priority,is_pinned,folder_id,created_at,updated_at')
@@ -379,7 +384,31 @@ Deno.serve(async (request) => {
         .order('created_at', { ascending: false });
       if (folderId) query = query.eq('folder_id', folderId);
       const { data } = await query;
-      return jsonResponse(200, { ok: true, result: data ?? [] });
+      const messages = data ?? [];
+
+      if (messages.length === 0) {
+        return jsonResponse(200, { ok: true, result: [] });
+      }
+
+      const messageIds = messages.map((row) => row.id).filter((id) => !!id);
+      const { data: readRows } = await service
+        .from('message_reads')
+        .select('message_id')
+        .eq('membership_id', ctx.membershipId)
+        .in('message_id', messageIds);
+      const readMessageIds = new Set((readRows ?? []).map((row) => row.message_id));
+
+      const mapped = messages
+        .map((row) => {
+          const isRead = readMessageIds.has(row.id);
+          return {
+            ...row,
+            isRead,
+          };
+        })
+        .filter((row) => (unreadOnly ? !row.isRead : true));
+
+      return jsonResponse(200, { ok: true, result: mapped });
     }
 
     if (route === 'getMessageById') {

@@ -20,8 +20,9 @@
   - ✅ Settings の表示名編集
   - ✅ Tasks 一覧の `My / Created / All` 切替
   - ✅ Messages 作成導線（フォルダ選択 / テンプレート適用 / 添付）
+  - ✅ Messages 一覧（フォルダフィルタ / 未読のみ表示）
   - ✅ 画面遷移時にメニューバーを固定する ShellRoute 化
-  - ▶ PWA差分の棚卸し（Messages 一覧フィルタ / 未読のみ表示）
+  - ▶ PWA差分の棚卸し（Settings Profile image）
 
 ## 2. マイルストーン
 | # | マイルストーン | 状態 | Exit条件 |
@@ -35,6 +36,6 @@
 - ACTION-1: `flutter analyze` と `flutter test` を常時グリーン維持。
 - ACTION-2: Auth導線の実機検証と、管理系UIの実操作テストを拡張。
 - ACTION-2a: Widgetテストを土台に、次は Integrationテストで主要CUJを埋める。
-- ACTION-3: Messages 一覧のフォルダフィルタ / 未読のみ表示を PWA 同等レベルまで寄せる。
+- ACTION-3: Settings のプロフィール画像（表示/更新）を PWA 同等レベルまで寄せる。
 - ACTION-4: `docs/SHIFTFLOW_e2e_scenarios.md` に沿って実機E2Eを実施し、結果を記録。
 - ACTION-5: DB migration を `scripts/db_push.sh`（`--db-url` stateless 実行）へ統一し、`link` 切替依存をなくす。

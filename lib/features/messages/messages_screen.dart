@@ -15,16 +15,49 @@ class MessagesScreen extends ConsumerStatefulWidget {
 
 class _MessagesScreenState extends ConsumerState<MessagesScreen> {
   late Future<List<Map<String, dynamic>>> _future;
+  bool _loadingFolders = false;
+  List<Map<String, dynamic>> _folders = const [];
+  String? _selectedFolderId;
+  bool _unreadOnly = false;
   final Map<String, bool> _readOverrides = <String, bool>{};
 
   @override
   void initState() {
     super.initState();
+    _loadFolders();
     _future = _load();
   }
 
   Future<List<Map<String, dynamic>>> _load() {
-    return ref.read(routeDataRepositoryProvider).getMessages();
+    return ref
+        .read(routeDataRepositoryProvider)
+        .getMessages(folderId: _selectedFolderId, unreadOnly: _unreadOnly);
+  }
+
+  Future<void> _loadFolders() async {
+    setState(() {
+      _loadingFolders = true;
+    });
+    try {
+      final result = await ref
+          .read(routeDataRepositoryProvider)
+          .listActiveFolders();
+      if (!mounted) return;
+      setState(() {
+        _folders = result;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _folders = const [];
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loadingFolders = false;
+        });
+      }
+    }
   }
 
   Future<void> _refresh() async {
@@ -364,6 +397,97 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
     setState(() {
       _readOverrides[messageId] = result['isRead'] == true;
     });
+    if (_unreadOnly && result['isRead'] == true) {
+      await _refresh();
+    }
+  }
+
+  void _setFolderFilter(String? folderId) {
+    setState(() {
+      _selectedFolderId = folderId;
+      _future = _load();
+    });
+  }
+
+  void _setUnreadOnly(bool unreadOnly) {
+    setState(() {
+      _unreadOnly = unreadOnly;
+      _future = _load();
+    });
+  }
+
+  Widget _buildFilters(AppLocalizations l10n) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          DropdownButtonFormField<String?>(
+            initialValue: _selectedFolderId,
+            decoration: InputDecoration(labelText: l10n.messageFolderFilter),
+            items: [
+              DropdownMenuItem<String?>(
+                value: null,
+                child: Text(l10n.noFolderSelected),
+              ),
+              for (final folder in _folders)
+                DropdownMenuItem<String?>(
+                  value: folder['id']?.toString(),
+                  child: Text(folder['name']?.toString() ?? '-'),
+                ),
+            ],
+            onChanged: _loadingFolders ? null : _setFolderFilter,
+          ),
+          const SizedBox(height: 8),
+          FilterChip(
+            label: Text(l10n.messageUnreadOnly),
+            selected: _unreadOnly,
+            onSelected: _setUnreadOnly,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMessageCard(
+    AppLocalizations l10n,
+    Map<String, dynamic> message,
+  ) {
+    final messageId = message['id']?.toString() ?? '';
+    final fallbackRead = message['isRead'] == true;
+    final isRead = _readOverrides[messageId] ?? fallbackRead;
+    final isPinned = message['is_pinned'] == true;
+    final title = message['title']?.toString() ?? '-';
+    final body = message['body']?.toString() ?? '';
+
+    return Card(
+      child: ListTile(
+        onTap: messageId.isEmpty
+            ? null
+            : () => _openDetails(messageId: messageId, title: title),
+        title: Row(
+          children: [
+            Expanded(child: Text(title)),
+            if (isPinned)
+              const Padding(
+                padding: EdgeInsets.only(left: 8),
+                child: Icon(Icons.push_pin, size: 18),
+              ),
+          ],
+        ),
+        subtitle: Text(body, maxLines: 2, overflow: TextOverflow.ellipsis),
+        leading: Icon(
+          isRead
+              ? Icons.mark_email_read_outlined
+              : Icons.mark_email_unread_outlined,
+        ),
+        trailing: IconButton(
+          tooltip: l10n.toggleRead,
+          icon: const Icon(Icons.done_all),
+          onPressed: messageId.isEmpty ? null : () => _toggleRead(messageId),
+        ),
+      ),
+    );
   }
 
   Future<void> _openDetails({
@@ -397,11 +521,18 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
           future: _future,
           builder: (context, snapshot) {
             if (snapshot.connectionState != ConnectionState.done) {
-              return const Center(child: CircularProgressIndicator());
+              return ListView(
+                children: [
+                  _buildFilters(l10n),
+                  const SizedBox(height: 120),
+                  const Center(child: CircularProgressIndicator()),
+                ],
+              );
             }
             if (snapshot.hasError) {
               return ListView(
                 children: [
+                  _buildFilters(l10n),
                   const SizedBox(height: 120),
                   Center(child: Text('${l10n.apiError}: ${snapshot.error}')),
                 ],
@@ -412,6 +543,7 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
             if (rows.isEmpty) {
               return ListView(
                 children: [
+                  _buildFilters(l10n),
                   const SizedBox(height: 120),
                   Center(child: Text(l10n.noData)),
                 ],
@@ -419,53 +551,23 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
             }
 
             return ListView.separated(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
               itemCount: rows.length,
-              separatorBuilder: (context, index) => const SizedBox(height: 8),
+              separatorBuilder: (context, index) => index == 0
+                  ? const SizedBox.shrink()
+                  : const SizedBox(height: 8),
               itemBuilder: (context, index) {
-                final message = rows[index];
-                final messageId = message['id']?.toString() ?? '';
-                final fallbackRead = message['isRead'] == true;
-                final isRead = _readOverrides[messageId] ?? fallbackRead;
-                final isPinned = message['is_pinned'] == true;
-                final title = message['title']?.toString() ?? '-';
-                final body = message['body']?.toString() ?? '';
-
-                return Card(
-                  child: ListTile(
-                    onTap: messageId.isEmpty
-                        ? null
-                        : () =>
-                              _openDetails(messageId: messageId, title: title),
-                    title: Row(
-                      children: [
-                        Expanded(child: Text(title)),
-                        if (isPinned)
-                          const Padding(
-                            padding: EdgeInsets.only(left: 8),
-                            child: Icon(Icons.push_pin, size: 18),
-                          ),
-                      ],
-                    ),
-                    subtitle: Text(
-                      body,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    leading: Icon(
-                      isRead
-                          ? Icons.mark_email_read_outlined
-                          : Icons.mark_email_unread_outlined,
-                    ),
-                    trailing: IconButton(
-                      tooltip: l10n.toggleRead,
-                      icon: const Icon(Icons.done_all),
-                      onPressed: messageId.isEmpty
-                          ? null
-                          : () => _toggleRead(messageId),
-                    ),
-                  ),
-                );
+                if (index == 0) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildFilters(l10n),
+                      const SizedBox(height: 4),
+                      _buildMessageCard(l10n, rows[index]),
+                    ],
+                  );
+                }
+                return _buildMessageCard(l10n, rows[index]);
               },
             );
           },

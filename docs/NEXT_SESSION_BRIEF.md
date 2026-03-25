@@ -18,17 +18,16 @@
 - Widget テスト追加（Auth/Home/Messages/Settings/Admin）
 - Settings の表示名編集
 - Tasks 一覧の `My / Created / All` 切替
-- Settings のプロフィール画像（表示/更新）
 - Messages 作成導線（フォルダ選択 / テンプレート適用 / 添付）
+- Messages 一覧（フォルダフィルタ / 未読のみ表示）
 - 画面遷移時にメニューバーが巻き込まれないよう `ShellRoute` 化
 
 ## PWA 再精査で見えた差分
-1. Messages 一覧
-   - フォルダフィルタ
-   - 未読のみ表示
+1. Settings
+   - プロフィール画像更新
 
 ## 直近の優先タスク
-1. Messages 一覧の PWA 同等化（フォルダフィルタ / 未読のみ表示）
+1. Settings のプロフィール画像対応
 2. Auth導線の実機検証（admin/manager/member）
 3. E2Eシナリオの実施結果記録（`docs/SHIFTFLOW_e2e_scenarios.md`）
 
@@ -46,5 +45,5 @@ supabase db reset --local --yes
 ```
 
 ## 完了条件（次回）
-- Messages 一覧の PWA 差分を1つ以上回収
+- Settings プロフィール画像の PWA 差分を回収
 - `flutter analyze` / `flutter test` / `supabase db lint --local --fail-on error` が成功

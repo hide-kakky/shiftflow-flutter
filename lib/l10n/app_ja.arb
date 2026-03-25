@@ -59,6 +59,8 @@
   "messageTitleRequired": "タイトルは必須です",
   "messageAttachmentUploadSuccess": "添付ファイルをアップロードしました",
   "messageAttachmentPartialUpload": "一部の添付アップロードに失敗しました",
+  "messageFolderFilter": "フォルダ",
+  "messageUnreadOnly": "未読のみ",
   "taskScopeMy": "My",
   "taskScopeCreated": "Created",
   "taskScopeAll": "All",
