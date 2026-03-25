@@ -51,9 +51,9 @@
 ### Messages
 | route | 説明 | 権限 |
 | --- | --- | --- |
-| `getMessages` | メッセージ一覧 | admin/manager/member |
+| `getMessages` | メッセージ一覧（`folderId` 指定可） | admin/manager/member |
 | `getMessageById` | メッセージ詳細+コメント | admin/manager/member |
-| `addNewMessage` | メッセージ作成 | admin/manager/member |
+| `addNewMessage` | メッセージ作成（現状 Flutter UI はタイトル/本文中心） | admin/manager/member |
 | `deleteMessageById` | メッセージ削除 | admin/manager/member |
 | `addNewComment` | コメント追加 | admin/manager/member |
 | `toggleMemoRead` | 既読トグル | admin/manager/member |
@@ -76,8 +76,8 @@
 ### Settings / Admin
 | route | 説明 | 権限 |
 | --- | --- | --- |
-| `getUserSettings` | ユーザー設定取得 | admin/manager/member/guest |
-| `saveUserSettings` | ユーザー設定保存 | admin/manager/member |
+| `getUserSettings` | ユーザー設定取得（`name`, `imageUrl`, `theme`, `language`, `role`, `email`） | admin/manager/member/guest |
+| `saveUserSettings` | ユーザー設定保存（現状は `name`, `theme`, `language`） | admin/manager/member |
 | `listActiveUsers` | 有効ユーザー一覧 | admin/manager |
 | `adminListUsers` | ユーザー管理一覧 | admin/manager |
 | `adminUpdateUser` | ユーザー更新 | admin/manager |
@@ -104,3 +104,4 @@
 ## 5. 関連文書
 - [SHIFTFLOW_requirements_v1.0.md](./SHIFTFLOW_requirements_v1.0.md)
 - [SHIFTFLOW_database_schema.md](./SHIFTFLOW_database_schema.md)
+- [SHIFTFLOW_pwa_gap_analysis_2026-03-26.md](./SHIFTFLOW_pwa_gap_analysis_2026-03-26.md)

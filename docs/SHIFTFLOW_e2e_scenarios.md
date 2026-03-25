@@ -30,10 +30,11 @@
 - 期待: フォルダ/テンプレートが一覧に反映
 
 ### E2E-05 設定変更
-1. 言語を `ja/en` 切替
-2. テーマを `light/dark/system` 切替
-3. 再起動後に設定保持確認
-- 期待: 表示と言語が保持される
+1. 表示名を変更して保存
+2. 言語を `ja/en` 切替
+3. テーマを `light/dark/system` 切替
+4. 再起動後に設定保持確認
+- 期待: 表示名・表示言語・テーマが保持される
 
 ### E2E-06 管理者機能
 1. `Admin > Users` でロール変更
@@ -61,3 +62,8 @@
   - `adminListUsers` を admin/manager/member で呼び分け
   - 結果: admin/manager は成功、member は `forbidden`
 - E2E-07 通知: 未実施（次回）
+
+## 5. PWA差分観点の追加確認
+- Messages 作成時にフォルダ・テンプレート・添付が使えるか
+- Tasks で `My / Created / All` の切替ができるか
+- Settings でプロフィール画像の更新ができるか

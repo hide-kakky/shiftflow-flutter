@@ -23,8 +23,10 @@
 - [ ] `./scripts/db_push.sh dev --dry-run`（migration の stateless 実行確認）
 
 ## 4. 実装（優先順）
-- [ ] Messages 詳細UI（既読状態・コメント一覧・ピン）
-- [ ] Admin 画面（Users/Organizations/Audit）
+- [ ] `docs/SHIFTFLOW_pwa_gap_analysis_2026-03-26.md` を確認
+- [ ] Messages 作成導線（フォルダ / テンプレート / 添付）
+- [ ] Tasks 一覧（`My / Created / All`）
+- [ ] Settings プロフィール画像
 - [ ] Auth導線の実機検証（admin/manager/member）
 
 ## 5. 実装後検証

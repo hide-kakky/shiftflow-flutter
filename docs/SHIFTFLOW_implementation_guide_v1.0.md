@@ -36,6 +36,11 @@
 - Settings（theme/language/profile）
 - Admin（users/orgs/audit）
 
+### Phase 2.5: PWA差分の回収
+- `docs/SHIFTFLOW_pwa_gap_analysis_2026-03-26.md` を起点に不足機能を埋める。
+- 優先度は `Messages 作成導線 -> Tasks 複数一覧 -> Settings プロフィール画像` とする。
+- 「理想要件」だけでなく「現在の実装状態」も同時に文書更新する。
+
 ### Phase 3: 品質強化
 - 通知3トリガーの安定化。
 - RLS/API/Widget/Integrationテスト拡充。
@@ -63,4 +68,5 @@
 - [SHIFTFLOW_requirements_v1.0.md](./SHIFTFLOW_requirements_v1.0.md)
 - [SHIFTFLOW_flutter_architecture.md](./SHIFTFLOW_flutter_architecture.md)
 - [SHIFTFLOW_testing_plan.md](./SHIFTFLOW_testing_plan.md)
+- [SHIFTFLOW_pwa_gap_analysis_2026-03-26.md](./SHIFTFLOW_pwa_gap_analysis_2026-03-26.md)
 - [NEXT_SESSION_CHECKLIST.md](./NEXT_SESSION_CHECKLIST.md)

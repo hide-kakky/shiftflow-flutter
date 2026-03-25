@@ -449,56 +449,59 @@ class _AdminFoldersTabState extends ConsumerState<_AdminFoldersTab> {
       onRefresh: _refresh,
       child: FutureBuilder<List<Map<String, dynamic>>>(
         future: _future,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError) {
-          return Center(child: Text('${l10n.apiError}: ${snapshot.error}'));
-        }
-        final rows = snapshot.data ?? const [];
-        if (rows.isEmpty) {
-          return Center(child: Text(l10n.noData));
-        }
-        return ListView(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: FilledButton.icon(
-                  onPressed: _openCreateDialog,
-                  icon: const Icon(Icons.create_new_folder_outlined),
-                  label: Text(l10n.adminCreateFolder),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState != ConnectionState.done) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('${l10n.apiError}: ${snapshot.error}'));
+          }
+          final rows = snapshot.data ?? const [];
+          return ListView(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: FilledButton.icon(
+                    onPressed: _openCreateDialog,
+                    icon: const Icon(Icons.create_new_folder_outlined),
+                    label: Text(l10n.adminCreateFolder),
+                  ),
                 ),
               ),
-            ),
-            ...rows.map((row) {
-              return ListTile(
-                title: Text(row['name']?.toString() ?? '-'),
-                subtitle: Text(
-                  'public=${row['is_public'] ?? row['isPublic']} active=${row['is_active'] ?? row['isActive']}',
-                ),
-                trailing: Wrap(
-                  spacing: 4,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.edit_outlined),
-                      tooltip: l10n.adminEditFolder,
-                      onPressed: () => _openEditDialog(row),
+              if (rows.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(16, 120, 16, 16),
+                  child: Center(child: Text('フォルダはまだありません')),
+                )
+              else
+                ...rows.map((row) {
+                  return ListTile(
+                    title: Text(row['name']?.toString() ?? '-'),
+                    subtitle: Text(
+                      'public=${row['is_public'] ?? row['isPublic']} active=${row['is_active'] ?? row['isActive']}',
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.archive_outlined),
-                      tooltip: l10n.adminArchiveFolder,
-                      onPressed: () => _archiveFolder(row),
+                    trailing: Wrap(
+                      spacing: 4,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit_outlined),
+                          tooltip: l10n.adminEditFolder,
+                          onPressed: () => _openEditDialog(row),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.archive_outlined),
+                          tooltip: l10n.adminArchiveFolder,
+                          onPressed: () => _archiveFolder(row),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              );
-            }),
-          ],
-        );
-      },
+                  );
+                }),
+            ],
+          );
+        },
       ),
     );
   }

@@ -177,6 +177,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get markComplete => 'Mark complete';
 
   @override
+  String get profile => 'Profile';
+
+  @override
+  String get displayName => 'Display name';
+
+  @override
+  String get displayNameHint => 'Name shown to the team';
+
+  @override
+  String get displayNameRequired => 'Display name is required.';
+
+  @override
+  String get saveProfile => 'Save profile';
+
+  @override
+  String get profileUpdated => 'Profile updated.';
+
+  @override
   String get theme => 'Theme';
 
   @override

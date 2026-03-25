@@ -25,10 +25,15 @@
 - [x] Tasks 詳細UI（担当者・期限・優先度）
 - [x] Tasks 添付ファイル対応（アップロード/紐付け/表示）
 - [x] Messages 詳細UI（既読状態・コメント一覧・ピン）
+- [ ] Messages 作成導線（フォルダ選択・テンプレート適用・添付）
 - [x] Folders/Templates 管理画面の拡充
 - [x] Admin 画面（Users/Organizations/Audit）の操作導線
+- [x] Settings の表示名編集
+- [ ] Settings のプロフィール画像対応
+- [ ] Tasks 一覧の `My / Created / All` 切替
 
 ## Phase 3: 品質
+- [x] 基本UI導線のWidgetテスト追加（Auth/Home/Messages/Settings/Admin）
 - [ ] DB/RLS 自動テスト拡充
 - [ ] API 正常系/異常系テスト拡充
 - [ ] Integrationテスト（主要CUJ）
