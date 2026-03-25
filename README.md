@@ -54,6 +54,7 @@ cp env/db_push.prod.env.example env/db_push.prod.env
 - [API定義](./docs/SHIFTFLOW_api_definition.md)
 - [DBスキーマ](./docs/SHIFTFLOW_database_schema.md)
 - [テスト計画](./docs/SHIFTFLOW_testing_plan.md)
+- [PWA差分分析](./docs/SHIFTFLOW_pwa_gap_analysis_2026-03-26.md)
 - [開発フロー](./docs/SHIFTFLOW_development_flow.md)
 - [Supabase キーローテーション手順](./docs/SHIFTFLOW_supabase_key_rotation_runbook.md)
 - [Codex × Supabase MCP トラブルシュート](./docs/SHIFTFLOW_codex_supabase_mcp_troubleshooting.md)

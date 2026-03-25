@@ -174,6 +174,24 @@ class AppLocalizationsJa extends AppLocalizations {
   String get markComplete => '完了にする';
 
   @override
+  String get profile => 'プロフィール';
+
+  @override
+  String get displayName => '表示名';
+
+  @override
+  String get displayNameHint => 'チームで表示される名前';
+
+  @override
+  String get displayNameRequired => '表示名を入力してください。';
+
+  @override
+  String get saveProfile => 'プロフィールを保存';
+
+  @override
+  String get profileUpdated => 'プロフィールを更新しました。';
+
+  @override
   String get theme => 'テーマ';
 
   @override

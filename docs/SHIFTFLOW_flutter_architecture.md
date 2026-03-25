@@ -61,6 +61,7 @@ supabase/
 - `/admin`
 
 未ログイン時は `/auth` にリダイレクト。
+ログイン後の主要画面は `ShellRoute` 配下で保持し、下部メニューが画面遷移アニメーションに巻き込まれない構成とする。
 
 ## 6. 例外処理方針
 - APIは `{ ok, code, reason, result }` 形式を返す。
@@ -72,7 +73,11 @@ supabase/
 - 生成: `flutter gen-l10n`
 - 言語設定はローカル保存 + `saveUserSettings` でサーバ同期
 
-## 8. 関連文書
+## 8. PWA差分の扱い
+- 現状差分は [SHIFTFLOW_pwa_gap_analysis_2026-03-26.md](./SHIFTFLOW_pwa_gap_analysis_2026-03-26.md) で管理する。
+- 特に `Messages` の作成導線、`Tasks` の複数一覧、`Settings` のプロフィール画像は未完了として追跡する。
+
+## 9. 関連文書
 - [SHIFTFLOW_api_definition.md](./SHIFTFLOW_api_definition.md)
 - [SHIFTFLOW_database_schema.md](./SHIFTFLOW_database_schema.md)
 - [SHIFTFLOW_setup_guide.md](./SHIFTFLOW_setup_guide.md)

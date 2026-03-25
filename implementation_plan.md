@@ -19,12 +19,17 @@
 - Folders/Templates 管理導線の拡張（フォルダ作成・更新・アーカイブ、テンプレート作成）
 - Supabase 環境分離（dev/prod）と stateless migration 運用（`scripts/db_push.sh`）を整備
 - 基本UI導線のWidgetテスト追加（Auth/Home/Messages/Settings/Admin）
+- Settings の表示名編集
+- 画面遷移時にメニューバーを固定する ShellRoute 化
+- `ShiftFlow_PWA` 再精査と差分整理（`docs/SHIFTFLOW_pwa_gap_analysis_2026-03-26.md`）
 
 ## 3. 次の実装対象
-1. Auth導線の実機検証（admin/manager/member のロール別確認）
-2. `docs/SHIFTFLOW_e2e_scenarios.md` の実施結果記録
-3. CI の migration 実行を `--db-url` ベースに移行（dev/prod 誤適用防止）
-4. Widgetテストを補完する Integrationテストの追加（主要CUJ）
+1. Messages 作成導線の PWA 差分回収（フォルダ/テンプレート/添付）
+2. Tasks 一覧の `My / Created / All` 切替
+3. Settings のプロフィール画像対応
+4. Auth導線の実機検証（admin/manager/member のロール別確認）
+5. `docs/SHIFTFLOW_e2e_scenarios.md` の実施結果記録
+6. Widgetテストを補完する Integrationテストの追加（主要CUJ）
 
 ## 4. 認証テスト運用の再設計方針（TASUKI 参考）
 1. ログイン画面は「通常ユーザー向けUI」を維持し、`Test Login` のような文言を常設しない。

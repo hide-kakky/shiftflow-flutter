@@ -17,7 +17,7 @@
 
 ### 2.3 Flutter
 - Unit: Provider/Repository/DTO
-- Widget: 画面遷移、フォーム入力、エラー表示
+- Widget: 画面遷移、フォーム入力、エラー表示、設定保存
 - Integration: ログイン〜主要業務導線
 
 ### 2.4 通知
@@ -93,6 +93,19 @@ deno run --allow-env --allow-net scripts/create_test_users.ts
   - admin: `ok=true`（rows=3）
   - manager: `ok=true`（rows=3）
   - member: `ok=false`, `code=forbidden`
+
+## 4.2 Widget テスト実施済み（2026-03-26）
+- `AuthScreen`: メール/パスワード未入力時のバリデーション
+- `HomeScreen`: overview 指標表示
+- `MessagesScreen`: 既読切替
+- `SettingsScreen`: 表示名 / 言語 / テーマ保存
+- `AdminScreen`: 権限制御
+
+## 4.3 次に補強するテスト
+- `Messages` のフォルダ選択 / テンプレート適用 / 添付追加
+- `Tasks` の My / Created / All 切替
+- `Settings` のプロフィール画像更新
+- 実機 E2E ログの記録
 
 ## 5. テストケースリンク
 - [SHIFTFLOW_e2e_scenarios.md](./SHIFTFLOW_e2e_scenarios.md)

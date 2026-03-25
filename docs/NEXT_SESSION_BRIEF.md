@@ -1,6 +1,6 @@
 # NEXT SESSION BRIEF
 
-## 現在の状態（2026-03-25 時点）
+## 現在の状態（2026-03-26 時点）
 - リポジトリ: `https://github.com/hide-kakky/shiftflow-flutter`
 - ブランチ: `main`
 - 状態: `main` と `origin/main` は同期済み（クリーン）
@@ -15,19 +15,32 @@
 - 認証テスト運用の再設計（本番UI維持 + QA補助導線 + test users 運用）
 - Supabase 環境分離（`shiftflow-dev` / `shiftflow-prod`）
 - DB migration の stateless 実行（`scripts/db_push.sh` + `--db-url`）
+- Widget テスト追加（Auth/Home/Messages/Settings/Admin）
+- Settings の表示名編集
+- 画面遷移時にメニューバーが巻き込まれないよう `ShellRoute` 化
+
+## PWA 再精査で見えた差分
+1. Messages 作成導線
+   - フォルダ選択
+   - テンプレート適用
+   - 添付追加
+2. Tasks 一覧
+   - `My / Created / All` の切替
+3. Settings
+   - プロフィール画像更新
 
 ## 直近の優先タスク
-1. Messages 詳細UI（既読状態・コメント一覧・ピン）
-2. Admin 画面の操作導線（Users/Organizations/Audit）
-3. Auth導線の実機検証（admin/manager/member）
-4. E2Eシナリオの実施結果記録（`docs/SHIFTFLOW_e2e_scenarios.md`）
-5. CI migration フローの `--db-url` 化（安全運用の統一）
+1. Messages 作成導線の PWA 同等化
+2. Tasks 一覧の `My / Created / All` 切替
+3. Settings のプロフィール画像対応
+4. Auth導線の実機検証（admin/manager/member）
+5. E2Eシナリオの実施結果記録（`docs/SHIFTFLOW_e2e_scenarios.md`）
 
 ## 再開時の最短コマンド
 ```bash
 cd /Users/hide_kakky/Dev/shiftflow_flutter
 git switch main && git pull --ff-only
-git switch -c feat/phase2-messages-admin
+git switch -c feat/pwa-gap-analysis-doc-refresh
 flutter pub get
 flutter gen-l10n
 supabase start
@@ -37,5 +50,5 @@ supabase db reset --local --yes
 ```
 
 ## 完了条件（次回）
-- Messages または Admin の Phase 2 タスクを1つ以上完了
+- Messages 作成導線または Tasks 一覧の PWA 差分を1つ以上回収
 - `flutter analyze` / `flutter test` / `supabase db lint --local --fail-on error` が成功

@@ -428,6 +428,42 @@ abstract class AppLocalizations {
   /// **'Mark complete'**
   String get markComplete;
 
+  /// No description provided for @profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get profile;
+
+  /// No description provided for @displayName.
+  ///
+  /// In en, this message translates to:
+  /// **'Display name'**
+  String get displayName;
+
+  /// No description provided for @displayNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Name shown to the team'**
+  String get displayNameHint;
+
+  /// No description provided for @displayNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Display name is required.'**
+  String get displayNameRequired;
+
+  /// No description provided for @saveProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Save profile'**
+  String get saveProfile;
+
+  /// No description provided for @profileUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile updated.'**
+  String get profileUpdated;
+
   /// No description provided for @theme.
   ///
   /// In en, this message translates to:

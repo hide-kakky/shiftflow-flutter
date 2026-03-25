@@ -47,6 +47,7 @@ class _FakeRouteDataRepository extends RouteDataRepository {
   final List<Map<String, dynamic>> _messages;
 
   final List<String> savedLanguages = <String>[];
+  final List<String> savedNames = <String>[];
   final List<String> savedThemes = <String>[];
   final List<String> toggledMessageIds = <String>[];
 
@@ -64,6 +65,9 @@ class _FakeRouteDataRepository extends RouteDataRepository {
   }) async {
     if (language != null) {
       savedLanguages.add(language);
+    }
+    if (name != null) {
+      savedNames.add(name);
     }
     if (theme != null) {
       savedThemes.add(theme);
@@ -229,7 +233,7 @@ void main() {
     expect(find.byIcon(Icons.mark_email_read_outlined), findsOneWidget);
   });
 
-  testWidgets('SettingsScreen saves selected language and theme', (tester) async {
+  testWidgets('SettingsScreen saves profile, language and theme', (tester) async {
     final repo = _FakeRouteDataRepository(
       userSettings: const {
         'name': 'Tester',
@@ -254,6 +258,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    await tester.enterText(find.byType(TextField).first, '山田 太郎');
+    await tester.tap(find.text('プロフィールを保存'));
+    await tester.pumpAndSettle();
+
     await tester.tap(find.byType(DropdownButton<String>).first);
     await tester.pumpAndSettle();
     await tester.tap(find.text('English').last);
@@ -265,6 +273,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final prefs = await SharedPreferences.getInstance();
+    expect(repo.savedNames, ['山田 太郎']);
     expect(container.read(localeProvider).languageCode, 'en');
     expect(container.read(themeModeProvider), ThemeMode.dark);
     expect(repo.savedLanguages, ['en']);

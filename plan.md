@@ -17,6 +17,9 @@
   - ▶ Flutter画面の機能同等化（Tasks/Messages/Admin/Folders-Templates の主要操作導線まで完了）
   - ✅ 認証テスト運用の再設計（本番UIを崩さない QA 導線 + ドキュメント反映）
   - ✅ 基本UI導線のWidgetテスト追加（Auth/Home/Messages/Settings/Admin）
+  - ✅ Settings の表示名編集
+  - ✅ 画面遷移時にメニューバーを固定する ShellRoute 化
+  - ▶ PWA差分の棚卸し（Messages 作成導線 / Tasks 複数一覧 / Profile image）
 
 ## 2. マイルストーン
 | # | マイルストーン | 状態 | Exit条件 |
@@ -30,6 +33,7 @@
 - ACTION-1: `flutter analyze` と `flutter test` を常時グリーン維持。
 - ACTION-2: Auth導線の実機検証と、管理系UIの実操作テストを拡張。
 - ACTION-2a: Widgetテストを土台に、次は Integrationテストで主要CUJを埋める。
-- ACTION-3: `docs/SHIFTFLOW_e2e_scenarios.md` に沿って実機E2Eを実施し、結果を記録。
-- ACTION-4: Auth導線の実機検証を実施し、ロール別（admin/manager/member）の結果を記録する。
-- ACTION-5: DB migration を `scripts/db_push.sh`（`--db-url` stateless 実行）へ統一し、`link` 切替依存をなくす。
+- ACTION-3: Messages 作成導線（フォルダ / テンプレート / 添付）を PWA 同等レベルまで寄せる。
+- ACTION-4: Tasks 一覧の `My / Created / All` を UI から切り替え可能にする。
+- ACTION-5: `docs/SHIFTFLOW_e2e_scenarios.md` に沿って実機E2Eを実施し、結果を記録。
+- ACTION-6: DB migration を `scripts/db_push.sh`（`--db-url` stateless 実行）へ統一し、`link` 切替依存をなくす。
