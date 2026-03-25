@@ -171,6 +171,15 @@ class AppLocalizationsJa extends AppLocalizations {
   String get taskTitleRequired => 'タイトルは必須です';
 
   @override
+  String get taskScopeMy => 'My';
+
+  @override
+  String get taskScopeCreated => 'Created';
+
+  @override
+  String get taskScopeAll => 'All';
+
+  @override
   String get markComplete => '完了にする';
 
   @override

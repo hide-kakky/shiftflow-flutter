@@ -15,6 +15,7 @@ class TasksScreen extends ConsumerStatefulWidget {
 }
 
 class _TasksScreenState extends ConsumerState<TasksScreen> {
+  _TaskListScope _scope = _TaskListScope.my;
   late Future<List<Map<String, dynamic>>> _future;
 
   @override
@@ -24,7 +25,50 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
   }
 
   Future<List<Map<String, dynamic>>> _load() {
-    return ref.read(routeDataRepositoryProvider).listMyTasks();
+    final repository = ref.read(routeDataRepositoryProvider);
+    switch (_scope) {
+      case _TaskListScope.my:
+        return repository.listMyTasks();
+      case _TaskListScope.created:
+        return repository.listCreatedTasks();
+      case _TaskListScope.all:
+        return repository.listAllTasks();
+    }
+  }
+
+  void _updateScope(_TaskListScope scope) {
+    if (_scope == scope) return;
+    setState(() {
+      _scope = scope;
+      _future = _load();
+    });
+  }
+
+  Widget _buildScopeSelector(AppLocalizations l10n) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          ChoiceChip(
+            label: Text(l10n.taskScopeMy),
+            selected: _scope == _TaskListScope.my,
+            onSelected: (_) => _updateScope(_TaskListScope.my),
+          ),
+          ChoiceChip(
+            label: Text(l10n.taskScopeCreated),
+            selected: _scope == _TaskListScope.created,
+            onSelected: (_) => _updateScope(_TaskListScope.created),
+          ),
+          ChoiceChip(
+            label: Text(l10n.taskScopeAll),
+            selected: _scope == _TaskListScope.all,
+            onSelected: (_) => _updateScope(_TaskListScope.all),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _refresh() async {
@@ -83,11 +127,22 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                       const SizedBox(height: 12),
                       DropdownButtonFormField<String>(
                         initialValue: priority,
-                        decoration: InputDecoration(labelText: l10n.taskPriority),
+                        decoration: InputDecoration(
+                          labelText: l10n.taskPriority,
+                        ),
                         items: [
-                          DropdownMenuItem(value: 'low', child: Text(l10n.priorityLow)),
-                          DropdownMenuItem(value: 'medium', child: Text(l10n.priorityMedium)),
-                          DropdownMenuItem(value: 'high', child: Text(l10n.priorityHigh)),
+                          DropdownMenuItem(
+                            value: 'low',
+                            child: Text(l10n.priorityLow),
+                          ),
+                          DropdownMenuItem(
+                            value: 'medium',
+                            child: Text(l10n.priorityMedium),
+                          ),
+                          DropdownMenuItem(
+                            value: 'high',
+                            child: Text(l10n.priorityHigh),
+                          ),
                         ],
                         onChanged: (value) {
                           if (value == null) return;
@@ -97,7 +152,10 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                         },
                       ),
                       const SizedBox(height: 12),
-                      Text(l10n.taskDueDate, style: Theme.of(context).textTheme.labelLarge),
+                      Text(
+                        l10n.taskDueDate,
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
                       const SizedBox(height: 8),
                       Wrap(
                         spacing: 8,
@@ -108,21 +166,31 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                               final now = DateTime.now();
                               final picked = await showDatePicker(
                                 context: context,
-                                firstDate: now.subtract(const Duration(days: 365)),
+                                firstDate: now.subtract(
+                                  const Duration(days: 365),
+                                ),
                                 lastDate: now.add(const Duration(days: 3650)),
                                 initialDate: dueDate ?? now,
                               );
                               if (picked == null) return;
                               setDialogState(() {
-                                dueDate = DateTime(picked.year, picked.month, picked.day, 18);
+                                dueDate = DateTime(
+                                  picked.year,
+                                  picked.month,
+                                  picked.day,
+                                  18,
+                                );
                               });
                             },
                             icon: const Icon(Icons.calendar_today_outlined),
                             label: Text(
                               dueDate == null
                                   ? l10n.selectDueDate
-                                  : DateFormat.yMd(Localizations.localeOf(context).toLanguageTag())
-                                      .format(dueDate!),
+                                  : DateFormat.yMd(
+                                      Localizations.localeOf(
+                                        context,
+                                      ).toLanguageTag(),
+                                    ).format(dueDate!),
                             ),
                           ),
                           if (dueDate != null)
@@ -137,7 +205,10 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                         ],
                       ),
                       const SizedBox(height: 12),
-                      Text(l10n.taskAssignees, style: Theme.of(context).textTheme.labelLarge),
+                      Text(
+                        l10n.taskAssignees,
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
                       const SizedBox(height: 8),
                       if (users.isEmpty)
                         Text(l10n.noAssigneesFound)
@@ -149,14 +220,18 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                             itemBuilder: (context, index) {
                               final user = users[index];
                               final userId = user['id']?.toString() ?? '';
-                              if (userId.isEmpty) return const SizedBox.shrink();
-                              final name = user['display_name']?.toString() ??
+                              if (userId.isEmpty) {
+                                return const SizedBox.shrink();
+                              }
+                              final name =
+                                  user['display_name']?.toString() ??
                                   user['name']?.toString() ??
                                   user['email']?.toString() ??
                                   userId;
                               return CheckboxListTile(
                                 contentPadding: EdgeInsets.zero,
-                                controlAffinity: ListTileControlAffinity.leading,
+                                controlAffinity:
+                                    ListTileControlAffinity.leading,
                                 value: selectedAssignees.contains(userId),
                                 title: Text(name),
                                 onChanged: (checked) {
@@ -173,7 +248,10 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                           ),
                         ),
                       const SizedBox(height: 12),
-                      Text(l10n.taskAttachments, style: Theme.of(context).textTheme.labelLarge),
+                      Text(
+                        l10n.taskAttachments,
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
                       const SizedBox(height: 8),
                       OutlinedButton.icon(
                         onPressed: () async {
@@ -182,7 +260,9 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                             withData: true,
                           );
                           if (picked == null) return;
-                          final files = picked.files.where((f) => f.bytes != null).toList(growable: false);
+                          final files = picked.files
+                              .where((f) => f.bytes != null)
+                              .toList(growable: false);
                           setDialogState(() {
                             selectedFiles
                               ..clear()
@@ -229,8 +309,12 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                               description: bodyController.text.trim(),
                               dueDate: dueDate,
                               priority: priority,
-                              assigneeUserIds: selectedAssignees.toList(growable: false),
-                              attachments: List<PlatformFile>.from(selectedFiles),
+                              assigneeUserIds: selectedAssignees.toList(
+                                growable: false,
+                              ),
+                              attachments: List<PlatformFile>.from(
+                                selectedFiles,
+                              ),
                             ),
                           );
                         },
@@ -251,9 +335,9 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
 
     if (draft.title.isEmpty) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.taskTitleRequired)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.taskTitleRequired)));
       titleController.dispose();
       bodyController.dispose();
       return;
@@ -295,7 +379,9 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       await _refresh();
     } catch (err) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$err')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('$err')));
     } finally {
       titleController.dispose();
       bodyController.dispose();
@@ -324,7 +410,9 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       final storagePath = 'attachments/$objectPath';
 
       try {
-        await supabase.storage.from('attachments').uploadBinary(
+        await supabase.storage
+            .from('attachments')
+            .uploadBinary(
               objectPath,
               bytes,
               fileOptions: FileOptions(
@@ -446,11 +534,18 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
           future: _future,
           builder: (context, snapshot) {
             if (snapshot.connectionState != ConnectionState.done) {
-              return const Center(child: CircularProgressIndicator());
+              return ListView(
+                children: [
+                  _buildScopeSelector(l10n),
+                  const SizedBox(height: 120),
+                  const Center(child: CircularProgressIndicator()),
+                ],
+              );
             }
             if (snapshot.hasError) {
               return ListView(
                 children: [
+                  _buildScopeSelector(l10n),
                   const SizedBox(height: 120),
                   Center(child: Text('${l10n.apiError}: ${snapshot.error}')),
                 ],
@@ -461,6 +556,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
             if (rows.isEmpty) {
               return ListView(
                 children: [
+                  _buildScopeSelector(l10n),
                   const SizedBox(height: 120),
                   Center(child: Text(l10n.noData)),
                 ],
@@ -468,61 +564,23 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
             }
 
             return ListView.separated(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
               itemCount: rows.length,
-              separatorBuilder: (context, index) => const SizedBox(height: 8),
+              separatorBuilder: (context, index) => index == 0
+                  ? const SizedBox.shrink()
+                  : const SizedBox(height: 8),
               itemBuilder: (context, index) {
-                final task = rows[index];
-                final taskId = task['id']?.toString() ?? '';
-                final status = task['status']?.toString() ?? 'open';
-                final priority = task['priority']?.toString() ?? 'medium';
-                final dueAtRaw = task['due_at']?.toString();
-                final dueAt = dueAtRaw == null ? null : DateTime.tryParse(dueAtRaw);
-                final dueText = dueAt == null
-                    ? '-'
-                    : DateFormat.yMd(Localizations.localeOf(context).toLanguageTag()).format(dueAt);
-                final description = task['description']?.toString() ?? '';
-                final attachmentNames = _extractAttachmentNames(task);
-
-                return Card(
-                  child: ListTile(
-                    title: Text(task['title']?.toString() ?? '-'),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (description.isNotEmpty) Text(description),
-                        Text('${l10n.taskDueDate}: $dueText'),
-                        if (attachmentNames.isNotEmpty)
-                          Text(
-                            '${l10n.taskAttachments}: ${attachmentNames.join(', ')}',
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                      ],
-                    ),
-                    trailing: Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        Chip(label: Text(status)),
-                        Chip(
-                          label: Text(_priorityLabel(l10n, priority)),
-                          backgroundColor: _priorityColor(context, priority),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.check_circle_outline),
-                          tooltip: l10n.markComplete,
-                          onPressed: taskId.isEmpty || status == 'completed'
-                              ? null
-                              : () async {
-                                  await ref.read(routeDataRepositoryProvider).completeTask(taskId);
-                                  await _refresh();
-                                },
-                        ),
-                      ],
-                    ),
-                  ),
-                );
+                if (index == 0) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildScopeSelector(l10n),
+                      const SizedBox(height: 4),
+                      _buildTaskCard(context, l10n, rows[index]),
+                    ],
+                  );
+                }
+                return _buildTaskCard(context, l10n, rows[index]);
               },
             );
           },
@@ -535,7 +593,70 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       ),
     );
   }
+
+  Widget _buildTaskCard(
+    BuildContext context,
+    AppLocalizations l10n,
+    Map<String, dynamic> task,
+  ) {
+    final taskId = task['id']?.toString() ?? '';
+    final status = task['status']?.toString() ?? 'open';
+    final priority = task['priority']?.toString() ?? 'medium';
+    final dueAtRaw = task['due_at']?.toString();
+    final dueAt = dueAtRaw == null ? null : DateTime.tryParse(dueAtRaw);
+    final dueText = dueAt == null
+        ? '-'
+        : DateFormat.yMd(
+            Localizations.localeOf(context).toLanguageTag(),
+          ).format(dueAt);
+    final description = task['description']?.toString() ?? '';
+    final attachmentNames = _extractAttachmentNames(task);
+
+    return Card(
+      child: ListTile(
+        title: Text(task['title']?.toString() ?? '-'),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (description.isNotEmpty) Text(description),
+            Text('${l10n.taskDueDate}: $dueText'),
+            if (attachmentNames.isNotEmpty)
+              Text(
+                '${l10n.taskAttachments}: ${attachmentNames.join(', ')}',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+          ],
+        ),
+        trailing: Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            Chip(label: Text(status)),
+            Chip(
+              label: Text(_priorityLabel(l10n, priority)),
+              backgroundColor: _priorityColor(context, priority),
+            ),
+            IconButton(
+              icon: const Icon(Icons.check_circle_outline),
+              tooltip: l10n.markComplete,
+              onPressed: taskId.isEmpty || status == 'completed'
+                  ? null
+                  : () async {
+                      await ref
+                          .read(routeDataRepositoryProvider)
+                          .completeTask(taskId);
+                      await _refresh();
+                    },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
+
+enum _TaskListScope { my, created, all }
 
 class _TaskDraft {
   const _TaskDraft({
@@ -556,10 +677,7 @@ class _TaskDraft {
 }
 
 class _UploadResult {
-  const _UploadResult({
-    required this.successCount,
-    required this.failedCount,
-  });
+  const _UploadResult({required this.successCount, required this.failedCount});
 
   final int successCount;
   final int failedCount;

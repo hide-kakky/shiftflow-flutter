@@ -30,7 +30,7 @@
 - [x] Admin 画面（Users/Organizations/Audit）の操作導線
 - [x] Settings の表示名編集
 - [ ] Settings のプロフィール画像対応
-- [ ] Tasks 一覧の `My / Created / All` 切替
+- [x] Tasks 一覧の `My / Created / All` 切替
 
 ## Phase 3: 品質
 - [x] 基本UI導線のWidgetテスト追加（Auth/Home/Messages/Settings/Admin）

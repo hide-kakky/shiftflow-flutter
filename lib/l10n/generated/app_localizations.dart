@@ -422,6 +422,24 @@ abstract class AppLocalizations {
   /// **'Title is required'**
   String get taskTitleRequired;
 
+  /// No description provided for @taskScopeMy.
+  ///
+  /// In en, this message translates to:
+  /// **'My'**
+  String get taskScopeMy;
+
+  /// No description provided for @taskScopeCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Created'**
+  String get taskScopeCreated;
+
+  /// No description provided for @taskScopeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get taskScopeAll;
+
   /// No description provided for @markComplete.
   ///
   /// In en, this message translates to:

@@ -174,6 +174,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get taskTitleRequired => 'Title is required';
 
   @override
+  String get taskScopeMy => 'My';
+
+  @override
+  String get taskScopeCreated => 'Created';
+
+  @override
+  String get taskScopeAll => 'All';
+
+  @override
   String get markComplete => 'Mark complete';
 
   @override
