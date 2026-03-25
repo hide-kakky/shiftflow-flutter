@@ -29,6 +29,7 @@ final userSettingsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
   final result = await repo.getUserSettings();
   return {
     'name': result['name'] ?? user.email ?? 'User',
+    'imageUrl': result['imageUrl'] ?? '',
     'role': result['role'] ?? 'member',
     'theme': result['theme'] ?? 'system',
     'language': result['language'] ?? 'ja',

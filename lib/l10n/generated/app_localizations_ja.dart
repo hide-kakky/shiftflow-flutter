@@ -195,6 +195,18 @@ class AppLocalizationsJa extends AppLocalizations {
   String get displayNameRequired => '表示名を入力してください。';
 
   @override
+  String get updateProfileImage => 'プロフィール画像を更新';
+
+  @override
+  String get profileImageUpdated => 'プロフィール画像を更新しました。';
+
+  @override
+  String get profileImageTypeError => '画像は PNG / JPG / WEBP のみ対応です。';
+
+  @override
+  String get profileImageSizeError => '画像サイズは2MB以下にしてください。';
+
+  @override
   String get saveProfile => 'プロフィールを保存';
 
   @override

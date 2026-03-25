@@ -18,6 +18,7 @@
 - Widget テスト追加（Auth/Home/Messages/Settings/Admin）
 - Settings の表示名編集
 - Tasks 一覧の `My / Created / All` 切替
+- Settings のプロフィール画像（表示/更新）
 - 画面遷移時にメニューバーが巻き込まれないよう `ShellRoute` 化
 
 ## PWA 再精査で見えた差分
@@ -25,16 +26,11 @@
    - フォルダ選択
    - テンプレート適用
    - 添付追加
-2. Tasks 一覧
-   - `My / Created / All` の切替
-3. Settings
-   - プロフィール画像更新
 
 ## 直近の優先タスク
 1. Messages 作成導線の PWA 同等化
-2. Settings のプロフィール画像対応
-3. Auth導線の実機検証（admin/manager/member）
-4. E2Eシナリオの実施結果記録（`docs/SHIFTFLOW_e2e_scenarios.md`）
+2. Auth導線の実機検証（admin/manager/member）
+3. E2Eシナリオの実施結果記録（`docs/SHIFTFLOW_e2e_scenarios.md`）
 
 ## 再開時の最短コマンド
 ```bash
@@ -50,5 +46,5 @@ supabase db reset --local --yes
 ```
 
 ## 完了条件（次回）
-- Messages 作成導線または Settings プロフィール画像の PWA 差分を1つ以上回収
+- Messages 作成導線の PWA 差分を1つ以上回収
 - `flutter analyze` / `flutter test` / `supabase db lint --local --fail-on error` が成功
