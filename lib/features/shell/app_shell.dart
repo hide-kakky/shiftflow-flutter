@@ -9,12 +9,21 @@ import '../shared/session_providers.dart';
 class AppShell extends ConsumerWidget {
   const AppShell({
     super.key,
-    required this.currentIndex,
+    required this.currentLocation,
     required this.child,
   });
 
-  final int currentIndex;
+  final String currentLocation;
   final Widget child;
+
+  int _resolveCurrentIndex(List<_NavDestination> destinations) {
+    for (var i = 0; i < destinations.length; i++) {
+      if (currentLocation == destinations[i].path) {
+        return i;
+      }
+    }
+    return 0;
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -33,7 +42,7 @@ class AppShell extends ConsumerWidget {
             l10n.navAdmin, Icons.admin_panel_settings_outlined, '/admin'),
     ];
 
-    final normalizedIndex = currentIndex >= destinations.length ? 0 : currentIndex;
+    final normalizedIndex = _resolveCurrentIndex(destinations);
 
     return Scaffold(
       appBar: AppBar(

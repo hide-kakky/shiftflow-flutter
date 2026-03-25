@@ -29,6 +29,7 @@
 - [x] Admin 画面（Users/Organizations/Audit）の操作導線
 
 ## Phase 3: 品質
+- [x] 基本UI導線のWidgetテスト追加（Auth/Home/Messages/Settings/Admin）
 - [ ] DB/RLS 自動テスト拡充
 - [ ] API 正常系/異常系テスト拡充
 - [ ] Integrationテスト（主要CUJ）

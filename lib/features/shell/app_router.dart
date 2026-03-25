@@ -32,25 +32,33 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/auth',
         builder: (context, state) => const AuthScreen(),
       ),
-      GoRoute(
-        path: '/home',
-        builder: (context, state) => const AppShell(currentIndex: 0, child: HomeScreen()),
-      ),
-      GoRoute(
-        path: '/tasks',
-        builder: (context, state) => const AppShell(currentIndex: 1, child: TasksScreen()),
-      ),
-      GoRoute(
-        path: '/messages',
-        builder: (context, state) => const AppShell(currentIndex: 2, child: MessagesScreen()),
-      ),
-      GoRoute(
-        path: '/settings',
-        builder: (context, state) => const AppShell(currentIndex: 3, child: SettingsScreen()),
-      ),
-      GoRoute(
-        path: '/admin',
-        builder: (context, state) => const AppShell(currentIndex: 4, child: AdminScreen()),
+      ShellRoute(
+        builder: (context, state, child) => AppShell(
+          currentLocation: state.matchedLocation,
+          child: child,
+        ),
+        routes: [
+          GoRoute(
+            path: '/home',
+            builder: (context, state) => const HomeScreen(),
+          ),
+          GoRoute(
+            path: '/tasks',
+            builder: (context, state) => const TasksScreen(),
+          ),
+          GoRoute(
+            path: '/messages',
+            builder: (context, state) => const MessagesScreen(),
+          ),
+          GoRoute(
+            path: '/settings',
+            builder: (context, state) => const SettingsScreen(),
+          ),
+          GoRoute(
+            path: '/admin',
+            builder: (context, state) => const AdminScreen(),
+          ),
+        ],
       ),
     ],
   );
