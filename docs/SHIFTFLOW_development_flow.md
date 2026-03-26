@@ -14,8 +14,9 @@
 ## 3. ブランチ戦略
 1. `main` に直接コミットしない。
 2. `feat/*` または `fix/*` で実装。
-3. `flutter analyze` / `flutter test` / 必要な Supabase 検証を通してから PR。
-4. PR マージ後に `main` を最新化して次のタスクへ進む。
+3. コミットメッセージは日本語で統一する。
+4. `flutter analyze` / `flutter test` / 必要な Supabase 検証を通してから PR。
+5. PR マージ後に `main` を最新化して次のタスクへ進む。
 
 ## 4. 日常開発フロー（UI/機能実装）
 1. `git switch main && git pull --ff-only`

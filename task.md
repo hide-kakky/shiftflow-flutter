@@ -3,6 +3,7 @@
 ## Git運用（必須）
 - [ ] `main` で直接作業しない
 - [ ] `feat/*` または `fix/*` ブランチで実装
+- [ ] コミットメッセージは日本語で記述
 - [ ] CIグリーン確認後にPR作成
 - [x] GitHub Public リポジトリ `hide-kakky/shiftflow-flutter` 作成済み
 

@@ -62,4 +62,5 @@ cp env/db_push.prod.env.example env/db_push.prod.env
 ## Git運用ルール
 - `main` 直コミット禁止
 - 機能単位で feature ブランチを作成
+- コミットメッセージは日本語で記述
 - CI（Flutter + Supabase）グリーンを確認して PR マージ
