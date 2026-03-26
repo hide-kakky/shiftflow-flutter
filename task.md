@@ -39,7 +39,7 @@
 - [ ] DB/RLS 自動テスト拡充
 - [ ] API 正常系/異常系テスト拡充
 - [ ] Integrationテスト（主要CUJ）
-- [ ] 通知失敗リトライ処理の実装
+- [x] 通知失敗リトライ処理の実装
 - [x] DB migration 運用を stateless 化（`scripts/db_push.sh` + `--db-url`）
 
 ## 次セッションで最初にやること

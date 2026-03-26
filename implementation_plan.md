@@ -17,6 +17,7 @@
 - Messages 詳細UIの拡張（コメント一覧/追加・ピン切替・既読/未読ユーザー表示）
 - Messages 作成導線の拡張（フォルダ選択・テンプレート適用・添付アップロード）
 - Messages 一覧の拡張（フォルダフィルタ・未読のみ表示）
+- 通知失敗リトライ基盤（`notification_dispatch_logs.retry_count/next_retry_at` + `retry_failed_notifications`）
 - Admin 画面の操作導線拡張（Users更新/Organizations更新/Audit再読込）
 - Folders/Templates 管理導線の拡張（フォルダ作成・更新・アーカイブ、テンプレート作成）
 - Supabase 環境分離（dev/prod）と stateless migration 運用（`scripts/db_push.sh`）を整備
@@ -31,7 +32,7 @@
 1. Auth導線の実機検証（admin/manager/member のロール別確認）
 2. `docs/SHIFTFLOW_e2e_scenarios.md` の実施結果記録
 3. Widgetテストを補完する Integrationテストの追加（主要CUJ）
-4. 通知失敗リトライ処理
+4. DB/RLS / API 自動テスト拡充
 
 ## 4. 認証テスト運用の再設計方針（TASUKI 参考）
 1. ログイン画面は「通常ユーザー向けUI」を維持し、`Test Login` のような文言を常設しない。

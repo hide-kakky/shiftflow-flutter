@@ -1,6 +1,8 @@
 # SHIFTFLOW Database Schema
 
-- 実装ファイル: `supabase/migrations/20260321093000_init_shiftflow_schema.sql`
+- 実装ファイル:
+  - `supabase/migrations/20260321093000_init_shiftflow_schema.sql`
+  - `supabase/migrations/20260326123000_notification_retry_columns.sql`
 
 ## 1. 列挙型
 - `app.user_role`: `admin`, `manager`, `member`, `guest`
@@ -58,6 +60,13 @@
 - `idx_tasks_org_status`
 - `idx_messages_org_created`
 - `idx_notification_dispatch_unique`
+- `idx_notification_dispatch_retry`
+
+## 5.1 通知リトライ列（`notification_dispatch_logs`）
+- `retry_count`:
+  - 失敗後の再キュー回数。`0` 以上。
+- `next_retry_at`:
+  - 次回再試行可能時刻。`retry_failed_notifications` がこの時刻を見て再キューする。
 
 ## 6. 注意点
 - `notification_dispatch_logs` は重複通知防止の中核。`event_type + source_id + target_user_id` の重複チェックを必ず維持する。

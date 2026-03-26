@@ -25,6 +25,7 @@
 - 担当タスク作成
 - 期限前日通知
 - 重複防止・失敗時ログ確認
+- `retry_failed_notifications` による再キュー（`failed -> queued`）確認
 
 ### 2.5 クロスプラットフォーム
 - iOS/Android/Web で同一CUJをスモーク実行
@@ -102,10 +103,8 @@ deno run --allow-env --allow-net scripts/create_test_users.ts
 - `AdminScreen`: 権限制御
 
 ## 4.3 次に補強するテスト
-- `Messages` のフォルダ選択 / テンプレート適用 / 添付追加
-- `Tasks` の My / Created / All 切替
-- `Settings` のプロフィール画像更新
 - 実機 E2E ログの記録
+- 通知失敗リトライ（`retry_count` / `next_retry_at`）の API テスト
 
 ## 5. テストケースリンク
 - [SHIFTFLOW_e2e_scenarios.md](./SHIFTFLOW_e2e_scenarios.md)

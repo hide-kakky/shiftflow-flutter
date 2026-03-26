@@ -32,6 +32,14 @@
 1. `notification_dispatch_logs.status='failed'` を確認
 2. `error_message` の分類
 3. 再試行ジョブを実行
+   - `retry_failed_notifications` を実行し、`status='queued'` へ戻す
+   - 例:
+```bash
+curl -s "http://127.0.0.1:54321/functions/v1/retry_failed_notifications" \
+  -H "apikey: ${SUPABASE_ANON_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{"limit":100,"maxRetries":3}'
+```
 
 ## 4. 監査
 - 管理操作は `audit_logs` で追跡。

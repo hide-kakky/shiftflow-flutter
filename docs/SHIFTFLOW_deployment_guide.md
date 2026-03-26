@@ -29,6 +29,7 @@ supabase db push
 supabase functions deploy api
 supabase functions deploy dispatch_notifications
 supabase functions deploy notify_due_tasks
+supabase functions deploy retry_failed_notifications
 ```
 
 ## 4. Flutter配布
