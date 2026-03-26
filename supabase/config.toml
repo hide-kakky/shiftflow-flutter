@@ -45,3 +45,6 @@ verify_jwt = true
 
 [functions.notify_due_tasks]
 verify_jwt = false
+
+[functions.retry_failed_notifications]
+verify_jwt = false

@@ -14,6 +14,7 @@
 - Tasks 一覧の `My / Created / All` 切替
 - Messages 作成導線（フォルダ選択 / テンプレート適用 / 添付）
 - Messages 一覧（フォルダフィルタ / 未読のみ表示）
+- 通知失敗リトライ基盤（`retry_count` / `next_retry_at` / `retry_failed_notifications`）
 - Settings の表示名編集
 - Settings のプロフィール画像（表示/更新）
 - 認証テスト運用の再設計（本番UI維持 + QA補助導線 + test users 運用）
@@ -24,7 +25,6 @@
 
 ## PWA 再精査で見えた差分
 1. Integration テストと手動 E2E 記録
-2. 通知失敗リトライ
 
 ## 直近の優先タスク
 1. Auth導線の実機検証（admin/manager/member）

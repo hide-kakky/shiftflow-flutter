@@ -25,6 +25,7 @@
 - 担当タスク作成
 - 期限前日通知
 - 重複防止・失敗時ログ確認
+- `retry_failed_notifications` による再キュー（`failed -> queued`）確認
 
 ### 2.5 クロスプラットフォーム
 - iOS/Android/Web で同一CUJをスモーク実行
@@ -84,7 +85,7 @@ deno run --allow-env --allow-net scripts/create_test_users.ts
 - E2Eシナリオ全件完了
 - 重要不具合（P1/P2）が未残存
 
-## 4.1 最新検証ログ（2026-03-25, Local Supabase）
+## 4.1 最新検証ログ（2026-03-26, Local Supabase）
 - 認証（Password Login）
   - `admin@shiftflow.local` / `TestPass123!`: pass
   - `manager@shiftflow.local` / `TestPass123!`: pass
@@ -93,6 +94,7 @@ deno run --allow-env --allow-net scripts/create_test_users.ts
   - admin: `ok=true`（rows=3）
   - manager: `ok=true`（rows=3）
   - member: `ok=false`, `code=forbidden`
+  - 実行スクリプト: `scripts/verify_auth_roles.ts`
 
 ## 4.2 Widget テスト実施済み（2026-03-26）
 - `AuthScreen`: メール/パスワード未入力時のバリデーション
@@ -102,10 +104,8 @@ deno run --allow-env --allow-net scripts/create_test_users.ts
 - `AdminScreen`: 権限制御
 
 ## 4.3 次に補強するテスト
-- `Messages` のフォルダ選択 / テンプレート適用 / 添付追加
-- `Tasks` の My / Created / All 切替
-- `Settings` のプロフィール画像更新
 - 実機 E2E ログの記録
+- 通知失敗リトライ（`retry_count` / `next_retry_at`）の API テスト
 
 ## 5. テストケースリンク
 - [SHIFTFLOW_e2e_scenarios.md](./SHIFTFLOW_e2e_scenarios.md)

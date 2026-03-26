@@ -52,7 +52,7 @@
 - 全シナリオ `pass`
 - 重大不具合なし
 
-## 4. 実施ログ（2026-03-25, Local Supabase, Web）
+## 4. 実施ログ（2026-03-26, Local Supabase, Web）
 - E2E-01 Magic Link ログイン: 未実施（次回）
 - E2E-02 タスク作成〜完了: 未実施（次回）
 - E2E-03 メッセージ投稿〜既読〜コメント: 未実施（次回）
@@ -61,6 +61,7 @@
 - E2E-06 管理者機能: 部分実施
   - `adminListUsers` を admin/manager/member で呼び分け
   - 結果: admin/manager は成功、member は `forbidden`
+  - 検証スクリプト: `scripts/verify_auth_roles.ts`
 - E2E-07 通知: 未実施（次回）
 
 ## 5. PWA差分観点の追加確認

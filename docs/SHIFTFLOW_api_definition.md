@@ -77,7 +77,7 @@
 | route | 説明 | 権限 |
 | --- | --- | --- |
 | `getUserSettings` | ユーザー設定取得（`name`, `imageUrl`, `theme`, `language`, `role`, `email`） | admin/manager/member/guest |
-| `saveUserSettings` | ユーザー設定保存（現状は `name`, `theme`, `language`） | admin/manager/member |
+| `saveUserSettings` | ユーザー設定保存（`name`, `imageUrl`, `theme`, `language`） | admin/manager/member |
 | `listActiveUsers` | 有効ユーザー一覧 | admin/manager |
 | `adminListUsers` | ユーザー管理一覧 | admin/manager |
 | `adminUpdateUser` | ユーザー更新 | admin/manager |
@@ -100,6 +100,7 @@
 - `addNewMessage` 後: `new_message`
 - `addNewTask` 後: `new_task_assigned`
 - `notify_due_tasks` で: `task_due_tomorrow`
+- `retry_failed_notifications` で: `notification_dispatch_logs.status='failed'` を再キュー
 
 ## 5. 関連文書
 - [SHIFTFLOW_requirements_v1.0.md](./SHIFTFLOW_requirements_v1.0.md)
