@@ -85,7 +85,7 @@ deno run --allow-env --allow-net scripts/create_test_users.ts
 - E2Eシナリオ全件完了
 - 重要不具合（P1/P2）が未残存
 
-## 4.1 最新検証ログ（2026-03-25, Local Supabase）
+## 4.1 最新検証ログ（2026-03-26, Local Supabase）
 - 認証（Password Login）
   - `admin@shiftflow.local` / `TestPass123!`: pass
   - `manager@shiftflow.local` / `TestPass123!`: pass
@@ -94,6 +94,7 @@ deno run --allow-env --allow-net scripts/create_test_users.ts
   - admin: `ok=true`（rows=3）
   - manager: `ok=true`（rows=3）
   - member: `ok=false`, `code=forbidden`
+  - 実行スクリプト: `scripts/verify_auth_roles.ts`
 
 ## 4.2 Widget テスト実施済み（2026-03-26）
 - `AuthScreen`: メール/パスワード未入力時のバリデーション
