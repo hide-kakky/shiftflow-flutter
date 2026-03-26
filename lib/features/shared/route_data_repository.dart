@@ -86,11 +86,14 @@ class RouteDataRepository {
     await _apiClient.invokeRoute('deleteTaskById', args: [taskId]);
   }
 
-  Future<List<Map<String, dynamic>>> getMessages({String? folderId}) async {
+  Future<List<Map<String, dynamic>>> getMessages({
+    String? folderId,
+    bool unreadOnly = false,
+  }) async {
     final result = await _apiClient.invokeRoute(
       'getMessages',
       args: [
-        {'folderId': folderId},
+        {'folderId': folderId, 'unreadOnly': unreadOnly},
       ],
     );
     return _asListOfMap(result);
