@@ -38,11 +38,7 @@ class AppShell extends ConsumerWidget {
       _NavDestination(l10n.navMessages, Icons.mail_outline, '/messages'),
       _NavDestination(l10n.navSettings, Icons.settings_outlined, '/settings'),
       if (canAdmin)
-        _NavDestination(
-          l10n.navAdmin,
-          Icons.shield_outlined,
-          '/admin',
-        ),
+        _NavDestination(l10n.navAdmin, Icons.shield_outlined, '/admin'),
     ];
 
     final selectedIndex = _resolveCurrentIndex(destinations);
@@ -64,7 +60,8 @@ class AppShell extends ConsumerWidget {
               ),
             ),
           IconButton(
-            onPressed: () => ref.read(authControllerProvider.notifier).signOut(),
+            onPressed: () =>
+                ref.read(authControllerProvider.notifier).signOut(),
             icon: const Icon(Icons.logout),
             tooltip: l10n.signOut,
           ),
@@ -123,10 +120,7 @@ class AppShell extends ConsumerWidget {
 }
 
 class _DesktopNav extends StatelessWidget {
-  const _DesktopNav({
-    required this.destinations,
-    required this.selectedIndex,
-  });
+  const _DesktopNav({required this.destinations, required this.selectedIndex});
 
   final List<_NavDestination> destinations;
   final int selectedIndex;
@@ -154,10 +148,7 @@ class _DesktopNav extends StatelessWidget {
 }
 
 class _DesktopNavButton extends StatelessWidget {
-  const _DesktopNavButton({
-    required this.destination,
-    required this.selected,
-  });
+  const _DesktopNavButton({required this.destination, required this.selected});
 
   final _NavDestination destination;
   final bool selected;
@@ -181,7 +172,9 @@ class _DesktopNavButton extends StatelessWidget {
             children: [
               Icon(
                 destination.icon,
-                color: selected ? theme.colorScheme.primary : theme.colorScheme.onSurface,
+                color: selected
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurface,
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -189,7 +182,9 @@ class _DesktopNavButton extends StatelessWidget {
                   destination.label,
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
-                    color: selected ? theme.colorScheme.primary : theme.colorScheme.onSurface,
+                    color: selected
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -202,10 +197,7 @@ class _DesktopNavButton extends StatelessWidget {
 }
 
 class _MobileNav extends StatelessWidget {
-  const _MobileNav({
-    required this.destinations,
-    required this.selectedIndex,
-  });
+  const _MobileNav({required this.destinations, required this.selectedIndex});
 
   final List<_NavDestination> destinations;
   final int selectedIndex;
@@ -213,11 +205,16 @@ class _MobileNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final background = isDark ? const Color(0xFF0A1833) : const Color(0xFF517CB2);
+    final background = isDark
+        ? const Color(0xFF0A1833)
+        : const Color(0xFF517CB2);
     final indicator = isDark ? const Color(0xFF9DB6FF) : Colors.white;
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
+    const navContentHeight = 42.0;
 
     return Container(
-      height: 72,
+      height: navContentHeight + bottomInset,
+      padding: EdgeInsets.only(bottom: bottomInset),
       decoration: BoxDecoration(
         color: background,
         boxShadow: [
@@ -228,43 +225,48 @@ class _MobileNav extends StatelessWidget {
           ),
         ],
       ),
-      child: SafeArea(
-        top: false,
-        child: Row(
-          children: [
-            for (var i = 0; i < destinations.length; i++)
-              Expanded(
-                child: InkWell(
-                  onTap: () => context.go(destinations[i].path),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 220),
-                    curve: Curves.easeOut,
-                    transform: Matrix4.translationValues(0, i == selectedIndex ? -4 : 0, 0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          destinations[i].icon,
-                          color: Colors.white.withValues(alpha: i == selectedIndex ? 1 : 0.92),
-                          size: 30,
+      child: Row(
+        children: [
+          for (var i = 0; i < destinations.length; i++)
+            Expanded(
+              child: InkWell(
+                onTap: () => context.go(destinations[i].path),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 220),
+                  curve: Curves.easeOut,
+                  transform: Matrix4.translationValues(
+                    0,
+                    i == selectedIndex ? -4 : 0,
+                    0,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        destinations[i].icon,
+                        color: Colors.white.withValues(
+                          alpha: i == selectedIndex ? 1 : 0.92,
                         ),
-                        const SizedBox(height: 8),
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 220),
-                          height: 4,
-                          width: 32,
-                          decoration: BoxDecoration(
-                            color: i == selectedIndex ? indicator : Colors.transparent,
-                            borderRadius: BorderRadius.circular(999),
-                          ),
+                        size: 30,
+                      ),
+                      const SizedBox(height: 8),
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 220),
+                        height: 4,
+                        width: 32,
+                        decoration: BoxDecoration(
+                          color: i == selectedIndex
+                              ? indicator
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(999),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }
