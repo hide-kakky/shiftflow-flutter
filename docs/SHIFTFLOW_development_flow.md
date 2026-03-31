@@ -1,6 +1,6 @@
 # SHIFTFLOW Development Flow
 
-最終更新: 2026-03-25
+最終更新: 2026-03-31
 
 ## 1. 目的
 - 開発速度と本番安全性を両立する。
@@ -17,6 +17,7 @@
 3. コミットメッセージは日本語で統一する。
 4. `flutter analyze` / `flutter test` / 必要な Supabase 検証を通してから PR。
 5. PR マージ後に `main` を最新化して次のタスクへ進む。
+6. 新ブランチ作成前に `./scripts/ios_local_status.sh` で `!?` を確認し、`!?` がある場合は `./scripts/ios_local_store.sh` で退避してから分岐する。
 
 ## 4. 日常開発フロー（UI/機能実装）
 1. `git switch main && git pull --ff-only`
@@ -77,3 +78,13 @@ cp env/db_push.prod.env.example env/db_push.prod.env
   - `./scripts/ios_local_apply.sh`（復元）
   - `./scripts/ios_local_status.sh`（状態確認）
 - `pop` ではなく `apply` を使い、stashを保持したまま安全に繰り返す。
+
+### 9-1. 必須ルール（明文化）
+1. ブランチを切る前に必ず `./scripts/ios_local_status.sh` を実行する。
+2. プロンプトが `!?` の場合は、必ず `./scripts/ios_local_store.sh` を実行してから `git switch -c ...` する。
+3. 実機検証が必要なときだけ `./scripts/ios_local_apply.sh` を実行する。
+4. 実機検証が終わったら `./scripts/ios_local_store.sh` で再退避してからコミット作業に戻る。
+
+### 9-2. ルール違反時の対処
+1. `!?` のままブランチを切ってしまったら、すぐに `./scripts/ios_local_store.sh` を実行する。
+2. すでにコミットへ混入した場合は、iOSローカル差分をコミットから外してからPRを作る。

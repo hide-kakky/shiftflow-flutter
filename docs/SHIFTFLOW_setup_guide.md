@@ -100,6 +100,9 @@ iOS 実機起動後は、`ios/` 配下にローカル差分が出ることがあ
 - `ios_local_apply.sh`: `ios-local-build-files` の最新stashを `apply`（stashは保持）
 - `ios_local_status.sh`: `git status` と iOS用stash一覧を表示
 
+> 新ブランチ作成前の必須手順:
+> `./scripts/ios_local_status.sh` を実行し、`!?` が出ていたら `./scripts/ios_local_store.sh` を実行してから `git switch -c <branch>` する。
+
 ## 5. Magic Link テスト
 1. `Auth` 画面でメールアドレスを入力。
 2. Supabase Local Inbucket（通常 `http://127.0.0.1:55424`）でメールを確認。
