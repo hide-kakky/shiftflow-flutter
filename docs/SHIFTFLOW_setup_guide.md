@@ -81,6 +81,25 @@ flutter run -d ios \
 flutter run -d android --dart-define-from-file=env/android.json
 ```
 
+### 4-3. iOS 実機差分の退避/復元（`!?` 対策）
+iOS 実機起動後は、`ios/` 配下にローカル差分が出ることがある。  
+`main` をクリーンに保つため、次のスクリプトを使う。
+
+```bash
+# 退避（!? を消す）
+./scripts/ios_local_store.sh
+
+# 状態確認
+./scripts/ios_local_status.sh
+
+# 実機検証前に戻す（popではなくapply）
+./scripts/ios_local_apply.sh
+```
+
+- `ios_local_store.sh`: iOS差分4ファイルのみを `stash push -u` で退避
+- `ios_local_apply.sh`: `ios-local-build-files` の最新stashを `apply`（stashは保持）
+- `ios_local_status.sh`: `git status` と iOS用stash一覧を表示
+
 ## 5. Magic Link テスト
 1. `Auth` 画面でメールアドレスを入力。
 2. Supabase Local Inbucket（通常 `http://127.0.0.1:55424`）でメールを確認。

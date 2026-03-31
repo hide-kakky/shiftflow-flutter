@@ -69,3 +69,11 @@ cp env/db_push.prod.env.example env/db_push.prod.env
 - 必要な migration が dev/prod で適用済み
 - E2Eシナリオ更新済み
 - 監査ログや権限系に回帰がない
+
+## 9. iOS 実機時の `!?` 運用
+- 実機起動で `ios/Runner.xcodeproj/*` などのローカル差分が出る場合は、コミットせず `stash` 退避する。
+- 標準スクリプト:
+  - `./scripts/ios_local_store.sh`（退避）
+  - `./scripts/ios_local_apply.sh`（復元）
+  - `./scripts/ios_local_status.sh`（状態確認）
+- `pop` ではなく `apply` を使い、stashを保持したまま安全に繰り返す。
