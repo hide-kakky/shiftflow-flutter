@@ -12,6 +12,8 @@
 - [ ] `git switch -c feat/phase3-<task-name>`
 
 ## 2. まず読む（3分）
+- [ ] `AGENTS.md`
+- [ ] `docs/SHIFTFLOW_rule_reference.md`
 - [ ] `docs/NEXT_SESSION_BRIEF.md`
 - [ ] `plan.md`
 - [ ] `task.md`

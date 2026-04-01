@@ -1,0 +1,46 @@
+# SHIFTFLOW Rule Reference
+
+最終更新: 2026-04-02
+
+## 1. 参照優先順（迷ったらこの順番）
+1. `AGENTS.md`（必須ルール・最優先）
+2. `docs/SHIFTFLOW_development_flow.md`（日常開発フロー）
+3. `docs/SHIFTFLOW_setup_guide.md`（環境構築/実行手順）
+4. `docs/NEXT_SESSION_CHECKLIST.md`（セッション開始チェック）
+5. `plan.md` / `task.md` / `implementation_plan.md`（進行管理）
+
+## 2. iOSローカル差分（`!?`）必須運用
+対象ファイル（実機起動で差分が出る可能性）:
+- `ios/Runner.xcodeproj/project.pbxproj`
+- `ios/Runner.xcworkspace/contents.xcworkspacedata`
+- `ios/Runner/Info.plist`
+- `ios/Podfile.lock`
+
+### 2-1. 新ブランチ作成前（必須）
+```bash
+./scripts/ios_local_status.sh
+# !? があれば
+./scripts/ios_local_store.sh
+git switch -c <branch>
+```
+
+### 2-2. 実機検証時
+```bash
+# 実機検証直前
+./scripts/ios_local_apply.sh
+
+# 実機検証後
+./scripts/ios_local_store.sh
+```
+
+- 復元は `pop` ではなく `apply` を使う（stash保持）
+- iOSローカル差分を機能実装コミットへ混ぜない
+
+## 3. 違反時の復旧
+1. `!?` のまま分岐した場合: すぐ `./scripts/ios_local_store.sh`
+2. コミットへ混入した場合: iOSローカル差分をコミットから外してPR作成
+
+## 4. 補助スクリプト
+- `./scripts/ios_local_status.sh`: 現在状態と iOS 用 stash 一覧を表示
+- `./scripts/ios_local_store.sh`: iOS差分だけ退避
+- `./scripts/ios_local_apply.sh`: iOS差分を復元（stash保持）

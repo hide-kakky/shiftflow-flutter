@@ -1,5 +1,10 @@
 # ShiftFlow Flutter 実装計画
 
+## 0. 運用参照順（必須）
+1. `AGENTS.md`
+2. `docs/SHIFTFLOW_rule_reference.md`
+3. `docs/SHIFTFLOW_development_flow.md`
+
 ## 1. ゴール
 1. ShiftFlow_PWA の業務機能を Flutter + Supabase で同等提供する。
 2. iOS/Android/Web で同一ユースケースを成立させる。

@@ -35,6 +35,9 @@
 ```bash
 cd /Users/hide_kakky/Dev/shiftflow_flutter
 git switch main && git pull --ff-only
+./scripts/ios_local_status.sh
+# !? があれば
+./scripts/ios_local_store.sh
 git switch -c feat/phase3-auth-e2e
 flutter pub get
 flutter gen-l10n
@@ -43,6 +46,11 @@ supabase db reset --local --yes
 ./scripts/run_web_dev.sh
 ./scripts/db_push.sh dev --dry-run
 ```
+
+## ルール参照順（必須）
+1. `AGENTS.md`
+2. `docs/SHIFTFLOW_rule_reference.md`
+3. `docs/SHIFTFLOW_development_flow.md`
 
 ## 完了条件（次回）
 - Auth導線の実機検証ログを残す

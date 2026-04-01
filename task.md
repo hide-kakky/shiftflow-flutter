@@ -1,6 +1,7 @@
 # ShiftFlow Flutter 実装タスク
 
 ## Git運用（必須）
+- [ ] `AGENTS.md` と `docs/SHIFTFLOW_rule_reference.md` を確認
 - [ ] `main` で直接作業しない
 - [ ] `feat/*` または `fix/*` ブランチで実装
 - [ ] コミットメッセージは日本語で記述

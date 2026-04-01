@@ -18,6 +18,7 @@
 - `main` 直コミット禁止。
 - ブランチ命名: `feat/*`, `fix/*`, `chore/*`, `docs/*`。
 - コミットメッセージは日本語で記述する。
+- ルール参照順は `AGENTS.md` -> `docs/SHIFTFLOW_rule_reference.md` -> `docs/SHIFTFLOW_development_flow.md`。
 - 1タスク1PRを原則とする。
 - PRには以下を必ず記載する。
   - 背景
@@ -70,4 +71,5 @@
 - [SHIFTFLOW_flutter_architecture.md](./SHIFTFLOW_flutter_architecture.md)
 - [SHIFTFLOW_testing_plan.md](./SHIFTFLOW_testing_plan.md)
 - [SHIFTFLOW_pwa_gap_analysis_2026-03-26.md](./SHIFTFLOW_pwa_gap_analysis_2026-03-26.md)
+- [SHIFTFLOW_rule_reference.md](./SHIFTFLOW_rule_reference.md)
 - [NEXT_SESSION_CHECKLIST.md](./NEXT_SESSION_CHECKLIST.md)

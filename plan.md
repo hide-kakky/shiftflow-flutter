@@ -1,6 +1,7 @@
 # ShiftFlow Flutter デリバリープラン（自律更新版）
 
 ## 0. 運用ルール
+0. 参照優先順は `AGENTS.md` -> `docs/SHIFTFLOW_rule_reference.md` -> `docs/SHIFTFLOW_development_flow.md` とする。
 1. 実装前に `docs/SHIFTFLOW_requirements_v1.0.md` と `docs/SHIFTFLOW_implementation_guide_v1.0.md` を確認する。
 2. 実装完了時に `plan.md` / `task.md` / `implementation_plan.md` を更新する。
 3. ステータス記法: `✅ 完了` / `▶ 進行中` / `□ 未着手`

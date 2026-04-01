@@ -6,6 +6,7 @@
 - 開発速度と本番安全性を両立する。
 - 「誰が実行しても同じ結果」になる運用に統一する。
 - エージェント運用の必須ルールは `AGENTS.md` を優先参照する。
+- 参照順の要約は `docs/SHIFTFLOW_rule_reference.md` を参照する。
 
 ## 2. 環境分離
 - local: Docker上の Supabase Local（`supabase start`）
