@@ -3,7 +3,7 @@
 ## Git運用（必須）
 - [ ] `AGENTS.md` と `docs/SHIFTFLOW_rule_reference.md` を確認
 - [ ] `main` で直接作業しない
-- [ ] `feat/*` または `fix/*` ブランチで実装
+- [ ] `feat/*` / `fix/*` / `chore/*` / `docs/*` ブランチで実装
 - [ ] コミットメッセージは日本語で記述
 - [ ] CIグリーン確認後にPR作成
 - [x] GitHub Public リポジトリ `hide-kakky/shiftflow-flutter` 作成済み

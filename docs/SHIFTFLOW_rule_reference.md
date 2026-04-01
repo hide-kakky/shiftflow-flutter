@@ -4,10 +4,11 @@
 
 ## 1. 参照優先順（迷ったらこの順番）
 1. `AGENTS.md`（必須ルール・最優先）
-2. `docs/SHIFTFLOW_development_flow.md`（日常開発フロー）
-3. `docs/SHIFTFLOW_setup_guide.md`（環境構築/実行手順）
-4. `docs/NEXT_SESSION_CHECKLIST.md`（セッション開始チェック）
-5. `plan.md` / `task.md` / `implementation_plan.md`（進行管理）
+2. `docs/SHIFTFLOW_rule_reference.md`（本書）
+3. `docs/SHIFTFLOW_development_flow.md`（日常開発フロー）
+4. `docs/SHIFTFLOW_setup_guide.md`（環境構築/実行手順）
+5. `docs/NEXT_SESSION_CHECKLIST.md`（セッション開始チェック）
+6. `plan.md` / `task.md` / `implementation_plan.md`（進行管理）
 
 ## 2. iOSローカル差分（`!?`）必須運用
 対象ファイル（実機起動で差分が出る可能性）:
