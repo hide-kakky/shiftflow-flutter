@@ -64,3 +64,7 @@ cp env/db_push.prod.env.example env/db_push.prod.env
 - 機能単位で feature ブランチを作成
 - コミットメッセージは日本語で記述
 - CI（Flutter + Supabase）グリーンを確認して PR マージ
+- 新ブランチ作成前に `./scripts/ios_local_status.sh` を実行し、`!?` があれば `./scripts/ios_local_store.sh` を実行してから分岐する
+- 実機検証の直前だけ `./scripts/ios_local_apply.sh` を実行し、検証後は `./scripts/ios_local_store.sh` で再退避する
+
+詳細ルール: `AGENTS.md`, `docs/SHIFTFLOW_development_flow.md`

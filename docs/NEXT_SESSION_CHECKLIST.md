@@ -7,6 +7,8 @@
 ## 1. 開始時（そのまま実行）
 - [ ] `cd /Users/hide_kakky/Dev/shiftflow_flutter`
 - [ ] `git switch main && git pull --ff-only`
+- [ ] `./scripts/ios_local_status.sh`
+- [ ] `!?` があれば `./scripts/ios_local_store.sh`
 - [ ] `git switch -c feat/phase3-<task-name>`
 
 ## 2. まず読む（3分）
