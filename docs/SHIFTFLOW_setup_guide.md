@@ -140,6 +140,9 @@ deno run --allow-env --allow-net scripts/create_test_users.ts
   - 接続先の Supabase URL が想定と不一致、または対象環境へ `api` 関数が未デプロイ。
 - `deno: command not found`
   - Deno をインストールしてから再実行。
+- iPhone の通知設定に ShiftFlow が出ない
+  - 通知許可ダイアログが未実行。アプリ初回起動時に表示されるので「許可」する。
+  - 既に拒否済みの場合は `設定 > 通知 > ShiftFlow` で手動で許可する。
 
 ## 8. 関連
 - [SHIFTFLOW_testing_plan.md](./SHIFTFLOW_testing_plan.md)
