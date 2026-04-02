@@ -1,9 +1,10 @@
 # NEXT SESSION BRIEF
 
-## 現在の状態（2026-03-26 時点）
+## 現在の状態（2026-04-03 時点）
 - リポジトリ: `https://github.com/hide-kakky/shiftflow-flutter`
-- ブランチ: `main`
-- 状態: `main` と `origin/main` は同期済み（クリーン）
+- 現在ブランチ: `feature/fcm-config-setup`
+- 状態: 作業ツリーはクリーン
+- 補足: ローカル `main` には FCM 実装がマージ済みだが、`origin/main` にはまだ未 push
 
 ## 完了済み
 - Flutter + Supabase 基盤
@@ -22,30 +23,59 @@
 - DB migration の stateless 実行（`scripts/db_push.sh` + `--db-url`）
 - Widget テスト追加（Auth/Home/Messages/Settings/Admin）
 - 画面遷移時にメニューバーが巻き込まれないよう `ShellRoute` 化
+- FCM プッシュ通知基盤の実装
+  - Flutter 側で FCM トークン取得と `notification_subscriptions` への登録
+  - Supabase Edge Functions から FCM HTTP v1 で配送
+  - `notification_dispatch_logs` の `queued -> sent/failed` 更新
+  - `retry_failed_notifications` から再送を実行
+  - iOS Push capability 用の entitlements / background mode 追加
+- 通知用 migration を dev へ適用済み
+  - `20260326123000_notification_retry_columns.sql`
+  - `20260402110000_add_fcm_notification_support.sql`
+- `ios/Runner.xcworkspace/xcshareddata/swiftpm/` を `.gitignore` へ追加
 
 ## PWA 再精査で見えた差分
 1. Integration テストと手動 E2E 記録
 
 ## 直近の優先タスク
-1. Auth導線の実機検証（admin/manager/member）
-2. E2Eシナリオの実施結果記録（`docs/SHIFTFLOW_e2e_scenarios.md`）
-3. Integrationテスト（主要CUJ）
+1. Firebase / FCM の実設定
+2. Supabase secrets 設定と Functions 再デプロイ
+3. 実機で通知トークン登録と push 配信確認
+4. E2Eシナリオの実施結果記録（`docs/SHIFTFLOW_e2e_scenarios.md`）
 
 ## 再開時の最短コマンド
 ```bash
 cd /Users/hide_kakky/Dev/shiftflow_flutter
-git switch main && git pull --ff-only
+git switch feature/fcm-config-setup
 ./scripts/ios_local_status.sh
-# !? があれば
-./scripts/ios_local_store.sh
-git switch -c feat/phase3-auth-e2e
 flutter pub get
 flutter gen-l10n
-supabase start
-supabase db reset --local --yes
-./scripts/run_web_dev.sh
-./scripts/db_push.sh dev --dry-run
+# 必要なら Firebase ローカル設定を復元
+git stash list
+# local-firebase-config を戻す場合
+git stash apply stash@{0}
 ```
+
+## 次回の具体タスク
+1. Firebase Console で iOS / Android app を登録
+2. APNs Auth Key を Firebase Cloud Messaging に登録
+3. `env/dev.json` に `FIREBASE_*` を設定
+4. Supabase に以下 secrets を設定
+   - `FCM_PROJECT_ID`
+   - `FCM_CLIENT_EMAIL`
+   - `FCM_PRIVATE_KEY`
+5. Functions を再デプロイ
+   - `supabase functions deploy api`
+   - `supabase functions deploy dispatch_notifications`
+   - `supabase functions deploy notify_due_tasks`
+   - `supabase functions deploy retry_failed_notifications`
+6. 実機で通知許可、トークン登録、メッセージ通知受信を確認
+
+## stash メモ
+- `stash@{0}`: `local-firebase-config: 2026-04-03`
+  - `GoogleService-Info.plist` などローカル Firebase 設定
+- `stash@{1}`: `ios-local-build-files: 2026-03-31 22:36:02`
+  - 旧 iOS ローカル差分。必要になるまでは触らない
 
 ## ルール参照順（必須）
 1. `AGENTS.md`
@@ -53,6 +83,7 @@ supabase db reset --local --yes
 3. `docs/SHIFTFLOW_development_flow.md`
 
 ## 完了条件（次回）
-- Auth導線の実機検証ログを残す
-- `docs/SHIFTFLOW_e2e_scenarios.md` の対象ケースを更新
-- `flutter analyze` / `flutter test` / `supabase db lint --local --fail-on error` が成功
+- Firebase / FCM の実設定が揃っている
+- 実機で push 通知を1回以上受信できる
+- `docs/SHIFTFLOW_e2e_scenarios.md` に通知検証結果を残す
+- 必要なブランチ / stash の整理方針が明確
