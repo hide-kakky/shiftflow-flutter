@@ -28,6 +28,7 @@ final userSettingsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
   final repo = ref.watch(routeDataRepositoryProvider);
   final result = await repo.getUserSettings();
   return {
+    'userId': result['userId'],
     'name': result['name'] ?? user.email ?? 'User',
     'imageUrl': result['imageUrl'] ?? '',
     'role': result['role'] ?? 'member',
@@ -40,6 +41,11 @@ final userSettingsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
 final userRoleProvider = Provider<String>((ref) {
   final settings = ref.watch(userSettingsProvider);
   return settings.valueOrNull?['role']?.toString() ?? 'guest';
+});
+
+final currentAppUserIdProvider = Provider<String?>((ref) {
+  final settings = ref.watch(userSettingsProvider);
+  return settings.valueOrNull?['userId']?.toString();
 });
 
 final isManagerOrAdminProvider = Provider<bool>((ref) {

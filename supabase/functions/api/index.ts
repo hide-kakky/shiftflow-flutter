@@ -1,5 +1,6 @@
 import { createServiceClient } from '../_shared/supabase.ts';
 import { corsHeaders, decodeJwtPayload, jsonResponse, readBearerToken } from '../_shared/cors.ts';
+import { dispatchQueuedNotifications } from '../_shared/notification_dispatch.ts';
 
 type AccessContext = {
   userId: string;
@@ -197,6 +198,7 @@ Deno.serve(async (request) => {
       return jsonResponse(200, {
         ok: true,
         result: {
+          userId: ctx.userId,
           name: user?.display_name ?? ctx.email,
           imageUrl: user?.profile_image_url ?? '',
           role: ctx.role,
@@ -325,6 +327,10 @@ Deno.serve(async (request) => {
       }
 
       await enqueueDispatch('new_task_assigned', ctx.orgId, inserted.id, targetUsers);
+      await dispatchQueuedNotifications({
+        sourceId: inserted.id,
+        eventType: 'new_task_assigned',
+      }).catch(() => undefined);
       await insertAuditLog('task.create', ctx, 'task', inserted.id, { title });
       return jsonResponse(200, { ok: true, result: inserted });
     }
@@ -465,8 +471,14 @@ Deno.serve(async (request) => {
         'new_message',
         ctx.orgId,
         message.id,
-        (targetUsers ?? []).map((x) => x.user_id),
+        (targetUsers ?? [])
+          .map((x) => x.user_id)
+          .filter((userId) => userId && userId !== ctx.userId),
       );
+      await dispatchQueuedNotifications({
+        sourceId: message.id,
+        eventType: 'new_message',
+      }).catch(() => undefined);
 
       await insertAuditLog('message.create', ctx, 'message', message.id, { title });
       return jsonResponse(200, { ok: true, result: message });

@@ -1,5 +1,6 @@
 import { createServiceClient } from '../_shared/supabase.ts';
 import { corsHeaders, decodeJwtPayload, jsonResponse, readBearerToken } from '../_shared/cors.ts';
+import { dispatchQueuedNotifications } from '../_shared/notification_dispatch.ts';
 
 function asString(value: unknown): string {
   return typeof value === 'string' ? value.trim() : '';
@@ -61,31 +62,40 @@ Deno.serve(async (request) => {
     const service = createServiceClient();
     const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
 
-    const eventType = asString(body.eventType) || 'new_message';
-    const sourceId = asString(body.sourceId) || crypto.randomUUID();
+    const eventType = asString(body.eventType) as 'new_message' | 'new_task_assigned' | 'task_due_tomorrow' | '';
+    const sourceId = asString(body.sourceId);
     const targetUserIds = asList(body.targetUserIds);
+    const limit = Number(body.limit ?? 100);
 
     if (targetUserIds.length === 0) {
-      return jsonResponse(400, { ok: false, code: 'target_required', reason: 'targetUserIds required' });
+      const result = await dispatchQueuedNotifications({
+        limit: Number.isFinite(limit) ? limit : 100,
+        sourceId: sourceId || undefined,
+        eventType: eventType || undefined,
+      });
+      return jsonResponse(200, { ok: true, result });
     }
+
+    const safeEventType = eventType || 'new_message';
+    const safeSourceId = sourceId || crypto.randomUUID();
 
     const rows = [];
     for (const userId of targetUserIds) {
       const { data: exists } = await service
         .from('notification_dispatch_logs')
         .select('id')
-        .eq('event_type', eventType)
-        .eq('source_id', sourceId)
+        .eq('event_type', safeEventType)
+        .eq('source_id', safeSourceId)
         .eq('target_user_id', userId)
         .maybeSingle();
       if (exists) continue;
       const { data: inserted, error } = await service
         .from('notification_dispatch_logs')
         .insert({
-          event_type: eventType,
+          event_type: safeEventType,
           organization_id: actor.orgId,
           target_user_id: userId,
-          source_id: sourceId,
+          source_id: safeSourceId,
           status: 'queued',
         })
         .select('*')
@@ -94,7 +104,12 @@ Deno.serve(async (request) => {
       rows.push(inserted);
     }
 
-    return jsonResponse(200, { ok: true, result: { queued: rows.length, rows } });
+    const dispatched = await dispatchQueuedNotifications({
+      sourceId: safeSourceId,
+      eventType: safeEventType,
+    });
+
+    return jsonResponse(200, { ok: true, result: { queued: rows.length, rows, dispatched } });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     return jsonResponse(500, { ok: false, code: 'dispatch_failed', reason: message });

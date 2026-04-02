@@ -1,5 +1,6 @@
 import { createServiceClient } from "../_shared/supabase.ts";
 import { corsHeaders, jsonResponse } from "../_shared/cors.ts";
+import { dispatchQueuedNotifications } from "../_shared/notification_dispatch.ts";
 
 function asNumber(value: unknown, fallback: number): number {
   const n = Number(value);
@@ -74,6 +75,14 @@ Deno.serve(async (request) => {
       queued += 1;
     }
 
+    const dispatched = queued > 0
+      ? await dispatchQueuedNotifications({ limit: queued }).catch(() => ({
+        scanned: 0,
+        sent: 0,
+        failed: 0,
+      }))
+      : { scanned: 0, sent: 0, failed: 0 };
+
     return jsonResponse(200, {
       ok: true,
       result: {
@@ -82,6 +91,7 @@ Deno.serve(async (request) => {
         exhausted,
         notDue,
         maxRetries,
+        dispatched,
       },
     });
   } catch (error) {
