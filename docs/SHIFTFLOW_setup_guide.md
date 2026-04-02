@@ -36,6 +36,19 @@ cp env/android.json.example env/android.json
 
 `env/dev.json` / `env/qa.local.json` / `env/qa.cloud.json` の `SUPABASE_ANON_KEY` を、自分の環境の値に置き換える。
 
+FCM プッシュ通知を使う場合は、同じ `env/*.json` に次も追加する。
+
+```json
+{
+  "FIREBASE_API_KEY": "xxx",
+  "FIREBASE_PROJECT_ID": "xxx",
+  "FIREBASE_MESSAGING_SENDER_ID": "xxx",
+  "FIREBASE_IOS_APP_ID": "1:xxx:ios:xxx",
+  "FIREBASE_ANDROID_APP_ID": "1:xxx:android:xxx",
+  "FIREBASE_IOS_BUNDLE_ID": "com.example.shiftflowFlutter"
+}
+```
+
 > `env/*.json` は `.gitignore` 済みで、リポジトリには含まれない。
 
 ### 4-2. スクリプトで起動（推奨）
@@ -141,6 +154,10 @@ deno run --allow-env --allow-net scripts/create_test_users.ts
 - `deno: command not found`
   - Deno をインストールしてから再実行。
 - iPhone の通知設定に ShiftFlow が出ない
+  - `FIREBASE_*` の dart-define 未設定だとプッシュ初期化自体が走らない。
+  - APNs / Push Notifications capability が無効だと iOS で端末トークンが取れない。
+  - Firebase Console 側の iOS App Bundle ID とアプリの Bundle ID が一致しているか確認する。
+  - Supabase secrets に `FCM_PROJECT_ID`, `FCM_CLIENT_EMAIL`, `FCM_PRIVATE_KEY` が入っているか確認する。
   - 通知許可ダイアログが未実行。アプリ初回起動時に表示されるので「許可」する。
   - 既に拒否済みの場合は `設定 > 通知 > ShiftFlow` で手動で許可する。
 

@@ -5,7 +5,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app.dart';
 import 'core/config/app_env.dart';
-import 'core/notifications/notification_permission_service.dart';
 import 'features/settings/settings_screen.dart';
 
 Future<void> main() async {
@@ -17,7 +16,6 @@ Future<void> main() async {
     url: AppEnv.supabaseUrl,
     anonKey: AppEnv.supabaseAnonKey,
   );
-  await NotificationPermissionService.requestIfNeeded();
 
   final prefs = await SharedPreferences.getInstance();
   final locale = prefs.getString('app_locale') ?? 'ja';

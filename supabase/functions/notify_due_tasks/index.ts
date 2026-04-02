@@ -1,5 +1,6 @@
 import { createServiceClient } from '../_shared/supabase.ts';
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts';
+import { dispatchQueuedNotifications } from '../_shared/notification_dispatch.ts';
 
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') {
@@ -59,11 +60,17 @@ Deno.serve(async (request) => {
       }
     }
 
+    const dispatched = await dispatchQueuedNotifications({
+      eventType: 'task_due_tomorrow',
+      limit: queued > 0 ? queued : undefined,
+    }).catch(() => ({ scanned: 0, sent: 0, failed: 0 }));
+
     return jsonResponse(200, {
       ok: true,
       result: {
         checked: dueTasks?.length ?? 0,
         queued,
+        dispatched,
       },
     });
   } catch (error) {

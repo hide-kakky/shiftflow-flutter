@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/notifications/push_notification_bootstrap.dart';
 import 'features/settings/settings_screen.dart';
 import 'features/shell/app_router.dart';
 import 'l10n/generated/app_localizations.dart';
@@ -21,23 +22,22 @@ class ShiftFlowApp extends ConsumerWidget {
     final locale = ref.watch(localeProvider);
     final themeMode = ref.watch(themeModeProvider);
 
-    return MaterialApp.router(
-      title: 'ShiftFlow',
-      routerConfig: router,
-      locale: locale,
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [
-        Locale('ja'),
-        Locale('en'),
-      ],
-      theme: _buildTheme(Brightness.light),
-      darkTheme: _buildTheme(Brightness.dark),
-      themeMode: themeMode,
+    return PushNotificationBootstrap(
+      child: MaterialApp.router(
+        title: 'ShiftFlow',
+        routerConfig: router,
+        locale: locale,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [Locale('ja'), Locale('en')],
+        theme: _buildTheme(Brightness.light),
+        darkTheme: _buildTheme(Brightness.dark),
+        themeMode: themeMode,
+      ),
     );
   }
 }
@@ -110,10 +110,7 @@ ThemeData _buildTheme(Brightness brightness) {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(
-          color: scheme.primary,
-          width: 1.4,
-        ),
+        borderSide: BorderSide(color: scheme.primary, width: 1.4),
       ),
     ),
     chipTheme: base.chipTheme.copyWith(
@@ -138,7 +135,9 @@ ThemeData _buildTheme(Brightness brightness) {
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-        side: BorderSide(color: isDark ? const Color(0x337AA2FF) : const Color(0xFFD0DAEA)),
+        side: BorderSide(
+          color: isDark ? const Color(0x337AA2FF) : const Color(0xFFD0DAEA),
+        ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         textStyle: const TextStyle(fontWeight: FontWeight.w700),
       ),
@@ -146,7 +145,9 @@ ThemeData _buildTheme(Brightness brightness) {
     tabBarTheme: TabBarThemeData(
       dividerColor: Colors.transparent,
       labelColor: scheme.primary,
-      unselectedLabelColor: isDark ? const Color(0xFFD5DEFF) : const Color(0xFF475569),
+      unselectedLabelColor: isDark
+          ? const Color(0xFFD5DEFF)
+          : const Color(0xFF475569),
       indicator: BoxDecoration(
         color: isDark ? const Color(0x2ED6E0FF) : Colors.white,
         borderRadius: BorderRadius.circular(12),
