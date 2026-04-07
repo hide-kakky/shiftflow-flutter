@@ -71,6 +71,118 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navAdmin => 'Admin';
 
   @override
+  String get homeHeroBadge => 'Workspace';
+
+  @override
+  String get homeHeroTitle => 'See today\'s work clearly, without noise.';
+
+  @override
+  String get homeHeroDescription =>
+      'Review open tasks, unread messages, and pending approvals in one place, then move directly to the next screen you need.';
+
+  @override
+  String get homeHeroPanelTitle => 'Current summary';
+
+  @override
+  String get homeSectionOverviewBadge => 'Overview';
+
+  @override
+  String get homeSectionOverviewTitle => 'Put the important numbers first.';
+
+  @override
+  String get homeSectionOverviewDescription =>
+      'This home view keeps the calm spacing and hierarchy inspired by Notion, while surfacing only the numbers needed for day-to-day decisions.';
+
+  @override
+  String get homeOpenTasks => 'Open tasks';
+
+  @override
+  String get homeOpenTasksHint =>
+      'Tasks not yet completed. Start here to review priority and due dates.';
+
+  @override
+  String get homeUnreadMessages => 'Unread messages';
+
+  @override
+  String get homeUnreadMessagesHint =>
+      'Messages that still need attention. Use this to avoid missing shared updates.';
+
+  @override
+  String get homePendingUsers => 'Pending users';
+
+  @override
+  String get homePendingUsersHint =>
+      'Users waiting for approval or status updates. Handle them from Admin.';
+
+  @override
+  String get homePendingUsersHintMember =>
+      'This is mainly for admins. Your role does not need follow-up here.';
+
+  @override
+  String get homeQuickActionsTitle => 'Quick actions';
+
+  @override
+  String get homeQuickActionsDescription =>
+      'The home screen keeps the main routes explicit so you can move to the right workspace with minimal friction.';
+
+  @override
+  String get homeActionTasksDescription =>
+      'Review due dates, assignees, and priority before working.';
+
+  @override
+  String get homeActionMessagesDescription =>
+      'Check unread threads, comments, and pinned updates.';
+
+  @override
+  String get homeActionSettingsDescription =>
+      'Update display name, theme, language, and profile image.';
+
+  @override
+  String get homeActionAdminDescription =>
+      'Manage users, organizations, folders, and audit logs.';
+
+  @override
+  String get homeFocusTitle => 'What needs attention now';
+
+  @override
+  String get homeFocusDescription =>
+      'Instead of showing numbers only, the home view summarizes the next action worth taking.';
+
+  @override
+  String homeFocusTasksTitle(int count) {
+    return '$count tasks are currently in progress';
+  }
+
+  @override
+  String get homeFocusTasksDescription =>
+      'Open the task list and review approaching due dates or uneven task ownership.';
+
+  @override
+  String homeFocusMessagesTitle(int count) {
+    return '$count unread messages need review';
+  }
+
+  @override
+  String get homeFocusMessagesDescription =>
+      'Unread items may include broad announcements or template-based posts. Review them before continuing work.';
+
+  @override
+  String homeFocusPendingUsersTitle(int count) {
+    return '$count users are waiting for approval';
+  }
+
+  @override
+  String get homeFocusPendingUsersDescription =>
+      'Admins should review user status and update organization or role settings if needed.';
+
+  @override
+  String get homeFocusStableTitle => 'No major backlog is visible now';
+
+  @override
+  String get homeFocusStableDescription =>
+      'The main indicators look stable. Continue with the detailed screens as needed.';
+
+  @override
   String get refresh => 'Refresh';
 
   @override

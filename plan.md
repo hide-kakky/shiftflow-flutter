@@ -25,6 +25,7 @@
   - ✅ Messages 一覧（フォルダフィルタ / 未読のみ表示）
   - ✅ 通知失敗リトライ基盤（`retry_count` / `next_retry_at` / `retry_failed_notifications`）
   - ✅ 画面遷移時にメニューバーを固定する ShellRoute 化
+  - ✅ Home 画面の情報設計とビジュアルを再構成（Notion系の余白 / 指標 / 導線を反映）
   - ▶ PWA差分の棚卸し（Phase 3: E2E / Integration）
 
 ## 2. マイルストーン

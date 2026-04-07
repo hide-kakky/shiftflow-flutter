@@ -69,6 +69,108 @@ class AppLocalizationsJa extends AppLocalizations {
   String get navAdmin => '管理';
 
   @override
+  String get homeHeroBadge => 'Workspace';
+
+  @override
+  String get homeHeroTitle => '今日の業務の流れを、静かに整理して把握できます。';
+
+  @override
+  String get homeHeroDescription =>
+      '開いているタスク、未読メッセージ、保留中の承認事項をひとつの画面で確認し、必要な画面へすぐ移動できます。';
+
+  @override
+  String get homeHeroPanelTitle => '現在のサマリー';
+
+  @override
+  String get homeSectionOverviewBadge => 'Overview';
+
+  @override
+  String get homeSectionOverviewTitle => '重要な数字を、読みやすく。';
+
+  @override
+  String get homeSectionOverviewDescription =>
+      'Notion のように余白と階層を大切にしつつ、業務判断に必要な数値だけを先頭に置く構成にしています。';
+
+  @override
+  String get homeOpenTasks => '対応中のタスク';
+
+  @override
+  String get homeOpenTasksHint => '完了前のタスク件数です。優先度と期限の確認をここから始めます。';
+
+  @override
+  String get homeUnreadMessages => '未読メッセージ';
+
+  @override
+  String get homeUnreadMessagesHint => 'まだ確認していない連絡件数です。共有事項の見落とし防止に使います。';
+
+  @override
+  String get homePendingUsers => '保留中ユーザー';
+
+  @override
+  String get homePendingUsersHint => '承認や状態更新が必要なユーザー数です。管理画面で対応します。';
+
+  @override
+  String get homePendingUsersHintMember => '管理者向けの確認項目です。あなたの権限では詳細操作は行いません。';
+
+  @override
+  String get homeQuickActionsTitle => 'クイック導線';
+
+  @override
+  String get homeQuickActionsDescription =>
+      '主要画面へ最短で移動できるよう、ホームでは操作入口を明確に分けています。';
+
+  @override
+  String get homeActionTasksDescription => '期限・担当者・優先度を確認して作業を進めます。';
+
+  @override
+  String get homeActionMessagesDescription => '未読確認、コメント、ピン留めされた共有を見返します。';
+
+  @override
+  String get homeActionSettingsDescription => '表示名、テーマ、言語、プロフィール画像を整えます。';
+
+  @override
+  String get homeActionAdminDescription => 'ユーザー、組織、フォルダ、監査ログを管理します。';
+
+  @override
+  String get homeFocusTitle => 'いま見るべきこと';
+
+  @override
+  String get homeFocusDescription => '数値を見て終わりではなく、次に取る行動がすぐ分かるように要点を整理しています。';
+
+  @override
+  String homeFocusTasksTitle(int count) {
+    return '$count 件のタスクが進行中です';
+  }
+
+  @override
+  String get homeFocusTasksDescription => '期限が近いものや担当の偏りがないか、タスク一覧で優先確認してください。';
+
+  @override
+  String homeFocusMessagesTitle(int count) {
+    return '$count 件の未読メッセージがあります';
+  }
+
+  @override
+  String get homeFocusMessagesDescription =>
+      '全体共有やテンプレート起点の投稿が含まれる可能性があります。先に確認してから作業すると安全です。';
+
+  @override
+  String homeFocusPendingUsersTitle(int count) {
+    return '$count 件の承認待ちユーザーがあります';
+  }
+
+  @override
+  String get homeFocusPendingUsersDescription =>
+      '管理者はユーザー状態を見直し、必要なら組織や権限設定を更新してください。';
+
+  @override
+  String get homeFocusStableTitle => 'いま大きな滞留はありません';
+
+  @override
+  String get homeFocusStableDescription =>
+      'ホームの主要指標は安定しています。次は個別画面で詳細確認を進めてください。';
+
+  @override
   String get refresh => '再読み込み';
 
   @override

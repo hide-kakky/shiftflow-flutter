@@ -34,6 +34,7 @@
 - [x] Settings の表示名編集
 - [x] Settings のプロフィール画像対応
 - [x] Tasks 一覧の `My / Created / All` 切替
+- [x] Home 画面の UI 再設計（概要指標 / クイック導線 / 注力事項の整理）
 
 ## Phase 3: 品質
 - [x] 基本UI導線のWidgetテスト追加（Auth/Home/Messages/Settings/Admin）

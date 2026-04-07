@@ -32,6 +32,7 @@
 - Settings のプロフィール画像（表示/更新）
 - 画面遷移時にメニューバーを固定する ShellRoute 化
 - `ShiftFlow_PWA` 再精査と差分整理（`docs/SHIFTFLOW_pwa_gap_analysis_2026-03-26.md`）
+- Home 画面を Notion 系デザインガイドを参考に再設計（概要カード / クイック導線 / フォーカス表示）
 
 ## 3. 次の実装対象
 1. Auth導線の実機検証（admin/manager/member のロール別確認）
