@@ -247,12 +247,12 @@ void main() {
     await _pumpScreen(tester, container: container, child: const HomeScreen());
     await tester.pumpAndSettle();
 
-    expect(find.text('Open Tasks'), findsOneWidget);
-    expect(find.text('4'), findsOneWidget);
-    expect(find.text('Unread Messages'), findsOneWidget);
-    expect(find.text('2'), findsOneWidget);
-    expect(find.text('Pending Users'), findsOneWidget);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.text('対応中のタスク'), findsWidgets);
+    expect(find.text('4'), findsWidgets);
+    expect(find.text('未読メッセージ'), findsWidgets);
+    expect(find.text('2'), findsWidgets);
+    expect(find.text('保留中ユーザー'), findsWidgets);
+    expect(find.text('1'), findsWidgets);
   });
 
   testWidgets('MessagesScreen updates read icon after toggle action', (

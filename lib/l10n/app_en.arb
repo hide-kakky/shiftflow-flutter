@@ -20,6 +20,57 @@
   "navMessages": "Messages",
   "navSettings": "Settings",
   "navAdmin": "Admin",
+  "homeHeroBadge": "Workspace",
+  "homeHeroTitle": "See today's work clearly, without noise.",
+  "homeHeroDescription": "Review open tasks, unread messages, and pending approvals in one place, then move directly to the next screen you need.",
+  "homeHeroPanelTitle": "Current summary",
+  "homeSectionOverviewBadge": "Overview",
+  "homeSectionOverviewTitle": "Put the important numbers first.",
+  "homeSectionOverviewDescription": "This home view keeps the calm spacing and hierarchy inspired by Notion, while surfacing only the numbers needed for day-to-day decisions.",
+  "homeOpenTasks": "Open tasks",
+  "homeOpenTasksHint": "Tasks not yet completed. Start here to review priority and due dates.",
+  "homeUnreadMessages": "Unread messages",
+  "homeUnreadMessagesHint": "Messages that still need attention. Use this to avoid missing shared updates.",
+  "homePendingUsers": "Pending users",
+  "homePendingUsersHint": "Users waiting for approval or status updates. Handle them from Admin.",
+  "homePendingUsersHintMember": "This is mainly for admins. Your role does not need follow-up here.",
+  "homeQuickActionsTitle": "Quick actions",
+  "homeQuickActionsDescription": "The home screen keeps the main routes explicit so you can move to the right workspace with minimal friction.",
+  "homeActionTasksDescription": "Review due dates, assignees, and priority before working.",
+  "homeActionMessagesDescription": "Check unread threads, comments, and pinned updates.",
+  "homeActionSettingsDescription": "Update display name, theme, language, and profile image.",
+  "homeActionAdminDescription": "Manage users, organizations, folders, and audit logs.",
+  "homeFocusTitle": "What needs attention now",
+  "homeFocusDescription": "Instead of showing numbers only, the home view summarizes the next action worth taking.",
+  "homeFocusTasksTitle": "{count} tasks are currently in progress",
+  "@homeFocusTasksTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeFocusTasksDescription": "Open the task list and review approaching due dates or uneven task ownership.",
+  "homeFocusMessagesTitle": "{count} unread messages need review",
+  "@homeFocusMessagesTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeFocusMessagesDescription": "Unread items may include broad announcements or template-based posts. Review them before continuing work.",
+  "homeFocusPendingUsersTitle": "{count} users are waiting for approval",
+  "@homeFocusPendingUsersTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeFocusPendingUsersDescription": "Admins should review user status and update organization or role settings if needed.",
+  "homeFocusStableTitle": "No major backlog is visible now",
+  "homeFocusStableDescription": "The main indicators look stable. Continue with the detailed screens as needed.",
   "refresh": "Refresh",
   "noData": "No data",
   "createTask": "Create task",

@@ -218,6 +218,186 @@ abstract class AppLocalizations {
   /// **'Admin'**
   String get navAdmin;
 
+  /// No description provided for @homeHeroBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace'**
+  String get homeHeroBadge;
+
+  /// No description provided for @homeHeroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'See today\'s work clearly, without noise.'**
+  String get homeHeroTitle;
+
+  /// No description provided for @homeHeroDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Review open tasks, unread messages, and pending approvals in one place, then move directly to the next screen you need.'**
+  String get homeHeroDescription;
+
+  /// No description provided for @homeHeroPanelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Current summary'**
+  String get homeHeroPanelTitle;
+
+  /// No description provided for @homeSectionOverviewBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview'**
+  String get homeSectionOverviewBadge;
+
+  /// No description provided for @homeSectionOverviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Put the important numbers first.'**
+  String get homeSectionOverviewTitle;
+
+  /// No description provided for @homeSectionOverviewDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'This home view keeps the calm spacing and hierarchy inspired by Notion, while surfacing only the numbers needed for day-to-day decisions.'**
+  String get homeSectionOverviewDescription;
+
+  /// No description provided for @homeOpenTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'Open tasks'**
+  String get homeOpenTasks;
+
+  /// No description provided for @homeOpenTasksHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks not yet completed. Start here to review priority and due dates.'**
+  String get homeOpenTasksHint;
+
+  /// No description provided for @homeUnreadMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'Unread messages'**
+  String get homeUnreadMessages;
+
+  /// No description provided for @homeUnreadMessagesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Messages that still need attention. Use this to avoid missing shared updates.'**
+  String get homeUnreadMessagesHint;
+
+  /// No description provided for @homePendingUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending users'**
+  String get homePendingUsers;
+
+  /// No description provided for @homePendingUsersHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Users waiting for approval or status updates. Handle them from Admin.'**
+  String get homePendingUsersHint;
+
+  /// No description provided for @homePendingUsersHintMember.
+  ///
+  /// In en, this message translates to:
+  /// **'This is mainly for admins. Your role does not need follow-up here.'**
+  String get homePendingUsersHintMember;
+
+  /// No description provided for @homeQuickActionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick actions'**
+  String get homeQuickActionsTitle;
+
+  /// No description provided for @homeQuickActionsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'The home screen keeps the main routes explicit so you can move to the right workspace with minimal friction.'**
+  String get homeQuickActionsDescription;
+
+  /// No description provided for @homeActionTasksDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Review due dates, assignees, and priority before working.'**
+  String get homeActionTasksDescription;
+
+  /// No description provided for @homeActionMessagesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Check unread threads, comments, and pinned updates.'**
+  String get homeActionMessagesDescription;
+
+  /// No description provided for @homeActionSettingsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Update display name, theme, language, and profile image.'**
+  String get homeActionSettingsDescription;
+
+  /// No description provided for @homeActionAdminDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage users, organizations, folders, and audit logs.'**
+  String get homeActionAdminDescription;
+
+  /// No description provided for @homeFocusTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What needs attention now'**
+  String get homeFocusTitle;
+
+  /// No description provided for @homeFocusDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Instead of showing numbers only, the home view summarizes the next action worth taking.'**
+  String get homeFocusDescription;
+
+  /// No description provided for @homeFocusTasksTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} tasks are currently in progress'**
+  String homeFocusTasksTitle(int count);
+
+  /// No description provided for @homeFocusTasksDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the task list and review approaching due dates or uneven task ownership.'**
+  String get homeFocusTasksDescription;
+
+  /// No description provided for @homeFocusMessagesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} unread messages need review'**
+  String homeFocusMessagesTitle(int count);
+
+  /// No description provided for @homeFocusMessagesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Unread items may include broad announcements or template-based posts. Review them before continuing work.'**
+  String get homeFocusMessagesDescription;
+
+  /// No description provided for @homeFocusPendingUsersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} users are waiting for approval'**
+  String homeFocusPendingUsersTitle(int count);
+
+  /// No description provided for @homeFocusPendingUsersDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Admins should review user status and update organization or role settings if needed.'**
+  String get homeFocusPendingUsersDescription;
+
+  /// No description provided for @homeFocusStableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No major backlog is visible now'**
+  String get homeFocusStableTitle;
+
+  /// No description provided for @homeFocusStableDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'The main indicators look stable. Continue with the detailed screens as needed.'**
+  String get homeFocusStableDescription;
+
   /// No description provided for @refresh.
   ///
   /// In en, this message translates to:

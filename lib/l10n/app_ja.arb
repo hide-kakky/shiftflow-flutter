@@ -20,6 +20,57 @@
   "navMessages": "メッセージ",
   "navSettings": "設定",
   "navAdmin": "管理",
+  "homeHeroBadge": "Workspace",
+  "homeHeroTitle": "今日の業務の流れを、静かに整理して把握できます。",
+  "homeHeroDescription": "開いているタスク、未読メッセージ、保留中の承認事項をひとつの画面で確認し、必要な画面へすぐ移動できます。",
+  "homeHeroPanelTitle": "現在のサマリー",
+  "homeSectionOverviewBadge": "Overview",
+  "homeSectionOverviewTitle": "重要な数字を、読みやすく。",
+  "homeSectionOverviewDescription": "Notion のように余白と階層を大切にしつつ、業務判断に必要な数値だけを先頭に置く構成にしています。",
+  "homeOpenTasks": "対応中のタスク",
+  "homeOpenTasksHint": "完了前のタスク件数です。優先度と期限の確認をここから始めます。",
+  "homeUnreadMessages": "未読メッセージ",
+  "homeUnreadMessagesHint": "まだ確認していない連絡件数です。共有事項の見落とし防止に使います。",
+  "homePendingUsers": "保留中ユーザー",
+  "homePendingUsersHint": "承認や状態更新が必要なユーザー数です。管理画面で対応します。",
+  "homePendingUsersHintMember": "管理者向けの確認項目です。あなたの権限では詳細操作は行いません。",
+  "homeQuickActionsTitle": "クイック導線",
+  "homeQuickActionsDescription": "主要画面へ最短で移動できるよう、ホームでは操作入口を明確に分けています。",
+  "homeActionTasksDescription": "期限・担当者・優先度を確認して作業を進めます。",
+  "homeActionMessagesDescription": "未読確認、コメント、ピン留めされた共有を見返します。",
+  "homeActionSettingsDescription": "表示名、テーマ、言語、プロフィール画像を整えます。",
+  "homeActionAdminDescription": "ユーザー、組織、フォルダ、監査ログを管理します。",
+  "homeFocusTitle": "いま見るべきこと",
+  "homeFocusDescription": "数値を見て終わりではなく、次に取る行動がすぐ分かるように要点を整理しています。",
+  "homeFocusTasksTitle": "{count} 件のタスクが進行中です",
+  "@homeFocusTasksTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeFocusTasksDescription": "期限が近いものや担当の偏りがないか、タスク一覧で優先確認してください。",
+  "homeFocusMessagesTitle": "{count} 件の未読メッセージがあります",
+  "@homeFocusMessagesTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeFocusMessagesDescription": "全体共有やテンプレート起点の投稿が含まれる可能性があります。先に確認してから作業すると安全です。",
+  "homeFocusPendingUsersTitle": "{count} 件の承認待ちユーザーがあります",
+  "@homeFocusPendingUsersTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeFocusPendingUsersDescription": "管理者はユーザー状態を見直し、必要なら組織や権限設定を更新してください。",
+  "homeFocusStableTitle": "いま大きな滞留はありません",
+  "homeFocusStableDescription": "ホームの主要指標は安定しています。次は個別画面で詳細確認を進めてください。",
   "refresh": "再読み込み",
   "noData": "データがありません",
   "createTask": "タスク作成",
