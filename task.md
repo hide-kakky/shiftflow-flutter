@@ -40,7 +40,10 @@
 - [x] 基本UI導線のWidgetテスト追加（Auth/Home/Messages/Settings/Admin）
 - [ ] DB/RLS 自動テスト拡充
 - [ ] API 正常系/異常系テスト拡充
-- [ ] Integrationテスト（主要CUJ）
+- [x] Integrationテスト基盤の初回整備（Auth redirect / Home 表示）
+- [x] Integrationテスト追加（Messages / Tasks）
+- [x] Integrationテスト追加（Settings）
+- [ ] Integrationテスト追加（Admin / 実機E2E補完）
 - [x] 通知失敗リトライ処理の実装
 - [x] DB migration 運用を stateless 化（`scripts/db_push.sh` + `--db-url`）
 

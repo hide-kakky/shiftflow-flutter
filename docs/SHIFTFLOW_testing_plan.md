@@ -19,6 +19,10 @@
 - Unit: Provider/Repository/DTO
 - Widget: 画面遷移、フォーム入力、エラー表示、設定保存
 - Integration: ログイン〜主要業務導線
+  - 実装済み: Auth redirect, Home 表示, auth state change のスモーク
+  - 実装済み: Messages 一覧 / フィルタ / 既読切替
+  - 実装済み: Tasks `My / Created / All` 切替
+  - 実装済み: Settings 表示名 / 言語 / テーマ保存
 
 ### 2.4 通知
 - 新規メッセージ
@@ -40,6 +44,7 @@
 ```bash
 flutter analyze
 flutter test
+flutter test integration_test
 supabase db reset --local --yes
 supabase db lint --local --fail-on error
 ```
@@ -104,6 +109,7 @@ deno run --allow-env --allow-net scripts/create_test_users.ts
 - `AdminScreen`: 権限制御
 
 ## 4.3 次に補強するテスト
+- `integration_test` を土台に `Admin` の主要CUJを追加
 - 実機 E2E ログの記録
 - 通知失敗リトライ（`retry_count` / `next_retry_at`）の API テスト
 

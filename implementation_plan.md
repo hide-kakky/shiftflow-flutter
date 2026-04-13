@@ -27,6 +27,9 @@
 - Folders/Templates 管理導線の拡張（フォルダ作成・更新・アーカイブ、テンプレート作成）
 - Supabase 環境分離（dev/prod）と stateless migration 運用（`scripts/db_push.sh`）を整備
 - 基本UI導線のWidgetテスト追加（Auth/Home/Messages/Settings/Admin）
+- Integrationテスト初回整備（Auth redirect / Home表示 / auth state change）
+- Integrationテスト追加（Messages filter / read toggle, Tasks scope switch）
+- Integrationテスト追加（Settings profile / language / theme save）
 - Settings の表示名編集
 - Tasks 一覧の `My / Created / All` 切替
 - Settings のプロフィール画像（表示/更新）
@@ -38,7 +41,8 @@
 1. Auth導線の実機検証（admin/manager/member のロール別確認）
 2. `docs/SHIFTFLOW_e2e_scenarios.md` の実施結果記録
 3. Widgetテストを補完する Integrationテストの追加（主要CUJ）
-4. DB/RLS / API 自動テスト拡充
+4. `Admin` の主要CUJを Integration テストへ拡張
+5. DB/RLS / API 自動テスト拡充
 
 ## 4. 認証テスト運用の再設計方針（TASUKI 参考）
 1. ログイン画面は「通常ユーザー向けUI」を維持し、`Test Login` のような文言を常設しない。
@@ -60,9 +64,11 @@ flutter pub get
 flutter gen-l10n
 flutter analyze
 flutter test
+flutter test integration_test
 supabase db reset --local --yes
 supabase db lint --local --fail-on error
 ```
 
 ## 7. リスク
 - Supabase Local が Docker依存のため、ローカル環境差異に注意。
+- iOS 実機 Integration テストは Xcode 操作許可と署名条件に依存する。Push 実機検証を再開する際は entitlements 運用を再確認する。
