@@ -3,7 +3,7 @@
 ## 1. 全体像
 - クライアント: Flutter（iOS/Android/Web）
 - BFF/API: Supabase Edge Function `api`
-- 認証: Supabase Auth（Magic Link）
+- 認証: Supabase Auth（Magic Link / Password）
 - DB: Supabase Postgres（RLS有効）
 - Storage: Supabase Storage（`profiles`, `attachments`）
 
@@ -47,10 +47,12 @@ supabase/
 ```
 
 ## 4. 認証・認可フロー
-1. ユーザーがメールアドレス入力
-2. Supabase AuthがMagic Link送信
-3. セッション作成後、アプリは `users` と `memberships` からアクセス文脈を解決
-4. route実行前に `role/status/org` を検証
+1. ユーザーは Magic Link または Password でログインする
+2. Supabase Auth がセッションを作成・保持する
+3. アプリ起動時は Supabase の保持セッションを参照し、未認証時のみ `/auth` を表示する
+4. セッション作成後、アプリは `users` と `memberships` からアクセス文脈を解決する
+5. route実行前に `role/status/org` を検証する
+6. `onAuthStateChange` でルーターを再評価し、サインアウトや失効時は保護ルートから外す
 
 ## 5. ルーティング
 - `/auth`
@@ -62,6 +64,7 @@ supabase/
 
 未ログイン時は `/auth` にリダイレクト。
 ログイン後の主要画面は `ShellRoute` 配下で保持し、下部メニューが画面遷移アニメーションに巻き込まれない構成とする。
+有効セッションが残っている場合は `/auth` を経由せず `/home` へ戻す。
 
 ## 6. 例外処理方針
 - APIは `{ ok, code, reason, result }` 形式を返す。
@@ -72,6 +75,12 @@ supabase/
 - ARB: `lib/l10n/app_ja.arb`, `lib/l10n/app_en.arb`
 - 生成: `flutter gen-l10n`
 - 言語設定はローカル保存 + `saveUserSettings` でサーバ同期
+
+## 7.1 セッション保持とローカル設定の境界
+- 認証セッションは Supabase Auth が保持する
+- `theme_mode` と `app_locale` は `SharedPreferences` に保存する
+- 認証セッションが切れても、表示テーマと言語はローカル設定として保持する
+- 逆に、言語やテーマを変更しても認証セッションは再作成しない
 
 ## 8. PWA差分の扱い
 - 現状差分は [SHIFTFLOW_pwa_gap_analysis_2026-03-26.md](./SHIFTFLOW_pwa_gap_analysis_2026-03-26.md) で管理する。

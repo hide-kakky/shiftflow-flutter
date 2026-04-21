@@ -36,6 +36,12 @@
 - 検証は通常導線（メール入力 / Magic Link / パスワードログイン）で実施する。
 - ロール切替はアプリUIを増やさず、`scripts/create_test_users.ts` で用意したアカウントを使って実施する。
 
+### 2.7 セッション保持
+- 有効セッションがある状態でアプリを再起動したとき、`/auth` を経由せず主要画面へ復元されること
+- サインアウト時に保護ルートへ戻れず、`/auth` へ遷移すること
+- `onAuthStateChange` により、認証状態変化でルーターが再評価されること
+- `theme_mode` / `app_locale` のローカル保持は認証セッションと独立していること
+
 ## 3. 実行コマンド
 ```bash
 flutter analyze
@@ -90,6 +96,10 @@ deno run --allow-env --allow-net scripts/create_test_users.ts
   - `admin@shiftflow.local` / `TestPass123!`: pass
   - `manager@shiftflow.local` / `TestPass123!`: pass
   - `member@shiftflow.local` / `TestPass123!`: pass
+- セッションスモーク（Integration）
+  - 未ログイン時は `/auth` へリダイレクト: pass
+  - ログイン済み時は `/home` 表示: pass
+  - auth state change による redirect 再評価: pass
 - ロール別アクセス制御（`route=adminListUsers`）
   - admin: `ok=true`（rows=3）
   - manager: `ok=true`（rows=3）
