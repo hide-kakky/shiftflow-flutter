@@ -1,7 +1,7 @@
 # ShiftFlow Flutter 実装タスク
 
 ## Git運用（必須）
-- [ ] `AGENTS.md` と `docs/SHIFTFLOW_rule_reference.md` を確認
+- [ ] `AGENTS.md` と `docs/ルール参照順.md` を確認
 - [ ] `main` で直接作業しない
 - [ ] `feat/*` / `fix/*` / `chore/*` / `docs/*` ブランチで実装
 - [ ] コミットメッセージは日本語で記述
@@ -22,8 +22,8 @@
 - [x] `Test Login` などテスト専用文言をログイン画面に常設しない設計へ統一
 - [x] QA専用導線をビルドフラグで制御（Debug/QAのみ有効、本番は無効）
 - [x] テストユーザー作成/更新スクリプトを `scripts/` に追加
-- [x] `docs/SHIFTFLOW_setup_guide.md` に test users 構築手順を追加
-- [x] `docs/SHIFTFLOW_testing_plan.md` に「本番UI同等テスト」観点を追加
+- [x] `docs/セットアップガイド.md` に test users 構築手順を追加
+- [x] `docs/テスト計画.md` に「本番UI同等テスト」観点を追加
 - [x] Tasks 詳細UI（担当者・期限・優先度）
 - [x] Tasks 添付ファイル対応（アップロード/紐付け/表示）
 - [x] Messages 詳細UI（既読状態・コメント一覧・ピン）
@@ -45,4 +45,4 @@
 - [x] DB migration 運用を stateless 化（`scripts/db_push.sh` + `--db-url`）
 
 ## 次セッションで最初にやること
-- [ ] [docs/NEXT_SESSION_CHECKLIST.md](./docs/NEXT_SESSION_CHECKLIST.md) を上から実行
+- [ ] [docs/次回セッション確認項目.md](./docs/次回セッション確認項目.md) を上から実行

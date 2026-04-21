@@ -103,6 +103,6 @@
 - `retry_failed_notifications` で: `notification_dispatch_logs.status='failed'` を再キュー
 
 ## 5. 関連文書
-- [SHIFTFLOW_requirements_v1.0.md](./SHIFTFLOW_requirements_v1.0.md)
-- [SHIFTFLOW_database_schema.md](./SHIFTFLOW_database_schema.md)
-- [SHIFTFLOW_pwa_gap_analysis_2026-03-26.md](./SHIFTFLOW_pwa_gap_analysis_2026-03-26.md)
+- [要件定義_v1.0.md](./要件定義_v1.0.md)
+- [データベーススキーマ.md](./データベーススキーマ.md)
+- [PWA差分分析_2026-03-26.md](./PWA差分分析_2026-03-26.md)

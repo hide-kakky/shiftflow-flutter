@@ -10,7 +10,7 @@ HITS="$(rg -n "sb_secret_[A-Za-z0-9._-]+|sb_publishable_[A-Za-z0-9._-]+" -S . \
   --glob '!.dart_tool' \
   --glob '!**/node_modules/**' \
   --glob '!env/*.json' \
-  --glob '!docs/SHIFTFLOW_supabase_key_rotation_runbook.md' || true)"
+  --glob '!docs/Supabaseキーローテーション手順.md' || true)"
 
 if [ -n "$HITS" ]; then
   echo "$HITS"
