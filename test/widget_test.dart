@@ -25,6 +25,16 @@ class _TestAuthController extends AuthController {
   _TestAuthController() : super(_MockSupabaseClient());
 }
 
+class _FakeExternalUrlLauncher extends ExternalUrlLauncher {
+  final List<Uri> launchedUris = <Uri>[];
+
+  @override
+  Future<bool> launch(Uri uri) async {
+    launchedUris.add(uri);
+    return true;
+  }
+}
+
 class _FakeRouteDataRepository extends RouteDataRepository {
   _FakeRouteDataRepository({
     this.homeContent = const <String, dynamic>{},
@@ -39,17 +49,31 @@ class _FakeRouteDataRepository extends RouteDataRepository {
     this.bootstrapData = const <String, dynamic>{},
     List<Map<String, dynamic>>? messages,
     List<Map<String, dynamic>>? folders,
+    Map<String, Map<String, dynamic>>? messageDetails,
     List<Map<String, dynamic>>? myTasks,
     List<Map<String, dynamic>>? createdTasks,
     List<Map<String, dynamic>>? allTasks,
+    Map<String, Map<String, dynamic>>? taskDetails,
+    List<Map<String, dynamic>>? users,
+    Map<String, List<Map<String, dynamic>>>? templatesByFolder,
     this.toggleReadResponse = const <String, dynamic>{'isRead': true},
   }) : _messages = List<Map<String, dynamic>>.from(messages ?? const []),
+       _messageDetails = Map<String, Map<String, dynamic>>.from(
+         messageDetails ?? const {},
+       ),
        _folders = List<Map<String, dynamic>>.from(folders ?? const []),
        _myTasks = List<Map<String, dynamic>>.from(myTasks ?? const []),
        _createdTasks = List<Map<String, dynamic>>.from(
          createdTasks ?? const [],
        ),
        _allTasks = List<Map<String, dynamic>>.from(allTasks ?? const []),
+       _taskDetails = Map<String, Map<String, dynamic>>.from(
+         taskDetails ?? const {},
+       ),
+       _users = List<Map<String, dynamic>>.from(users ?? const []),
+       _templatesByFolder = Map<String, List<Map<String, dynamic>>>.from(
+         templatesByFolder ?? const {},
+       ),
        super(ApiClient(_MockSupabaseClient()));
 
   final Map<String, dynamic> homeContent;
@@ -57,16 +81,28 @@ class _FakeRouteDataRepository extends RouteDataRepository {
   final Map<String, dynamic> bootstrapData;
   final Map<String, dynamic> toggleReadResponse;
   final List<Map<String, dynamic>> _messages;
+  final Map<String, Map<String, dynamic>> _messageDetails;
   final List<Map<String, dynamic>> _folders;
   final List<Map<String, dynamic>> _myTasks;
   final List<Map<String, dynamic>> _createdTasks;
   final List<Map<String, dynamic>> _allTasks;
+  final Map<String, Map<String, dynamic>> _taskDetails;
+  final List<Map<String, dynamic>> _users;
+  final Map<String, List<Map<String, dynamic>>> _templatesByFolder;
 
   final List<String> savedLanguages = <String>[];
   final List<String> savedNames = <String>[];
   final List<String> savedThemes = <String>[];
   final List<String> savedImageUrls = <String>[];
   final List<String> toggledMessageIds = <String>[];
+  final List<List<String>> bulkReadRequests = <List<String>>[];
+  final List<String> deletedMessageIds = <String>[];
+  final List<String> downloadAttachmentIds = <String>[];
+  final List<String> updatedTaskIds = <String>[];
+  final List<String> deletedTaskIds = <String>[];
+  final List<String> completedTaskIds = <String>[];
+  final List<String> updatedTemplateIds = <String>[];
+  final List<String> deletedTemplateIds = <String>[];
   final List<String?> requestedFolderIds = <String?>[];
   final List<bool> requestedUnreadOnly = <bool>[];
   int listMyTasksCalls = 0;
@@ -135,9 +171,53 @@ class _FakeRouteDataRepository extends RouteDataRepository {
   }
 
   @override
+  Future<List<Map<String, dynamic>>> listFolders() async {
+    return List<Map<String, dynamic>>.from(_folders);
+  }
+
+  @override
   Future<Map<String, dynamic>> toggleMemoRead(String messageId) async {
     toggledMessageIds.add(messageId);
     return toggleReadResponse;
+  }
+
+  @override
+  Future<Map<String, dynamic>> markMemosReadBulk(List<String> messageIds) async {
+    bulkReadRequests.add(List<String>.from(messageIds));
+    for (final messageId in messageIds) {
+      _replaceMessage(messageId, {'isRead': true});
+    }
+    return {'updated': messageIds.length};
+  }
+
+  @override
+  Future<Map<String, dynamic>> getMessageById(String messageId) async {
+    return _messageDetails[messageId] ??
+        _messages.firstWhere(
+          (message) => message['id'] == messageId,
+          orElse: () => <String, dynamic>{'id': messageId},
+        );
+  }
+
+  @override
+  Future<void> deleteMessageById(String messageId) async {
+    deletedMessageIds.add(messageId);
+    _messages.removeWhere((message) => message['id'] == messageId);
+    _messageDetails.remove(messageId);
+  }
+
+  @override
+  Future<Map<String, dynamic>> messageReadStatus(String messageId) async {
+    return const {
+      'readUsers': <Map<String, dynamic>>[],
+      'unreadUsers': <Map<String, dynamic>>[],
+    };
+  }
+
+  @override
+  Future<Map<String, dynamic>> downloadAttachment(String attachmentId) async {
+    downloadAttachmentIds.add(attachmentId);
+    return {'url': 'https://example.com/$attachmentId'};
   }
 
   @override
@@ -159,7 +239,148 @@ class _FakeRouteDataRepository extends RouteDataRepository {
   }
 
   @override
+  Future<Map<String, dynamic>> getTaskById(String taskId) async {
+    return _taskDetails[taskId] ??
+        _myTasks.firstWhere(
+          (task) => task['id'] == taskId,
+          orElse: () => <String, dynamic>{'id': taskId},
+        );
+  }
+
+  @override
+  Future<Map<String, dynamic>> updateTask({
+    required String taskId,
+    String? title,
+    String? description,
+    String? status,
+    DateTime? dueAt,
+    String? priority,
+    List<String>? assigneeUserIds,
+  }) async {
+    updatedTaskIds.add(taskId);
+    final current = Map<String, dynamic>.from(await getTaskById(taskId));
+    final updated = {
+      ...current,
+      ...?title == null ? null : {'title': title},
+      ...?description == null ? null : {'description': description},
+      ...?status == null ? null : {'status': status},
+      ...?priority == null ? null : {'priority': priority},
+      ...?dueAt == null ? null : {'due_at': dueAt.toIso8601String()},
+      ...?assigneeUserIds == null
+          ? null
+          : {
+              'task_assignees': assigneeUserIds
+                  .map(
+                    (id) => {
+                      'user_id': id,
+                      'users': {
+                        'id': id,
+                        'display_name': _users
+                                .firstWhere(
+                                  (user) => user['userId'] == id,
+                                  orElse: () => <String, dynamic>{},
+                                )['displayName']
+                                ?.toString() ??
+                            id,
+                      },
+                    },
+                  )
+                  .toList(growable: false),
+            },
+    };
+    _taskDetails[taskId] = Map<String, dynamic>.from(updated);
+    _replaceTask(taskId, updated);
+    return updated;
+  }
+
+  @override
+  Future<Map<String, dynamic>> completeTask(String taskId) async {
+    completedTaskIds.add(taskId);
+    return updateTask(taskId: taskId, status: 'completed');
+  }
+
+  @override
+  Future<void> deleteTaskById(String taskId) async {
+    deletedTaskIds.add(taskId);
+    _taskDetails.remove(taskId);
+    _myTasks.removeWhere((task) => task['id'] == taskId);
+    _createdTasks.removeWhere((task) => task['id'] == taskId);
+    _allTasks.removeWhere((task) => task['id'] == taskId);
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> listActiveUsers() async {
+    return List<Map<String, dynamic>>.from(_users);
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> listTemplates(String folderId) async {
+    return List<Map<String, dynamic>>.from(
+      _templatesByFolder[folderId] ?? const <Map<String, dynamic>>[],
+    );
+  }
+
+  @override
+  Future<Map<String, dynamic>> updateTemplate({
+    required String templateId,
+    String? name,
+    String? titleFormat,
+    String? bodyFormat,
+  }) async {
+    updatedTemplateIds.add(templateId);
+    for (final entry in _templatesByFolder.entries) {
+      final index = entry.value.indexWhere((template) => template['id'] == templateId);
+      if (index >= 0) {
+        entry.value[index] = {
+          ...entry.value[index],
+          ...?name == null ? null : {'name': name},
+          ...?titleFormat == null ? null : {'title_format': titleFormat},
+          ...?bodyFormat == null ? null : {'body_format': bodyFormat},
+        };
+        return entry.value[index];
+      }
+    }
+    return <String, dynamic>{'id': templateId};
+  }
+
+  @override
+  Future<void> deleteTemplate(String templateId) async {
+    deletedTemplateIds.add(templateId);
+    for (final entry in _templatesByFolder.entries) {
+      entry.value.removeWhere((template) => template['id'] == templateId);
+    }
+  }
+
+  @override
   Future<Map<String, dynamic>> getBootstrapData() async => bootstrapData;
+
+  void _replaceTask(String taskId, Map<String, dynamic> updated) {
+    for (final list in [_myTasks, _createdTasks, _allTasks]) {
+      final index = list.indexWhere((task) => task['id'] == taskId);
+      if (index >= 0) {
+        list[index] = {
+          ...list[index],
+          ...updated,
+        };
+      }
+    }
+  }
+
+  void _replaceMessage(String messageId, Map<String, dynamic> updated) {
+    final index = _messages.indexWhere((message) => message['id'] == messageId);
+    if (index >= 0) {
+      _messages[index] = {
+        ..._messages[index],
+        ...updated,
+      };
+    }
+    if (_messageDetails.containsKey(messageId)) {
+      _messageDetails[messageId] = {
+        ..._messageDetails[messageId]!,
+        ...updated,
+      };
+    }
+  }
 }
 
 Future<void> _pumpScreen(
@@ -406,6 +627,129 @@ void main() {
     expect(repo.listAllTasksCalls, greaterThanOrEqualTo(1));
   });
 
+  testWidgets('TasksScreen edits and deletes tasks from the list', (
+    tester,
+  ) async {
+    final repo = _FakeRouteDataRepository(
+      myTasks: const [
+        {
+          'id': 'task-1',
+          'title': 'Old task',
+          'description': 'before',
+          'status': 'open',
+          'priority': 'medium',
+        },
+      ],
+      taskDetails: const {
+        'task-1': {
+          'id': 'task-1',
+          'title': 'Old task',
+          'description': 'before',
+          'status': 'open',
+          'priority': 'medium',
+          'task_assignees': [
+            {
+              'user_id': 'user-1',
+              'users': {'id': 'user-1', 'display_name': '担当者A'},
+            },
+          ],
+        },
+      },
+      users: const [
+        {'userId': 'user-1', 'displayName': '担当者A'},
+      ],
+    );
+    final container = ProviderContainer(
+      overrides: [routeDataRepositoryProvider.overrideWithValue(repo)],
+    );
+    addTearDown(container.dispose);
+
+    await _pumpScreen(tester, container: container, child: const TasksScreen());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.more_vert).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('編集').last);
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField).first, 'Updated task');
+    await tester.tap(find.text('保存').last);
+    await tester.pumpAndSettle();
+
+    expect(repo.updatedTaskIds, ['task-1']);
+    expect(find.text('Updated task'), findsWidgets);
+
+    await tester.tap(find.byIcon(Icons.more_vert).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('削除').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('削除').last);
+    await tester.pumpAndSettle();
+
+    expect(repo.deletedTaskIds, ['task-1']);
+    expect(find.text('Updated task'), findsNothing);
+  });
+
+  testWidgets('TasksScreen opens detail and downloads attachments', (
+    tester,
+  ) async {
+    final repo = _FakeRouteDataRepository(
+      myTasks: const [
+        {
+          'id': 'task-1',
+          'title': 'Task with detail',
+          'description': 'card body',
+          'status': 'open',
+          'priority': 'medium',
+        },
+      ],
+      taskDetails: const {
+        'task-1': {
+          'id': 'task-1',
+          'title': 'Task with detail',
+          'description': 'detail body',
+          'status': 'open',
+          'priority': 'medium',
+          'task_assignees': [
+            {
+              'user_id': 'user-1',
+              'users': {'id': 'user-1', 'display_name': '担当者A'},
+            },
+          ],
+          'task_attachments': [
+            {
+              'attachment_id': 'attachment-1',
+              'attachments': {'id': 'attachment-1', 'file_name': 'guide.pdf'},
+            },
+          ],
+        },
+      },
+    );
+    final launcher = _FakeExternalUrlLauncher();
+    final container = ProviderContainer(
+      overrides: [
+        routeDataRepositoryProvider.overrideWithValue(repo),
+        externalUrlLauncherProvider.overrideWithValue(launcher),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    await _pumpScreen(tester, container: container, child: const TasksScreen());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Task with detail'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('detail body'), findsOneWidget);
+    expect(find.text('担当者A'), findsOneWidget);
+
+    await tester.tap(find.text('guide.pdf'));
+    await tester.pumpAndSettle();
+
+    expect(repo.downloadAttachmentIds, ['attachment-1']);
+    expect(launcher.launchedUris.single.toString(), 'https://example.com/attachment-1');
+  });
+
   testWidgets('SettingsScreen saves profile, language and theme', (
     tester,
   ) async {
@@ -456,6 +800,161 @@ void main() {
     expect(repo.savedThemes, ['dark']);
     expect(prefs.getString('app_locale'), 'en');
     expect(prefs.getString('theme_mode'), 'dark');
+  });
+
+  testWidgets('MessagesScreen marks selected messages as read', (tester) async {
+    final repo = _FakeRouteDataRepository(
+      messages: const [
+        {
+          'id': 'message-1',
+          'title': '未読1',
+          'body': 'body',
+          'isRead': false,
+        },
+        {
+          'id': 'message-2',
+          'title': '未読2',
+          'body': 'body',
+          'isRead': false,
+        },
+      ],
+    );
+    final container = ProviderContainer(
+      overrides: [routeDataRepositoryProvider.overrideWithValue(repo)],
+    );
+    addTearDown(container.dispose);
+
+    await _pumpScreen(
+      tester,
+      container: container,
+      child: const MessagesScreen(),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.longPress(find.text('未読1'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('未読2'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('選択分を既読'));
+    await tester.pumpAndSettle();
+
+    expect(repo.bulkReadRequests, [
+      ['message-1', 'message-2'],
+    ]);
+  });
+
+  testWidgets('Message detail downloads attachments and deletes message', (
+    tester,
+  ) async {
+    final repo = _FakeRouteDataRepository(
+      messages: const [
+        {
+          'id': 'message-1',
+          'title': '連絡',
+          'body': '一覧本文',
+          'isRead': false,
+        },
+      ],
+      messageDetails: const {
+        'message-1': {
+          'id': 'message-1',
+          'title': '連絡',
+          'body': '詳細本文',
+          'comments': [],
+          'message_attachments': [
+            {
+              'attachment_id': 'attachment-2',
+              'attachments': {'id': 'attachment-2', 'file_name': 'memo.pdf'},
+            },
+          ],
+        },
+      },
+    );
+    final launcher = _FakeExternalUrlLauncher();
+    final container = ProviderContainer(
+      overrides: [
+        routeDataRepositoryProvider.overrideWithValue(repo),
+        externalUrlLauncherProvider.overrideWithValue(launcher),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    await _pumpScreen(
+      tester,
+      container: container,
+      child: const MessagesScreen(),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('連絡'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('詳細本文'), findsOneWidget);
+
+    await tester.tap(find.text('memo.pdf'));
+    await tester.pumpAndSettle();
+    expect(repo.downloadAttachmentIds, ['attachment-2']);
+
+    await tester.tap(find.byIcon(Icons.delete_outline).last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('削除').last);
+    await tester.pumpAndSettle();
+
+    expect(repo.deletedMessageIds, ['message-1']);
+    expect(find.text('連絡'), findsNothing);
+  });
+
+  testWidgets('AdminScreen edits and deletes templates', (tester) async {
+    final repo = _FakeRouteDataRepository(
+      folders: const [
+        {'id': 'folder-1', 'name': '連絡'},
+      ],
+      templatesByFolder: {
+        'folder-1': [
+          {
+            'id': 'template-1',
+            'name': '朝会',
+            'title_format': '朝会テンプレ',
+            'body_format': '本文',
+          },
+        ],
+      },
+    );
+    final container = ProviderContainer(
+      overrides: [
+        routeDataRepositoryProvider.overrideWithValue(repo),
+        isManagerOrAdminProvider.overrideWith((ref) => true),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    await _pumpScreen(tester, container: container, child: const AdminScreen());
+    await tester.pumpAndSettle();
+
+    await tester.drag(find.byType(TabBarView), const Offset(-600, 0));
+    await tester.pumpAndSettle();
+    await tester.drag(find.byType(TabBarView), const Offset(-600, 0));
+    await tester.pumpAndSettle();
+    await tester.drag(find.byType(TabBarView), const Offset(-600, 0));
+    await tester.pumpAndSettle();
+    expect(find.text('朝会'), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.edit_outlined).last);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).first, '更新後テンプレ');
+    await tester.tap(find.text('保存').last);
+    await tester.pumpAndSettle();
+
+    expect(repo.updatedTemplateIds, ['template-1']);
+    expect(find.text('更新後テンプレ'), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.delete_outline).last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('削除').last);
+    await tester.pumpAndSettle();
+
+    expect(repo.deletedTemplateIds, ['template-1']);
+    expect(find.text('更新後テンプレ'), findsNothing);
   });
 
   testWidgets('AdminScreen shows permission denied for non managers', (

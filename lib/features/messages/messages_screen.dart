@@ -20,6 +20,7 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
   String? _selectedFolderId;
   bool _unreadOnly = false;
   final Map<String, bool> _readOverrides = <String, bool>{};
+  final Set<String> _selectedMessageIds = <String>{};
 
   @override
   void initState() {
@@ -318,9 +319,7 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
       final storagePath = 'attachments/$objectPath';
 
       try {
-        await supabase.storage
-            .from('attachments')
-            .uploadBinary(
+        await supabase.storage.from('attachments').uploadBinary(
               objectPath,
               bytes,
               fileOptions: FileOptions(
@@ -402,6 +401,42 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
     }
   }
 
+  Future<void> _markSelectedRead() async {
+    final l10n = AppLocalizations.of(context);
+    if (_selectedMessageIds.isEmpty) return;
+    await ref
+        .read(routeDataRepositoryProvider)
+        .markMemosReadBulk(_selectedMessageIds.toList(growable: false));
+    if (!mounted) return;
+    setState(() {
+      for (final messageId in _selectedMessageIds) {
+        _readOverrides[messageId] = true;
+      }
+      _selectedMessageIds.clear();
+    });
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.messagesMarkedRead)));
+    await _refresh();
+  }
+
+  void _toggleSelection(String messageId) {
+    if (messageId.isEmpty) return;
+    setState(() {
+      if (_selectedMessageIds.contains(messageId)) {
+        _selectedMessageIds.remove(messageId);
+      } else {
+        _selectedMessageIds.add(messageId);
+      }
+    });
+  }
+
+  void _clearSelection() {
+    setState(() {
+      _selectedMessageIds.clear();
+    });
+  }
+
   void _setFolderFilter(String? folderId) {
     setState(() {
       _selectedFolderId = folderId;
@@ -414,6 +449,30 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
       _unreadOnly = unreadOnly;
       _future = _load();
     });
+  }
+
+  Future<void> _openAttachment(String attachmentId) async {
+    final l10n = AppLocalizations.of(context);
+    try {
+      final result = await ref
+          .read(routeDataRepositoryProvider)
+          .downloadAttachment(attachmentId);
+      final url = result['url']?.toString() ?? '';
+      if (url.isEmpty) throw Exception('empty_url');
+      final uri = Uri.tryParse(url);
+      if (uri == null) throw Exception('invalid_url');
+      final launched = await ref.read(externalUrlLauncherProvider).launch(uri);
+      if (!launched && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.attachmentOpenFailed)),
+        );
+      }
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.attachmentOpenFailed)));
+    }
   }
 
   Widget _buildFilters(AppLocalizations l10n) {
@@ -444,6 +503,26 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
             selected: _unreadOnly,
             onSelected: _setUnreadOnly,
           ),
+          if (_selectedMessageIds.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    l10n.selectedMessages(_selectedMessageIds.length),
+                  ),
+                ),
+                TextButton(
+                  onPressed: _clearSelection,
+                  child: Text(l10n.clearSelection),
+                ),
+                FilledButton(
+                  onPressed: _markSelectedRead,
+                  child: Text(l10n.markSelectedRead),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );
@@ -459,12 +538,17 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
     final isPinned = message['is_pinned'] == true;
     final title = message['title']?.toString() ?? '-';
     final body = message['body']?.toString() ?? '';
+    final selecting = _selectedMessageIds.isNotEmpty;
+    final selected = _selectedMessageIds.contains(messageId);
 
     return Card(
       child: ListTile(
         onTap: messageId.isEmpty
             ? null
-            : () => _openDetails(messageId: messageId, title: title),
+            : selecting
+                ? () => _toggleSelection(messageId)
+                : () => _openDetails(messageId: messageId, title: title),
+        onLongPress: messageId.isEmpty ? null : () => _toggleSelection(messageId),
         title: Row(
           children: [
             Expanded(child: Text(title)),
@@ -476,11 +560,16 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
           ],
         ),
         subtitle: Text(body, maxLines: 2, overflow: TextOverflow.ellipsis),
-        leading: Icon(
-          isRead
-              ? Icons.mark_email_read_outlined
-              : Icons.mark_email_unread_outlined,
-        ),
+        leading: selecting
+            ? Checkbox(
+                value: selected,
+                onChanged: (_) => _toggleSelection(messageId),
+              )
+            : Icon(
+                isRead
+                    ? Icons.mark_email_read_outlined
+                    : Icons.mark_email_unread_outlined,
+              ),
         trailing: IconButton(
           tooltip: l10n.toggleRead,
           icon: const Icon(Icons.done_all),
@@ -494,7 +583,7 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
     required String messageId,
     required String title,
   }) async {
-    await showModalBottomSheet<void>(
+    final changed = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       builder: (context) {
@@ -503,11 +592,45 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
           child: _MessageDetailSheet(
             messageId: messageId,
             fallbackTitle: title,
+            onDeleteMessage: _deleteMessage,
+            onOpenAttachment: _openAttachment,
           ),
         );
       },
     );
+    if (changed == true) {
+      await _refresh();
+    }
+  }
+
+  Future<bool> _deleteMessage(String messageId) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.confirmDeleteTitle),
+        content: Text(l10n.confirmDeleteMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return false;
+
+    await ref.read(routeDataRepositoryProvider).deleteMessageById(messageId);
+    if (!mounted) return false;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.messageDeleted)));
     await _refresh();
+    return true;
   }
 
   @override
@@ -589,14 +712,25 @@ class _UploadResult {
   final int failedCount;
 }
 
+class _AttachmentInfo {
+  const _AttachmentInfo({required this.id, required this.name});
+
+  final String id;
+  final String name;
+}
+
 class _MessageDetailSheet extends ConsumerStatefulWidget {
   const _MessageDetailSheet({
     required this.messageId,
     required this.fallbackTitle,
+    required this.onDeleteMessage,
+    required this.onOpenAttachment,
   });
 
   final String messageId;
   final String fallbackTitle;
+  final Future<bool> Function(String messageId) onDeleteMessage;
+  final Future<void> Function(String attachmentId) onOpenAttachment;
 
   @override
   ConsumerState<_MessageDetailSheet> createState() =>
@@ -624,6 +758,28 @@ class _MessageDetailSheetState extends ConsumerState<_MessageDetailSheet> {
       _detailFuture = _loadDetail();
     });
     await _detailFuture;
+  }
+
+  List<_AttachmentInfo> _extractAttachments(Map<String, dynamic> message) {
+    final rows = message['message_attachments'];
+    if (rows is! List) return const [];
+
+    return rows
+        .whereType<Map>()
+        .map((row) {
+          final attachment = row['attachments'];
+          final attachmentId =
+              row['attachment_id']?.toString() ??
+              (attachment is Map ? attachment['id']?.toString() : null) ??
+              '';
+          final name = attachment is Map
+              ? attachment['file_name']?.toString() ?? ''
+              : '';
+          if (attachmentId.isEmpty || name.isEmpty) return null;
+          return _AttachmentInfo(id: attachmentId, name: name);
+        })
+        .whereType<_AttachmentInfo>()
+        .toList(growable: false);
   }
 
   Future<void> _togglePin() async {
@@ -693,6 +849,13 @@ class _MessageDetailSheetState extends ConsumerState<_MessageDetailSheet> {
     await _refreshDetail();
   }
 
+  Future<void> _handleDelete() async {
+    final deleted = await widget.onDeleteMessage(widget.messageId);
+    if (deleted && mounted) {
+      Navigator.of(context).pop(true);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -717,6 +880,7 @@ class _MessageDetailSheetState extends ConsumerState<_MessageDetailSheet> {
                   growable: false,
                 )
               : const <Map>[];
+          final attachments = _extractAttachments(message);
 
           return Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
@@ -743,10 +907,38 @@ class _MessageDetailSheetState extends ConsumerState<_MessageDetailSheet> {
                       onPressed: _toggleRead,
                       icon: const Icon(Icons.done_all),
                     ),
+                    IconButton(
+                      tooltip: l10n.delete,
+                      onPressed: _handleDelete,
+                      icon: const Icon(Icons.delete_outline),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 8),
                 Text(body),
+                const SizedBox(height: 16),
+                Text(
+                  l10n.taskAttachments,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 8),
+                if (attachments.isEmpty)
+                  Text(l10n.noAttachments)
+                else
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: attachments
+                        .map(
+                          (attachment) => ActionChip(
+                            avatar: const Icon(Icons.attach_file, size: 16),
+                            label: Text(attachment.name),
+                            onPressed: () =>
+                                widget.onOpenAttachment(attachment.id),
+                          ),
+                        )
+                        .toList(growable: false),
+                  ),
                 const SizedBox(height: 16),
                 Row(
                   children: [
@@ -858,17 +1050,18 @@ class _MessageDetailSheetState extends ConsumerState<_MessageDetailSheet> {
                             final createdAt =
                                 comment['created_at']?.toString() ?? '';
                             return ListTile(
+                              dense: true,
                               contentPadding: EdgeInsets.zero,
-                              title: Text(
-                                author?.isNotEmpty == true ? author! : fallback,
-                              ),
+                              title: Text(author?.isNotEmpty == true ? author! : fallback),
                               subtitle: Text(comment['body']?.toString() ?? ''),
-                              trailing: Text(
-                                createdAt.length >= 16
-                                    ? createdAt.substring(0, 16)
-                                    : createdAt,
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
+                              trailing: createdAt.isEmpty
+                                  ? null
+                                  : Text(
+                                      createdAt,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall,
+                                    ),
                             );
                           },
                         ),

@@ -225,10 +225,36 @@ class AppLocalizationsJa extends AppLocalizations {
   String get body => '本文';
 
   @override
+  String get details => '詳細';
+
+  @override
+  String get edit => '編集';
+
+  @override
+  String get delete => '削除';
+
+  @override
   String get save => '保存';
 
   @override
   String get cancel => 'キャンセル';
+
+  @override
+  String get clearSelection => '選択解除';
+
+  @override
+  String get markSelectedRead => '選択分を既読';
+
+  @override
+  String selectedMessages(int count) {
+    return '$count 件選択中';
+  }
+
+  @override
+  String get confirmDeleteTitle => '削除の確認';
+
+  @override
+  String get confirmDeleteMessage => 'この操作は元に戻せません。削除しますか？';
 
   @override
   String get taskDueDate => '期限';
@@ -273,6 +299,21 @@ class AppLocalizationsJa extends AppLocalizations {
   String get taskTitleRequired => 'タイトルは必須です';
 
   @override
+  String get taskUpdated => 'タスクを更新しました。';
+
+  @override
+  String get taskDeleted => 'タスクを削除しました。';
+
+  @override
+  String get taskDetails => 'タスク詳細';
+
+  @override
+  String get noAssigneesAssigned => '担当者は未設定です';
+
+  @override
+  String get noAttachments => '添付はありません';
+
+  @override
   String get noFolderSelected => 'フォルダ未選択';
 
   @override
@@ -292,6 +333,18 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get messageUnreadOnly => '未読のみ';
+
+  @override
+  String get messageDeleted => 'メッセージを削除しました。';
+
+  @override
+  String get messagesMarkedRead => '選択したメッセージを既読にしました。';
+
+  @override
+  String get openAttachment => '添付を開く';
+
+  @override
+  String get attachmentOpenFailed => '添付を開けませんでした。';
 
   @override
   String get taskScopeMy => 'My';
@@ -436,6 +489,12 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get adminTemplateCreated => 'テンプレートを作成しました。';
+
+  @override
+  String get adminTemplateUpdated => 'テンプレートを更新しました。';
+
+  @override
+  String get adminTemplateDeleted => 'テンプレートを削除しました。';
 
   @override
   String get adminNoFoldersForTemplates => '先にフォルダを作成してください。';
