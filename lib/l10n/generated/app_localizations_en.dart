@@ -238,10 +238,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get body => 'Body';
 
   @override
+  String get details => 'Details';
+
+  @override
+  String get edit => 'Edit';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
   String get save => 'Save';
 
   @override
   String get cancel => 'Cancel';
+
+  @override
+  String get clearSelection => 'Clear selection';
+
+  @override
+  String get markSelectedRead => 'Mark selected as read';
+
+  @override
+  String selectedMessages(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get confirmDeleteTitle => 'Confirm delete';
+
+  @override
+  String get confirmDeleteMessage =>
+      'This action cannot be undone. Delete this item?';
 
   @override
   String get taskDueDate => 'Due date';
@@ -286,6 +313,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get taskTitleRequired => 'Title is required';
 
   @override
+  String get taskUpdated => 'Task updated.';
+
+  @override
+  String get taskDeleted => 'Task deleted.';
+
+  @override
+  String get taskDetails => 'Task details';
+
+  @override
+  String get noAssigneesAssigned => 'No assignees';
+
+  @override
+  String get noAttachments => 'No attachments';
+
+  @override
   String get noFolderSelected => 'No folder';
 
   @override
@@ -306,6 +348,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get messageUnreadOnly => 'Unread only';
+
+  @override
+  String get messageDeleted => 'Message deleted.';
+
+  @override
+  String get messagesMarkedRead => 'Selected messages marked as read.';
+
+  @override
+  String get openAttachment => 'Open attachment';
+
+  @override
+  String get attachmentOpenFailed => 'Failed to open attachment.';
 
   @override
   String get taskScopeMy => 'My';
@@ -451,6 +505,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminTemplateCreated => 'Template created.';
+
+  @override
+  String get adminTemplateUpdated => 'Template updated.';
+
+  @override
+  String get adminTemplateDeleted => 'Template deleted.';
 
   @override
   String get adminNoFoldersForTemplates => 'Create a folder first.';

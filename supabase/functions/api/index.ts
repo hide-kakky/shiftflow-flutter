@@ -288,7 +288,14 @@ Deno.serve(async (request) => {
 
     if (route === 'getTaskById') {
       const taskId = asString(args[0]);
-      const { data } = await service.from('tasks').select('*').eq('id', taskId).eq('organization_id', ctx.orgId).maybeSingle();
+      const { data } = await service
+        .from('tasks')
+        .select(
+          '*,task_attachments(attachment_id,attachments(id,file_name,content_type,size_bytes)),task_assignees(user_id,users(id,email,display_name))',
+        )
+        .eq('id', taskId)
+        .eq('organization_id', ctx.orgId)
+        .maybeSingle();
       return jsonResponse(200, { ok: true, result: data ?? {} });
     }
 
@@ -339,23 +346,73 @@ Deno.serve(async (request) => {
       const payload = asMap(args[0]);
       const taskId = asString(payload.taskId);
       const patch: Record<string, unknown> = {};
+      const hasOwn = (key: string) => Object.prototype.hasOwnProperty.call(payload, key);
       const title = asString(payload.title);
       const description = asString(payload.description);
       const status = asString(payload.status);
-      if (title) patch.title = title;
-      if (description) patch.description = description;
-      if (status) patch.status = status;
-      if (Object.keys(patch).length === 0) return jsonResponse(200, { ok: true, result: {} });
+      const priority = asString(payload.priority);
+      const dueAtMs = Number(payload.dueAtMs ?? 0);
 
-      const { data, error } = await service
-        .from('tasks')
-        .update(patch)
-        .eq('id', taskId)
-        .eq('organization_id', ctx.orgId)
-        .select('*')
-        .single();
-      if (error) throw error;
-      await insertAuditLog('task.update', ctx, 'task', taskId, patch);
+      if (hasOwn('title')) patch.title = title;
+      if (hasOwn('description')) patch.description = description;
+      if (hasOwn('status') && status) patch.status = status;
+      if (hasOwn('priority')) {
+        patch.priority = priority === 'low' || priority === 'high' ? priority : 'medium';
+      }
+      if (hasOwn('dueAtMs')) {
+        patch.due_at = Number.isFinite(dueAtMs) && dueAtMs > 0
+          ? new Date(dueAtMs).toISOString()
+          : null;
+      }
+
+      if (Object.keys(patch).length === 0 && !hasOwn('assigneeUserIds')) {
+        return jsonResponse(200, { ok: true, result: {} });
+      }
+
+      let data: Record<string, unknown> | null = null;
+      if (Object.keys(patch).length > 0) {
+        const updateResult = await service
+          .from('tasks')
+          .update(patch)
+          .eq('id', taskId)
+          .eq('organization_id', ctx.orgId)
+          .select('*')
+          .single();
+        if (updateResult.error) throw updateResult.error;
+        data = updateResult.data;
+      }
+
+      if (hasOwn('assigneeUserIds')) {
+        const assignees = asList(payload.assigneeUserIds)
+          .map((v) => asString(v))
+          .filter((v) => v.length > 0);
+        await service.from('task_assignees').delete().eq('task_id', taskId);
+        if (assignees.length > 0) {
+          await service.from('task_assignees').insert(
+            assignees.map((userId) => ({
+              task_id: taskId,
+              user_id: userId,
+            })),
+          );
+        }
+      }
+
+      await insertAuditLog('task.update', ctx, 'task', taskId, {
+        ...patch,
+        ...(hasOwn('assigneeUserIds') ? { assigneeUserIds: payload.assigneeUserIds } : {}),
+      });
+
+      if (data == null) {
+        const selected = await service
+          .from('tasks')
+          .select('*')
+          .eq('id', taskId)
+          .eq('organization_id', ctx.orgId)
+          .single();
+        if (selected.error) throw selected.error;
+        data = selected.data;
+      }
+
       return jsonResponse(200, { ok: true, result: data });
     }
 
@@ -423,7 +480,9 @@ Deno.serve(async (request) => {
       const messageId = asString(args[0]);
       const { data: message } = await service
         .from('messages')
-        .select('*')
+        .select(
+          '*,message_attachments(attachment_id,attachments(id,file_name,content_type,size_bytes))',
+        )
         .eq('organization_id', ctx.orgId)
         .eq('id', messageId)
         .maybeSingle();
@@ -671,6 +730,38 @@ Deno.serve(async (request) => {
         await insertAuditLog('template.create', ctx, 'template', data.id, { folderId, name });
         return jsonResponse(201, { ok: true, result: data });
       }
+    }
+
+    if (segments[0] === 'templates' && segments.length === 2 && method === 'PATCH') {
+      ensureManager(ctx);
+      const templateId = segments[1];
+      const patch: Record<string, unknown> = {};
+      if (body.name !== undefined) patch.name = asString(body.name);
+      if (body.titleFormat !== undefined) patch.title_format = asString(body.titleFormat);
+      if (body.bodyFormat !== undefined) patch.body_format = asString(body.bodyFormat);
+      const { data, error } = await service
+        .from('templates')
+        .update(patch)
+        .eq('id', templateId)
+        .eq('organization_id', ctx.orgId)
+        .select('*')
+        .single();
+      if (error) throw error;
+      await insertAuditLog('template.update', ctx, 'template', templateId, patch);
+      return jsonResponse(200, { ok: true, result: data });
+    }
+
+    if (segments[0] === 'templates' && segments.length === 2 && method === 'DELETE') {
+      ensureManager(ctx);
+      const templateId = segments[1];
+      const { error } = await service
+        .from('templates')
+        .delete()
+        .eq('id', templateId)
+        .eq('organization_id', ctx.orgId);
+      if (error) throw error;
+      await insertAuditLog('template.delete', ctx, 'template', templateId, {});
+      return jsonResponse(200, { ok: true, result: { deleted: true } });
     }
 
     if (route === 'listActiveUsers') {

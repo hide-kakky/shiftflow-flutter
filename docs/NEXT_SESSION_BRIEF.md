@@ -1,72 +1,77 @@
 # NEXT SESSION BRIEF
 
-## 現在の状態（2026-04-07 時点）
+## 現在の状態（2026-04-21 時点）
 - リポジトリ: `https://github.com/hide-kakky/shiftflow-flutter`
-- 現在ブランチ: `main`
-- 状態: 作業ツリーはクリーン
+- 現在ブランチ: `chore/continue-development`
+- 状態:
+  - 基本機能の未接続 UI を一通り実装済み
+  - `flutter analyze` / `flutter test` は通過済み
+  - 実機起動は iPhone へのインストールまでは到達
+  - ただしアプリ起動直後に `SUPABASE_URL` / `SUPABASE_ANON_KEY` 未指定で停止
 - 補足:
-  - ホーム画面の Notion 系 UI 再設計は `main` へ push 済み
-  - ローカル / リモートともに作業ブランチは整理済み
-  - 実機 UI 確認のため Push capability を外したローカル差分は stash に退避済み
+  - `env/dev.json` は未作成
+  - 実機向けに iOS ローカル差分が出ている
+  - iOS ローカル差分は feature 実装コミットへ混ぜない運用を維持する
 
 ## 直近で完了したこと
-- Home 画面を再設計
-  - 概要指標の再配置
-  - クイック導線の追加
-  - 「いま見るべきこと」の要約表示
-  - `DESIGN Notion.md` から必要な要素だけ抽出して反映
-- `plan.md` / `task.md` / `implementation_plan.md` / `docs/SHIFTFLOW_pwa_gap_analysis_2026-03-26.md` を更新
-- `flutter analyze` / `flutter test` を通過
-- `main` へローカルマージし、`origin/main` へ push 済み
-- 使い終わったローカル / リモートブランチを整理
+- Tasks
+  - タスク詳細シートを追加
+  - タスク編集 / 削除 UI を追加
+  - 添付をタップして開く導線を追加
+- Messages
+  - 複数選択と一括既読を追加
+  - 詳細シートから削除できるようにした
+  - 添付をタップして開く導線を追加
+- Admin
+  - テンプレート編集 / 削除 UI を追加
+- API / Repository
+  - `updateTask` を拡張
+  - `updateTemplate` / `deleteTemplate` を追加
+  - Edge Function 側に template の `PATCH` / `DELETE` ルートを追加
+- テスト
+  - 既存 widget test を拡張
+  - `test/features/shell/app_router_test.dart` を追加
+  - 認証リダイレクトと auth state change の再評価を固定
 
 ## まだ終わっていないこと
-1. Firebase / FCM の実設定
-2. Supabase secrets 設定と Functions 再デプロイ
-3. 実機で push 通知の本番相当検証
-4. `docs/SHIFTFLOW_e2e_scenarios.md` への検証結果記録
+1. `env/dev.json` を作成して実機で Supabase 接続確認
+2. 実機で次の基本操作を通す
+   - ログイン
+   - タスク詳細 / 編集 / 削除
+   - メッセージ一括既読 / 詳細削除 / 添付起動
+   - Admin テンプレート編集 / 削除
+3. 実機テスト結果を docs に反映
+4. 現在ブランチを push / PR / merge
 
 ## 今の論点
-- `Personal Team` では Push Notifications capability が使えない
-- 実機 UI 確認のため、一時的に Push 関連を外して起動した
-- 実機で push 通知まで確認するには、次のどちらかが必要
-  - Apple Developer Program の有料アカウントで正式に署名する
-  - 通知検証は後回しにして、まず Web / 非 Push 実機で UI 開発を進める
+- 実機起動そのものは通るが、`--dart-define-from-file=env/dev.json` がないとアプリが停止する
+- 実機確認用に iOS のローカル差分がある
+  - `ios/Podfile`
+  - `ios/Podfile.lock`
+  - `ios/Runner.xcodeproj/project.pbxproj`
+  - `ios/Runner/Runner.entitlements`
+- 特に Bundle ID と entitlement 調整はローカル検証都合なので、コミット前に切り分けが必要
 
 ## 再開時の最短コマンド
 ```bash
 cd /Users/hide_kakky/Dev/shiftflow_flutter
 ./scripts/ios_local_status.sh
-git stash list
-flutter pub get
-flutter gen-l10n
+cp env/dev.json.example env/dev.json
+# env/dev.json の SUPABASE_URL / SUPABASE_ANON_KEY を設定
+flutter run -d 00008110-000645C62E86201E --dart-define-from-file=env/dev.json
 ```
-
-## stash メモ
-- `stash@{0}`: `ios-local-build-files: 2026-04-07 11:03:05`
-  - 実機確認時の iOS ローカル差分
-- `stash@{1}`: `local-firebase-config: ui-check-temp`
-  - `GoogleService-Info.plist` と一時 Firebase 設定
-- `stash@{2}`: `local-firebase-config: 2026-04-03`
-  - 旧 Firebase ローカル設定
-- `stash@{3}`: `ios-local-build-files: 2026-03-31 22:36:02`
-  - 旧 iOS ローカル差分
 
 ## 次回のおすすめ着手順
 1. `AGENTS.md` と `docs/SHIFTFLOW_rule_reference.md` を読む
-2. `git stash list` を確認し、今回使う stash を決める
-3. UI 続行なら:
-   - stash は戻さず `main` のまま作業ブランチを切る
-4. FCM 続行なら:
-   - 必要な stash を `apply`
-   - Apple / Firebase / Supabase の設定を再開
+2. `env/dev.json` を作成して Supabase 接続設定を入れる
+3. 実機で基本機能を順番に確認する
+4. 実機確認後に `./scripts/ios_local_store.sh` で iOS ローカル差分を退避する
+5. その後に GitHub 公開フローへ進む
 
 ## 次回の完了条件候補
-- UI 継続の場合:
-  - Home 以外の画面とのデザイン整合を進める
-- FCM 継続の場合:
-  - 実機で push 通知を 1 回以上受信
-  - `docs/SHIFTFLOW_e2e_scenarios.md` に結果を残す
+- 実機で主要 CUJ が一通り確認できる
+- iOS ローカル差分を feature 差分から分離できている
+- 現在ブランチが push / PR / merge 済み
 
 ## ルール参照順（必須）
 1. `AGENTS.md`

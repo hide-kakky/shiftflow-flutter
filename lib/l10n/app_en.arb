@@ -89,8 +89,23 @@
   "unreadUsers": "Unread users",
   "title": "Title",
   "body": "Body",
+  "details": "Details",
+  "edit": "Edit",
+  "delete": "Delete",
   "save": "Save",
   "cancel": "Cancel",
+  "clearSelection": "Clear selection",
+  "markSelectedRead": "Mark selected as read",
+  "selectedMessages": "{count} selected",
+  "@selectedMessages": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "confirmDeleteTitle": "Confirm delete",
+  "confirmDeleteMessage": "This action cannot be undone. Delete this item?",
   "taskDueDate": "Due date",
   "selectDueDate": "Select due date",
   "clearDueDate": "Clear due date",
@@ -105,6 +120,11 @@
   "taskAttachmentUploadSuccess": "Attachments uploaded",
   "taskAttachmentPartialUpload": "Some attachments failed to upload",
   "taskTitleRequired": "Title is required",
+  "taskUpdated": "Task updated.",
+  "taskDeleted": "Task deleted.",
+  "taskDetails": "Task details",
+  "noAssigneesAssigned": "No assignees",
+  "noAttachments": "No attachments",
   "noFolderSelected": "No folder",
   "noTemplateSelected": "No template",
   "messageTitleRequired": "Title is required",
@@ -112,6 +132,10 @@
   "messageAttachmentPartialUpload": "Some attachments failed to upload",
   "messageFolderFilter": "Folder",
   "messageUnreadOnly": "Unread only",
+  "messageDeleted": "Message deleted.",
+  "messagesMarkedRead": "Selected messages marked as read.",
+  "openAttachment": "Open attachment",
+  "attachmentOpenFailed": "Failed to open attachment.",
   "taskScopeMy": "My",
   "taskScopeCreated": "Created",
   "taskScopeAll": "All",
@@ -160,6 +184,8 @@
   "adminTitleFormat": "Title format",
   "adminBodyFormat": "Body format",
   "adminTemplateCreated": "Template created.",
+  "adminTemplateUpdated": "Template updated.",
+  "adminTemplateDeleted": "Template deleted.",
   "adminNoFoldersForTemplates": "Create a folder first.",
   "magicLinkSent": "Magic link sent.",
   "apiError": "API error"

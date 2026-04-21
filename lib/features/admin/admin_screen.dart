@@ -615,6 +615,109 @@ class _AdminTemplatesTabState extends ConsumerState<_AdminTemplatesTab> {
     await _refreshAll();
   }
 
+  Future<void> _editTemplate(Map<String, dynamic> template) async {
+    final l10n = AppLocalizations.of(context);
+    final templateId = template['id']?.toString() ?? '';
+    if (templateId.isEmpty) return;
+
+    final nameController = TextEditingController(
+      text: template['name']?.toString() ?? '',
+    );
+    final titleController = TextEditingController(
+      text: template['title_format']?.toString() ?? '',
+    );
+    final bodyController = TextEditingController(
+      text: template['body_format']?.toString() ?? '',
+    );
+
+    final shouldSave = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.edit),
+        content: SizedBox(
+          width: 460,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nameController,
+                  decoration: InputDecoration(labelText: l10n.adminTemplateName),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: titleController,
+                  decoration: InputDecoration(labelText: l10n.adminTitleFormat),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: bodyController,
+                  minLines: 3,
+                  maxLines: 6,
+                  decoration: InputDecoration(labelText: l10n.adminBodyFormat),
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.save),
+          ),
+        ],
+      ),
+    );
+    if (shouldSave != true) return;
+
+    await ref.read(routeDataRepositoryProvider).updateTemplate(
+          templateId: templateId,
+          name: nameController.text.trim(),
+          titleFormat: titleController.text.trim(),
+          bodyFormat: bodyController.text.trim(),
+        );
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.adminTemplateUpdated)),
+    );
+    await _refreshAll();
+  }
+
+  Future<void> _deleteTemplate(Map<String, dynamic> template) async {
+    final l10n = AppLocalizations.of(context);
+    final templateId = template['id']?.toString() ?? '';
+    if (templateId.isEmpty) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.confirmDeleteTitle),
+        content: Text(l10n.confirmDeleteMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    await ref.read(routeDataRepositoryProvider).deleteTemplate(templateId);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.adminTemplateDeleted)),
+    );
+    await _refreshAll();
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -695,7 +798,24 @@ class _AdminTemplatesTabState extends ConsumerState<_AdminTemplatesTab> {
                     children: templates
                         .map((template) => ListTile(
                               title: Text(template['name']?.toString() ?? '-'),
-                              subtitle: Text(template['title_format']?.toString() ?? ''),
+                              subtitle: Text(
+                                template['title_format']?.toString() ?? '',
+                              ),
+                              trailing: Wrap(
+                                spacing: 4,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.edit_outlined),
+                                    tooltip: l10n.edit,
+                                    onPressed: () => _editTemplate(template),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete_outline),
+                                    tooltip: l10n.delete,
+                                    onPressed: () => _deleteTemplate(template),
+                                  ),
+                                ],
+                              ),
                             ))
                         .toList(growable: false),
                   );

@@ -62,6 +62,9 @@ class RouteDataRepository {
     String? title,
     String? description,
     String? status,
+    DateTime? dueAt,
+    String? priority,
+    List<String>? assigneeUserIds,
   }) async {
     final result = await _apiClient.invokeRoute(
       'updateTask',
@@ -71,6 +74,9 @@ class RouteDataRepository {
           'title': title,
           'description': description,
           'status': status,
+          'dueAtMs': dueAt?.millisecondsSinceEpoch,
+          'priority': priority,
+          'assigneeUserIds': assigneeUserIds,
         },
       ],
     );
@@ -243,6 +249,31 @@ class RouteDataRepository {
       },
     );
     return _asMap(result);
+  }
+
+  Future<Map<String, dynamic>> updateTemplate({
+    required String templateId,
+    String? name,
+    String? titleFormat,
+    String? bodyFormat,
+  }) async {
+    final result = await _apiClient.invokeRoute(
+      'templates/$templateId',
+      extra: {
+        'method': 'PATCH',
+        ...?name == null ? null : {'name': name},
+        ...?titleFormat == null ? null : {'titleFormat': titleFormat},
+        ...?bodyFormat == null ? null : {'bodyFormat': bodyFormat},
+      },
+    );
+    return _asMap(result);
+  }
+
+  Future<void> deleteTemplate(String templateId) async {
+    await _apiClient.invokeRoute(
+      'templates/$templateId',
+      extra: {'method': 'DELETE'},
+    );
   }
 
   Future<Map<String, dynamic>> getUserSettings() async {

@@ -506,6 +506,24 @@ abstract class AppLocalizations {
   /// **'Body'**
   String get body;
 
+  /// No description provided for @details.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get details;
+
+  /// No description provided for @edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
   /// No description provided for @save.
   ///
   /// In en, this message translates to:
@@ -517,6 +535,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cancel'**
   String get cancel;
+
+  /// No description provided for @clearSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear selection'**
+  String get clearSelection;
+
+  /// No description provided for @markSelectedRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark selected as read'**
+  String get markSelectedRead;
+
+  /// No description provided for @selectedMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String selectedMessages(int count);
+
+  /// No description provided for @confirmDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm delete'**
+  String get confirmDeleteTitle;
+
+  /// No description provided for @confirmDeleteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This action cannot be undone. Delete this item?'**
+  String get confirmDeleteMessage;
 
   /// No description provided for @taskDueDate.
   ///
@@ -602,6 +650,36 @@ abstract class AppLocalizations {
   /// **'Title is required'**
   String get taskTitleRequired;
 
+  /// No description provided for @taskUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Task updated.'**
+  String get taskUpdated;
+
+  /// No description provided for @taskDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Task deleted.'**
+  String get taskDeleted;
+
+  /// No description provided for @taskDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Task details'**
+  String get taskDetails;
+
+  /// No description provided for @noAssigneesAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'No assignees'**
+  String get noAssigneesAssigned;
+
+  /// No description provided for @noAttachments.
+  ///
+  /// In en, this message translates to:
+  /// **'No attachments'**
+  String get noAttachments;
+
   /// No description provided for @noFolderSelected.
   ///
   /// In en, this message translates to:
@@ -643,6 +721,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unread only'**
   String get messageUnreadOnly;
+
+  /// No description provided for @messageDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Message deleted.'**
+  String get messageDeleted;
+
+  /// No description provided for @messagesMarkedRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected messages marked as read.'**
+  String get messagesMarkedRead;
+
+  /// No description provided for @openAttachment.
+  ///
+  /// In en, this message translates to:
+  /// **'Open attachment'**
+  String get openAttachment;
+
+  /// No description provided for @attachmentOpenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to open attachment.'**
+  String get attachmentOpenFailed;
 
   /// No description provided for @taskScopeMy.
   ///
@@ -931,6 +1033,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Template created.'**
   String get adminTemplateCreated;
+
+  /// No description provided for @adminTemplateUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Template updated.'**
+  String get adminTemplateUpdated;
+
+  /// No description provided for @adminTemplateDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Template deleted.'**
+  String get adminTemplateDeleted;
 
   /// No description provided for @adminNoFoldersForTemplates.
   ///

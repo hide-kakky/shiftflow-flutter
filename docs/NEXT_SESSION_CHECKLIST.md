@@ -1,13 +1,13 @@
 # NEXT SESSION CHECKLIST
 
 ## 0. 最初に決めること
-- [ ] 次回は `UI 継続` か `FCM 再開` のどちらを進めるか決める
+- [ ] 先に `実機確認` を終えるか、先に `GitHub へ公開` するか決める
 
 ## 1. 開始時（そのまま実行）
 - [ ] `cd /Users/hide_kakky/Dev/shiftflow_flutter`
-- [ ] `git switch main`
+- [ ] `git branch --show-current`
 - [ ] `./scripts/ios_local_status.sh`
-- [ ] `git stash list`
+- [ ] `git status --short`
 - [ ] `flutter pub get`
 - [ ] `flutter gen-l10n`
 
@@ -18,42 +18,46 @@
 - [ ] `plan.md`
 - [ ] `task.md`
 
-## 3-A. UI 継続ルート
-- [ ] `git switch -c feat/<next-ui-task>`
-- [ ] Home と他画面のデザイン整合を確認
-- [ ] 必要な画面だけ実装修正
+## 3-A. 実機確認ルート
+- [ ] `cp env/dev.json.example env/dev.json`
+- [ ] `env/dev.json` に `SUPABASE_URL` を設定
+- [ ] `env/dev.json` に `SUPABASE_ANON_KEY` を設定
+- [ ] `flutter run -d 00008110-000645C62E86201E --dart-define-from-file=env/dev.json`
+- [ ] ログインできることを確認
+- [ ] `Tasks` で詳細 / 編集 / 削除を確認
+- [ ] `Messages` で複数選択 / 一括既読 / 詳細削除 / 添付起動を確認
+- [ ] `Admin > Templates` で編集 / 削除を確認
+- [ ] 必要なら実機テスト結果を docs に追記
+
+## 3-B. GitHub 公開ルート
+- [ ] iOS ローカル差分を feature 差分へ混ぜない方針を確認
+- [ ] 必要なら `./scripts/ios_local_store.sh` で iOS ローカル差分を退避
+- [ ] `git diff --stat`
 - [ ] `flutter analyze`
 - [ ] `flutter test`
+- [ ] コミット対象を確認
+- [ ] 日本語コミットメッセージで commit
+- [ ] ブランチを push
+- [ ] PR 作成
+- [ ] `main` へ merge
 
-## 3-B. FCM 再開ルート
-- [ ] 必要な stash を選ぶ
-- [ ] `git stash apply stash@{0}` または対象 stash を適用
-- [ ] `env/dev.json` の `FIREBASE_*` を確認
-- [ ] Firebase Console の iOS / Android app 設定を確認
-- [ ] Supabase secrets の設定値を準備
+## 4. 今回の主な確認対象
+- [ ] `TasksScreen` の詳細シート追加
+- [ ] `TasksScreen` の編集 / 削除導線
+- [ ] `MessagesScreen` の一括既読
+- [ ] `MessagesScreen` の詳細削除
+- [ ] 添付ダウンロード導線
+- [ ] `AdminScreen` のテンプレート編集 / 削除
+- [ ] `app_router` の認証リダイレクトテスト
 
-## 4-B. FCM 実装（優先順）
-- [ ] Firebase Console で iOS / Android app を登録
-- [ ] APNs Auth Key を Firebase Cloud Messaging に登録
-- [ ] `supabase secrets set` で `FCM_PROJECT_ID / FCM_CLIENT_EMAIL / FCM_PRIVATE_KEY` を設定
-- [ ] `supabase functions deploy api`
-- [ ] `supabase functions deploy dispatch_notifications`
-- [ ] `supabase functions deploy notify_due_tasks`
-- [ ] `supabase functions deploy retry_failed_notifications`
-
-## 5-B. FCM 実機検証
-- [ ] `flutter run -d ios --dart-define-from-file=env/dev.json`
-- [ ] 通知許可を与える
-- [ ] `notification_subscriptions` に FCM トークンが入ることを確認
-- [ ] メッセージ作成後に `notification_dispatch_logs` が `sent` になることを確認
-- [ ] 実機で push 通知を受信する
-
-## 6. 終了前
-- [ ] 必要なら `plan.md` / `task.md` / `implementation_plan.md` を更新
+## 5. 終了前
+- [ ] 必要なら `docs/NEXT_SESSION_BRIEF.md` を更新
+- [ ] 必要なら `docs/NEXT_SESSION_CHECKLIST.md` を更新
 - [ ] 実機確認した場合は `./scripts/ios_local_store.sh` で iOS ローカル差分を再退避
-- [ ] 使い終わった stash を整理する
+- [ ] `git status --short` を確認
 
-## 7. GitHub
+## 6. GitHub
 - [ ] `gh auth status`
-- [ ] 新しい作業ブランチを push
-- [ ] 必要なら PR 作成
+- [ ] 現在ブランチを push
+- [ ] PR を作成
+- [ ] merge 後にローカルを同期

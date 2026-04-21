@@ -89,8 +89,23 @@
   "unreadUsers": "未読ユーザー",
   "title": "タイトル",
   "body": "本文",
+  "details": "詳細",
+  "edit": "編集",
+  "delete": "削除",
   "save": "保存",
   "cancel": "キャンセル",
+  "clearSelection": "選択解除",
+  "markSelectedRead": "選択分を既読",
+  "selectedMessages": "{count} 件選択中",
+  "@selectedMessages": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "confirmDeleteTitle": "削除の確認",
+  "confirmDeleteMessage": "この操作は元に戻せません。削除しますか？",
   "taskDueDate": "期限",
   "selectDueDate": "期限を選択",
   "clearDueDate": "期限をクリア",
@@ -105,6 +120,11 @@
   "taskAttachmentUploadSuccess": "添付ファイルをアップロードしました",
   "taskAttachmentPartialUpload": "一部の添付アップロードに失敗しました",
   "taskTitleRequired": "タイトルは必須です",
+  "taskUpdated": "タスクを更新しました。",
+  "taskDeleted": "タスクを削除しました。",
+  "taskDetails": "タスク詳細",
+  "noAssigneesAssigned": "担当者は未設定です",
+  "noAttachments": "添付はありません",
   "noFolderSelected": "フォルダ未選択",
   "noTemplateSelected": "テンプレート未選択",
   "messageTitleRequired": "タイトルは必須です",
@@ -112,6 +132,10 @@
   "messageAttachmentPartialUpload": "一部の添付アップロードに失敗しました",
   "messageFolderFilter": "フォルダ",
   "messageUnreadOnly": "未読のみ",
+  "messageDeleted": "メッセージを削除しました。",
+  "messagesMarkedRead": "選択したメッセージを既読にしました。",
+  "openAttachment": "添付を開く",
+  "attachmentOpenFailed": "添付を開けませんでした。",
   "taskScopeMy": "My",
   "taskScopeCreated": "Created",
   "taskScopeAll": "All",
@@ -160,6 +184,8 @@
   "adminTitleFormat": "タイトル書式",
   "adminBodyFormat": "本文書式",
   "adminTemplateCreated": "テンプレートを作成しました。",
+  "adminTemplateUpdated": "テンプレートを更新しました。",
+  "adminTemplateDeleted": "テンプレートを削除しました。",
   "adminNoFoldersForTemplates": "先にフォルダを作成してください。",
   "magicLinkSent": "マジックリンクを送信しました。",
   "apiError": "APIエラー"

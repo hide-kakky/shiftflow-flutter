@@ -36,12 +36,27 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     }
   }
 
+  Future<List<Map<String, dynamic>>> _loadAssignableUsers() async {
+    try {
+      return await ref.read(routeDataRepositoryProvider).listActiveUsers();
+    } catch (_) {
+      return const [];
+    }
+  }
+
   void _updateScope(_TaskListScope scope) {
     if (_scope == scope) return;
     setState(() {
       _scope = scope;
       _future = _load();
     });
+  }
+
+  Future<void> _refresh() async {
+    setState(() {
+      _future = _load();
+    });
+    await _future;
   }
 
   Widget _buildScopeSelector(AppLocalizations l10n) {
@@ -71,32 +86,25 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     );
   }
 
-  Future<void> _refresh() async {
-    setState(() {
-      _future = _load();
-    });
-    await _future;
-  }
-
-  Future<void> _createTask() async {
+  Future<_TaskDraft?> _showTaskDraftDialog({
+    required String dialogTitle,
+    required List<Map<String, dynamic>> users,
+    _TaskDraft? initialDraft,
+    bool enableAttachments = true,
+  }) async {
     final l10n = AppLocalizations.of(context);
-    final titleController = TextEditingController();
-    final bodyController = TextEditingController();
-    final repository = ref.read(routeDataRepositoryProvider);
-
-    List<Map<String, dynamic>> users = const [];
-    try {
-      users = await repository.listActiveUsers();
-    } catch (_) {
-      users = const [];
-    }
-
-    if (!mounted) return;
-
-    DateTime? dueDate;
-    var priority = 'medium';
-    final selectedAssignees = <String>{};
-    final selectedFiles = <PlatformFile>[];
+    final titleController = TextEditingController(text: initialDraft?.title ?? '');
+    final bodyController = TextEditingController(
+      text: initialDraft?.description ?? '',
+    );
+    var dueDate = initialDraft?.dueDate;
+    var priority = initialDraft?.priority ?? 'medium';
+    final selectedAssignees = <String>{
+      ...?initialDraft?.assigneeUserIds,
+    };
+    final selectedFiles = <PlatformFile>[
+      ...?initialDraft?.attachments,
+    ];
 
     final draft = await showDialog<_TaskDraft>(
       context: context,
@@ -104,7 +112,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              title: Text(l10n.createTask),
+              title: Text(dialogTitle),
               content: SingleChildScrollView(
                 child: SizedBox(
                   width: 360,
@@ -127,9 +135,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                       const SizedBox(height: 12),
                       DropdownButtonFormField<String>(
                         initialValue: priority,
-                        decoration: InputDecoration(
-                          labelText: l10n.taskPriority,
-                        ),
+                        decoration: InputDecoration(labelText: l10n.taskPriority),
                         items: [
                           DropdownMenuItem(
                             value: 'low',
@@ -219,11 +225,12 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                             itemCount: users.length,
                             itemBuilder: (context, index) {
                               final user = users[index];
-                              final userId = user['id']?.toString() ?? '';
+                              final userId = _userIdFromRow(user);
                               if (userId.isEmpty) {
                                 return const SizedBox.shrink();
                               }
                               final name =
+                                  user['displayName']?.toString() ??
                                   user['display_name']?.toString() ??
                                   user['name']?.toString() ??
                                   user['email']?.toString() ??
@@ -247,48 +254,50 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                             },
                           ),
                         ),
-                      const SizedBox(height: 12),
-                      Text(
-                        l10n.taskAttachments,
-                        style: Theme.of(context).textTheme.labelLarge,
-                      ),
-                      const SizedBox(height: 8),
-                      OutlinedButton.icon(
-                        onPressed: () async {
-                          final picked = await FilePicker.platform.pickFiles(
-                            allowMultiple: true,
-                            withData: true,
-                          );
-                          if (picked == null) return;
-                          final files = picked.files
-                              .where((f) => f.bytes != null)
-                              .toList(growable: false);
-                          setDialogState(() {
-                            selectedFiles
-                              ..clear()
-                              ..addAll(files);
-                          });
-                        },
-                        icon: const Icon(Icons.attach_file),
-                        label: Text(l10n.pickAttachments),
-                      ),
-                      if (selectedFiles.isNotEmpty) ...[
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            for (final file in selectedFiles)
-                              InputChip(
-                                label: Text(file.name),
-                                onDeleted: () {
-                                  setDialogState(() {
-                                    selectedFiles.remove(file);
-                                  });
-                                },
-                              ),
-                          ],
+                      if (enableAttachments) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          l10n.taskAttachments,
+                          style: Theme.of(context).textTheme.labelLarge,
                         ),
+                        const SizedBox(height: 8),
+                        OutlinedButton.icon(
+                          onPressed: () async {
+                            final picked = await FilePicker.platform.pickFiles(
+                              allowMultiple: true,
+                              withData: true,
+                            );
+                            if (picked == null) return;
+                            final files = picked.files
+                                .where((f) => f.bytes != null)
+                                .toList(growable: false);
+                            setDialogState(() {
+                              selectedFiles
+                                ..clear()
+                                ..addAll(files);
+                            });
+                          },
+                          icon: const Icon(Icons.attach_file),
+                          label: Text(l10n.pickAttachments),
+                        ),
+                        if (selectedFiles.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              for (final file in selectedFiles)
+                                InputChip(
+                                  label: Text(file.name),
+                                  onDeleted: () {
+                                    setDialogState(() {
+                                      selectedFiles.remove(file);
+                                    });
+                                  },
+                                ),
+                            ],
+                          ),
+                        ],
                       ],
                     ],
                   ),
@@ -327,21 +336,21 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       },
     );
 
-    if (draft == null) {
-      titleController.dispose();
-      bodyController.dispose();
-      return;
-    }
+    return draft;
+  }
 
-    if (draft.title.isEmpty) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l10n.taskTitleRequired)));
-      titleController.dispose();
-      bodyController.dispose();
-      return;
-    }
+  Future<bool> _createTask() async {
+    final l10n = AppLocalizations.of(context);
+    final repository = ref.read(routeDataRepositoryProvider);
+    final users = await _loadAssignableUsers();
+    if (!mounted) return false;
+
+    final draft = await _showTaskDraftDialog(
+      dialogTitle: l10n.createTask,
+      users: users,
+      enableAttachments: true,
+    );
+    if (draft == null) return false;
 
     try {
       final createdTask = await repository.addNewTask(
@@ -360,7 +369,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
             organizationId: orgId,
             files: draft.attachments,
           );
-          if (!mounted) return;
+          if (!mounted) return false;
           if (result.failedCount > 0) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -377,14 +386,142 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         }
       }
       await _refresh();
+      return true;
     } catch (err) {
-      if (!mounted) return;
+      if (!mounted) return false;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('$err')));
-    } finally {
-      titleController.dispose();
-      bodyController.dispose();
+      return false;
+    }
+  }
+
+  Future<bool> _editTask(Map<String, dynamic> task) async {
+    final l10n = AppLocalizations.of(context);
+    final repository = ref.read(routeDataRepositoryProvider);
+    final taskId = task['id']?.toString() ?? '';
+    if (taskId.isEmpty) return false;
+
+    final users = await _loadAssignableUsers();
+    final detail = await repository.getTaskById(taskId);
+    if (!mounted) return false;
+
+    final draft = await _showTaskDraftDialog(
+      dialogTitle: l10n.edit,
+      users: users,
+      enableAttachments: false,
+      initialDraft: _TaskDraft(
+        title: detail['title']?.toString() ?? task['title']?.toString() ?? '',
+        description:
+            detail['description']?.toString() ??
+            task['description']?.toString() ??
+            '',
+        dueDate: _parseDateTime(detail['due_at']?.toString()),
+        priority: detail['priority']?.toString() ?? 'medium',
+        assigneeUserIds: _extractAssigneeIds(detail),
+        attachments: const [],
+      ),
+    );
+    if (draft == null) return false;
+
+    await repository.updateTask(
+      taskId: taskId,
+      title: draft.title,
+      description: draft.description,
+      dueAt: draft.dueDate,
+      priority: draft.priority,
+      assigneeUserIds: draft.assigneeUserIds,
+    );
+    if (!mounted) return false;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.taskUpdated)));
+    await _refresh();
+    return true;
+  }
+
+  Future<bool> _deleteTask(String taskId) async {
+    final l10n = AppLocalizations.of(context);
+    if (taskId.isEmpty) return false;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.confirmDeleteTitle),
+        content: Text(l10n.confirmDeleteMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return false;
+
+    await ref.read(routeDataRepositoryProvider).deleteTaskById(taskId);
+    if (!mounted) return false;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.taskDeleted)));
+    await _refresh();
+    return true;
+  }
+
+  Future<bool> _markTaskComplete(String taskId) async {
+    if (taskId.isEmpty) return false;
+    await ref.read(routeDataRepositoryProvider).completeTask(taskId);
+    await _refresh();
+    return true;
+  }
+
+  Future<void> _openTaskDetails(String taskId) async {
+    if (taskId.isEmpty) return;
+    final changed = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return FractionallySizedBox(
+          heightFactor: 0.92,
+          child: _TaskDetailSheet(
+            taskId: taskId,
+            onEditTask: _editTask,
+            onDeleteTask: _deleteTask,
+            onCompleteTask: _markTaskComplete,
+            onOpenAttachment: _openAttachment,
+          ),
+        );
+      },
+    );
+    if (changed == true) {
+      await _refresh();
+    }
+  }
+
+  Future<void> _openAttachment(String attachmentId) async {
+    final l10n = AppLocalizations.of(context);
+    try {
+      final result = await ref
+          .read(routeDataRepositoryProvider)
+          .downloadAttachment(attachmentId);
+      final url = result['url']?.toString() ?? '';
+      if (url.isEmpty) throw Exception('empty_url');
+      final uri = Uri.tryParse(url);
+      if (uri == null) throw Exception('invalid_url');
+      final launched = await ref.read(externalUrlLauncherProvider).launch(uri);
+      if (!launched && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.attachmentOpenFailed)),
+        );
+      }
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.attachmentOpenFailed)));
     }
   }
 
@@ -410,9 +547,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       final storagePath = 'attachments/$objectPath';
 
       try {
-        await supabase.storage
-            .from('attachments')
-            .uploadBinary(
+        await supabase.storage.from('attachments').uploadBinary(
               objectPath,
               bytes,
               fileOptions: FileOptions(
@@ -481,7 +616,12 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     return sanitized;
   }
 
-  List<String> _extractAttachmentNames(Map<String, dynamic> task) {
+  DateTime? _parseDateTime(String? value) {
+    if (value == null || value.isEmpty) return null;
+    return DateTime.tryParse(value);
+  }
+
+  List<_AttachmentInfo> _extractAttachments(Map<String, dynamic> task) {
     final rows = task['task_attachments'];
     if (rows is! List) return const [];
 
@@ -489,14 +629,37 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         .whereType<Map>()
         .map((row) {
           final attachment = row['attachments'];
-          if (attachment is Map) {
-            final name = attachment['file_name']?.toString() ?? '';
-            return name;
-          }
-          return '';
+          final attachmentId =
+              row['attachment_id']?.toString() ??
+              (attachment is Map ? attachment['id']?.toString() : null) ??
+              '';
+          final name = attachment is Map
+              ? attachment['file_name']?.toString() ?? ''
+              : '';
+          if (attachmentId.isEmpty || name.isEmpty) return null;
+          return _AttachmentInfo(id: attachmentId, name: name);
         })
-        .where((name) => name.isNotEmpty)
+        .whereType<_AttachmentInfo>()
         .toList(growable: false);
+  }
+
+  List<String> _extractAssigneeIds(Map<String, dynamic> task) {
+    final rows = task['task_assignees'];
+    if (rows is! List) return const [];
+
+    return rows
+        .whereType<Map>()
+        .map((row) => _userIdFromRow(row))
+        .where((id) => id.isNotEmpty)
+        .toList(growable: false);
+  }
+
+  String _userIdFromRow(Map<dynamic, dynamic> row) {
+    return row['userId']?.toString() ??
+        row['user_id']?.toString() ??
+        (row['users'] is Map ? row['users']['id']?.toString() : null) ??
+        row['id']?.toString() ??
+        '';
   }
 
   Color _priorityColor(BuildContext context, String priority) {
@@ -520,6 +683,19 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       case 'medium':
       default:
         return l10n.priorityMedium;
+    }
+  }
+
+  Future<void> _handleTaskAction(
+    _TaskAction action,
+    Map<String, dynamic> task,
+  ) async {
+    final taskId = task['id']?.toString() ?? '';
+    switch (action) {
+      case _TaskAction.edit:
+        await _editTask(task);
+      case _TaskAction.delete:
+        await _deleteTask(taskId);
     }
   }
 
@@ -602,61 +778,326 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     final taskId = task['id']?.toString() ?? '';
     final status = task['status']?.toString() ?? 'open';
     final priority = task['priority']?.toString() ?? 'medium';
-    final dueAtRaw = task['due_at']?.toString();
-    final dueAt = dueAtRaw == null ? null : DateTime.tryParse(dueAtRaw);
+    final dueAt = _parseDateTime(task['due_at']?.toString());
     final dueText = dueAt == null
         ? '-'
         : DateFormat.yMd(
             Localizations.localeOf(context).toLanguageTag(),
           ).format(dueAt);
     final description = task['description']?.toString() ?? '';
-    final attachmentNames = _extractAttachmentNames(task);
+    final attachments = _extractAttachments(task);
 
     return Card(
       child: ListTile(
+        onTap: taskId.isEmpty ? null : () => _openTaskDetails(taskId),
         title: Text(task['title']?.toString() ?? '-'),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (description.isNotEmpty) Text(description),
             Text('${l10n.taskDueDate}: $dueText'),
-            if (attachmentNames.isNotEmpty)
-              Text(
-                '${l10n.taskAttachments}: ${attachmentNames.join(', ')}',
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+            if (attachments.isNotEmpty)
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: [
+                  for (final attachment in attachments)
+                    ActionChip(
+                      avatar: const Icon(Icons.attach_file, size: 16),
+                      label: Text(attachment.name),
+                      onPressed: () => _openAttachment(attachment.id),
+                    ),
+                ],
               ),
           ],
         ),
-        trailing: Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            Chip(label: Text(status)),
-            Chip(
-              label: Text(_priorityLabel(l10n, priority)),
-              backgroundColor: _priorityColor(context, priority),
-            ),
-            IconButton(
-              icon: const Icon(Icons.check_circle_outline),
-              tooltip: l10n.markComplete,
-              onPressed: taskId.isEmpty || status == 'completed'
-                  ? null
-                  : () async {
-                      await ref
-                          .read(routeDataRepositoryProvider)
-                          .completeTask(taskId);
-                      await _refresh();
-                    },
-            ),
-          ],
+        trailing: SizedBox(
+          width: 120,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Flexible(
+                child: Chip(
+                  label: Text(
+                    _priorityLabel(l10n, priority),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  backgroundColor: _priorityColor(context, priority),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.check_circle_outline),
+                tooltip: l10n.markComplete,
+                onPressed: taskId.isEmpty || status == 'completed'
+                    ? null
+                    : () => _markTaskComplete(taskId),
+              ),
+              PopupMenuButton<_TaskAction>(
+                onSelected: (action) => _handleTaskAction(action, task),
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: _TaskAction.edit,
+                    child: Text(l10n.edit),
+                  ),
+                  PopupMenuItem(
+                    value: _TaskAction.delete,
+                    child: Text(l10n.delete),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
+class _TaskDetailSheet extends ConsumerStatefulWidget {
+  const _TaskDetailSheet({
+    required this.taskId,
+    required this.onEditTask,
+    required this.onDeleteTask,
+    required this.onCompleteTask,
+    required this.onOpenAttachment,
+  });
+
+  final String taskId;
+  final Future<bool> Function(Map<String, dynamic> task) onEditTask;
+  final Future<bool> Function(String taskId) onDeleteTask;
+  final Future<bool> Function(String taskId) onCompleteTask;
+  final Future<void> Function(String attachmentId) onOpenAttachment;
+
+  @override
+  ConsumerState<_TaskDetailSheet> createState() => _TaskDetailSheetState();
+}
+
+class _TaskDetailSheetState extends ConsumerState<_TaskDetailSheet> {
+  late Future<Map<String, dynamic>> _detailFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _detailFuture = _loadDetail();
+  }
+
+  Future<Map<String, dynamic>> _loadDetail() {
+    return ref.read(routeDataRepositoryProvider).getTaskById(widget.taskId);
+  }
+
+  Future<void> _refreshDetail() async {
+    setState(() {
+      _detailFuture = _loadDetail();
+    });
+    await _detailFuture;
+  }
+
+  DateTime? _parseDateTime(String? value) {
+    if (value == null || value.isEmpty) return null;
+    return DateTime.tryParse(value);
+  }
+
+  List<_AttachmentInfo> _extractAttachments(Map<String, dynamic> task) {
+    final rows = task['task_attachments'];
+    if (rows is! List) return const [];
+
+    return rows
+        .whereType<Map>()
+        .map((row) {
+          final attachment = row['attachments'];
+          final attachmentId =
+              row['attachment_id']?.toString() ??
+              (attachment is Map ? attachment['id']?.toString() : null) ??
+              '';
+          final name = attachment is Map
+              ? attachment['file_name']?.toString() ?? ''
+              : '';
+          if (attachmentId.isEmpty || name.isEmpty) return null;
+          return _AttachmentInfo(id: attachmentId, name: name);
+        })
+        .whereType<_AttachmentInfo>()
+        .toList(growable: false);
+  }
+
+  List<String> _extractAssignees(Map<String, dynamic> task) {
+    final rows = task['task_assignees'];
+    if (rows is! List) return const [];
+
+    return rows
+        .whereType<Map>()
+        .map((row) {
+          final user = row['users'];
+          if (user is Map) {
+            return user['display_name']?.toString() ??
+                user['email']?.toString() ??
+                '';
+          }
+          return '';
+        })
+        .where((name) => name.isNotEmpty)
+        .toList(growable: false);
+  }
+
+  String _priorityLabel(AppLocalizations l10n, String priority) {
+    switch (priority) {
+      case 'high':
+        return l10n.priorityHigh;
+      case 'low':
+        return l10n.priorityLow;
+      case 'medium':
+      default:
+        return l10n.priorityMedium;
+    }
+  }
+
+  Future<void> _handleEdit(Map<String, dynamic> task) async {
+    final updated = await widget.onEditTask(task);
+    if (updated) {
+      await _refreshDetail();
+    }
+  }
+
+  Future<void> _handleDelete() async {
+    final deleted = await widget.onDeleteTask(widget.taskId);
+    if (deleted && mounted) {
+      Navigator.of(context).pop(true);
+    }
+  }
+
+  Future<void> _handleComplete() async {
+    final completed = await widget.onCompleteTask(widget.taskId);
+    if (completed) {
+      await _refreshDetail();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
+    return SafeArea(
+      child: FutureBuilder<Map<String, dynamic>>(
+        future: _detailFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState != ConnectionState.done) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('${l10n.apiError}: ${snapshot.error}'));
+          }
+
+          final task = snapshot.data ?? const <String, dynamic>{};
+          final status = task['status']?.toString() ?? 'open';
+          final dueAt = _parseDateTime(task['due_at']?.toString());
+          final dueText = dueAt == null
+              ? '-'
+              : DateFormat.yMd(
+                  Localizations.localeOf(context).toLanguageTag(),
+                ).format(dueAt);
+          final attachments = _extractAttachments(task);
+          final assignees = _extractAssignees(task);
+
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        task['title']?.toString() ?? l10n.taskDetails,
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: l10n.edit,
+                      onPressed: () => _handleEdit(task),
+                      icon: const Icon(Icons.edit_outlined),
+                    ),
+                    IconButton(
+                      tooltip: l10n.delete,
+                      onPressed: _handleDelete,
+                      icon: const Icon(Icons.delete_outline),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(task['description']?.toString() ?? ''),
+                const SizedBox(height: 16),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    Chip(label: Text(status)),
+                    Chip(
+                      label: Text(
+                        _priorityLabel(
+                          l10n,
+                          task['priority']?.toString() ?? 'medium',
+                        ),
+                      ),
+                    ),
+                    Chip(label: Text('${l10n.taskDueDate}: $dueText')),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  l10n.taskAssignees,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 8),
+                if (assignees.isEmpty)
+                  Text(l10n.noAssigneesAssigned)
+                else
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: assignees
+                        .map((name) => Chip(label: Text(name)))
+                        .toList(growable: false),
+                  ),
+                const SizedBox(height: 16),
+                Text(
+                  l10n.taskAttachments,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 8),
+                if (attachments.isEmpty)
+                  Text(l10n.noAttachments)
+                else
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: attachments
+                        .map(
+                          (attachment) => ActionChip(
+                            avatar: const Icon(Icons.attach_file, size: 16),
+                            label: Text(attachment.name),
+                            onPressed: () =>
+                                widget.onOpenAttachment(attachment.id),
+                          ),
+                        )
+                        .toList(growable: false),
+                  ),
+                const Spacer(),
+                FilledButton.icon(
+                  onPressed: status == 'completed' ? null : _handleComplete,
+                  icon: const Icon(Icons.check_circle_outline),
+                  label: Text(l10n.markComplete),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
 enum _TaskListScope { my, created, all }
+
+enum _TaskAction { edit, delete }
 
 class _TaskDraft {
   const _TaskDraft({
@@ -681,4 +1122,11 @@ class _UploadResult {
 
   final int successCount;
   final int failedCount;
+}
+
+class _AttachmentInfo {
+  const _AttachmentInfo({required this.id, required this.name});
+
+  final String id;
+  final String name;
 }
