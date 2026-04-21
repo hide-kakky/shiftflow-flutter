@@ -48,17 +48,17 @@ cp env/db_push.prod.env.example env/db_push.prod.env
 ```
 
 ## 主な設計ドキュメント
-- [要件定義](./docs/SHIFTFLOW_requirements_v1.0.md)
-- [実装ガイド](./docs/SHIFTFLOW_implementation_guide_v1.0.md)
-- [Flutterアーキテクチャ](./docs/SHIFTFLOW_flutter_architecture.md)
-- [API定義](./docs/SHIFTFLOW_api_definition.md)
-- [DBスキーマ](./docs/SHIFTFLOW_database_schema.md)
-- [テスト計画](./docs/SHIFTFLOW_testing_plan.md)
-- [PWA差分分析](./docs/SHIFTFLOW_pwa_gap_analysis_2026-03-26.md)
-- [ルール参照順](./docs/SHIFTFLOW_rule_reference.md)
-- [開発フロー](./docs/SHIFTFLOW_development_flow.md)
-- [Supabase キーローテーション手順](./docs/SHIFTFLOW_supabase_key_rotation_runbook.md)
-- [Codex × Supabase MCP トラブルシュート](./docs/SHIFTFLOW_codex_supabase_mcp_troubleshooting.md)
+- [要件定義](./docs/要件定義_v1.0.md)
+- [実装ガイド](./docs/実装ガイド_v1.0.md)
+- [Flutterアーキテクチャ](./docs/Flutterアーキテクチャ.md)
+- [API定義](./docs/API定義.md)
+- [DBスキーマ](./docs/データベーススキーマ.md)
+- [テスト計画](./docs/テスト計画.md)
+- [PWA差分分析](./docs/PWA差分分析_2026-03-26.md)
+- [ルール参照順](./docs/ルール参照順.md)
+- [開発フロー](./docs/開発フロー.md)
+- [Supabase キーローテーション手順](./docs/Supabaseキーローテーション手順.md)
+- [Codex × Supabase MCP トラブルシュート](./docs/CodexとSupabase_MCPトラブルシュート.md)
 
 ## Git運用ルール
 - `main` 直コミット禁止
@@ -68,4 +68,4 @@ cp env/db_push.prod.env.example env/db_push.prod.env
 - 新ブランチ作成前に `./scripts/ios_local_status.sh` を実行し、`!?` があれば `./scripts/ios_local_store.sh` を実行してから分岐する
 - 実機検証の直前だけ `./scripts/ios_local_apply.sh` を実行し、検証後は `./scripts/ios_local_store.sh` で再退避する
 
-詳細ルール: `AGENTS.md`, `docs/SHIFTFLOW_rule_reference.md`, `docs/SHIFTFLOW_development_flow.md`
+詳細ルール: `AGENTS.md`, `docs/ルール参照順.md`, `docs/開発フロー.md`

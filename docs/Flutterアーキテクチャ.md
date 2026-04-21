@@ -83,10 +83,10 @@ supabase/
 - 逆に、言語やテーマを変更しても認証セッションは再作成しない
 
 ## 8. PWA差分の扱い
-- 現状差分は [SHIFTFLOW_pwa_gap_analysis_2026-03-26.md](./SHIFTFLOW_pwa_gap_analysis_2026-03-26.md) で管理する。
+- 現状差分は [PWA差分分析_2026-03-26.md](./PWA差分分析_2026-03-26.md) で管理する。
 - 特に `Messages` の作成導線、`Tasks` の複数一覧、`Settings` のプロフィール画像は未完了として追跡する。
 
 ## 9. 関連文書
-- [SHIFTFLOW_api_definition.md](./SHIFTFLOW_api_definition.md)
-- [SHIFTFLOW_database_schema.md](./SHIFTFLOW_database_schema.md)
-- [SHIFTFLOW_setup_guide.md](./SHIFTFLOW_setup_guide.md)
+- [API定義.md](./API定義.md)
+- [データベーススキーマ.md](./データベーススキーマ.md)
+- [セットアップガイド.md](./セットアップガイド.md)

@@ -2,8 +2,8 @@
 
 ## 0. 運用参照順（必須）
 1. `AGENTS.md`
-2. `docs/SHIFTFLOW_rule_reference.md`
-3. `docs/SHIFTFLOW_development_flow.md`
+2. `docs/ルール参照順.md`
+3. `docs/開発フロー.md`
 
 ## 1. ゴール
 1. ShiftFlow_PWA の業務機能を Flutter + Supabase で同等提供する。
@@ -31,12 +31,12 @@
 - Tasks 一覧の `My / Created / All` 切替
 - Settings のプロフィール画像（表示/更新）
 - 画面遷移時にメニューバーを固定する ShellRoute 化
-- `ShiftFlow_PWA` 再精査と差分整理（`docs/SHIFTFLOW_pwa_gap_analysis_2026-03-26.md`）
+- `ShiftFlow_PWA` 再精査と差分整理（`docs/PWA差分分析_2026-03-26.md`）
 - Home 画面を Notion 系デザインガイドを参考に再設計（概要カード / クイック導線 / フォーカス表示）
 
 ## 3. 次の実装対象
 1. Auth導線の実機検証（admin/manager/member のロール別確認）
-2. `docs/SHIFTFLOW_e2e_scenarios.md` の実施結果記録
+2. `docs/E2Eシナリオ.md` の実施結果記録
 3. Widgetテストを補完する Integrationテストの追加（主要CUJ）
 4. DB/RLS / API 自動テスト拡充
 
@@ -51,8 +51,8 @@
 1. `lib/core/config` の `AppFlavor` / `enableQaTools` で、ビルド時に QA 機能の有効/無効を制御可能にした。
 2. Auth画面は通常UIを維持しつつ、開発時のみ到達可能な QA 補助導線（長押し）を実装した。
 3. QA 導線は「アカウント候補入力補助」のみに限定し、一般向け文言に統一した。
-4. `scripts/create_test_users.ts` と `docs/SHIFTFLOW_setup_guide.md` を整備した。
-5. `docs/SHIFTFLOW_testing_plan.md` に「本番UI同等テスト」を追加した。
+4. `scripts/create_test_users.ts` と `docs/セットアップガイド.md` を整備した。
+5. `docs/テスト計画.md` に「本番UI同等テスト」を追加した。
 
 ## 6. 検証手順
 ```bash

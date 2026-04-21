@@ -1,8 +1,8 @@
 # ShiftFlow Flutter デリバリープラン（自律更新版）
 
 ## 0. 運用ルール
-0. 参照優先順は `AGENTS.md` -> `docs/SHIFTFLOW_rule_reference.md` -> `docs/SHIFTFLOW_development_flow.md` とする。
-1. 実装前に `docs/SHIFTFLOW_requirements_v1.0.md` と `docs/SHIFTFLOW_implementation_guide_v1.0.md` を確認する。
+0. 参照優先順は `AGENTS.md` -> `docs/ルール参照順.md` -> `docs/開発フロー.md` とする。
+1. 実装前に `docs/要件定義_v1.0.md` と `docs/実装ガイド_v1.0.md` を確認する。
 2. 実装完了時に `plan.md` / `task.md` / `implementation_plan.md` を更新する。
 3. ステータス記法: `✅ 完了` / `▶ 進行中` / `□ 未着手`
 4. 末尾の `ACTION` を常に最新化する。
@@ -40,6 +40,6 @@
 - ACTION-1: `flutter analyze` と `flutter test` を常時グリーン維持。
 - ACTION-2: Auth導線の実機検証と、管理系UIの実操作テストを拡張。
 - ACTION-2a: Widgetテストを土台に、次は Integrationテストで主要CUJを埋める。
-- ACTION-3: `docs/SHIFTFLOW_e2e_scenarios.md` に沿って実機E2Eを実施し、結果を記録。
+- ACTION-3: `docs/E2Eシナリオ.md` に沿って実機E2Eを実施し、結果を記録。
 - ACTION-4: DB/RLS と API の自動テストを拡充する。
 - ACTION-5: DB migration を `scripts/db_push.sh`（`--db-url` stateless 実行）へ統一し、`link` 切替依存をなくす。

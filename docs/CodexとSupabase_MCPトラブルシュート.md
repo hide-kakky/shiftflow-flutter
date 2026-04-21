@@ -60,4 +60,4 @@ cp env/db_push.prod.env.example env/db_push.prod.env
 ## 5. セキュリティ注意
 - `SUPABASE_ACCESS_TOKEN` / `service_role` は Git にコミットしない。
 - 本番キーと開発キーを分離する。
-- 漏えい時は [SHIFTFLOW_supabase_key_rotation_runbook.md](./SHIFTFLOW_supabase_key_rotation_runbook.md) に従いローテーションする。
+- 漏えい時は [Supabaseキーローテーション手順.md](./Supabaseキーローテーション手順.md) に従いローテーションする。
