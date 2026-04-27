@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/providers/core_providers.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../shared/session_providers.dart';
 
 class MessagesScreen extends ConsumerStatefulWidget {
   const MessagesScreen({super.key});
@@ -15,24 +16,81 @@ class MessagesScreen extends ConsumerStatefulWidget {
 
 class _MessagesScreenState extends ConsumerState<MessagesScreen> {
   late Future<List<Map<String, dynamic>>> _future;
+  ProviderSubscription<Map<String, dynamic>?>? _currentUnitSubscription;
   bool _loadingFolders = false;
   List<Map<String, dynamic>> _folders = const [];
+  Map<String, int> _folderUnreadCounts = const {};
   String? _selectedFolderId;
-  bool _unreadOnly = false;
+  String _selectedScope = 'all';
+  String _selectedTab = 'current';
+  String? _selectedUnitId;
   final Map<String, bool> _readOverrides = <String, bool>{};
   final Set<String> _selectedMessageIds = <String>{};
 
   @override
   void initState() {
     super.initState();
+    _selectedUnitId = ref.read(currentUnitProvider)?['id']?.toString();
+    _currentUnitSubscription = ref.listenManual(currentUnitProvider, (
+      _,
+      next,
+    ) async {
+      final nextUnitId = next?['id']?.toString();
+      if (!mounted || nextUnitId == null || nextUnitId == _selectedUnitId) {
+        return;
+      }
+      setState(() {
+        _selectedUnitId = nextUnitId;
+        _selectedTab = 'current';
+        _selectedFolderId = null;
+      });
+      await _loadFolders();
+      await _refresh();
+    });
     _loadFolders();
     _future = _load();
   }
 
-  Future<List<Map<String, dynamic>>> _load() {
-    return ref
-        .read(routeDataRepositoryProvider)
-        .getMessages(folderId: _selectedFolderId, unreadOnly: _unreadOnly);
+  @override
+  void dispose() {
+    _currentUnitSubscription?.close();
+    super.dispose();
+  }
+
+  Future<List<Map<String, dynamic>>> _load() async {
+    final repository = ref.read(routeDataRepositoryProvider);
+    if (_selectedScope == 'all') {
+      final results = await Future.wait([
+        repository.getMessages(
+          currentUnitId: _selectedUnitId,
+          tab: _selectedTab,
+          folderId: _selectedFolderId,
+          scope: 'shared',
+        ),
+        repository.getMessages(
+          currentUnitId: _selectedUnitId,
+          tab: _selectedTab,
+          scope: 'direct',
+        ),
+      ]);
+      final merged = [...results[0], ...results[1]];
+      merged.sort((a, b) {
+        final left =
+            DateTime.tryParse(a['created_at']?.toString() ?? '') ??
+            DateTime.fromMillisecondsSinceEpoch(0);
+        final right =
+            DateTime.tryParse(b['created_at']?.toString() ?? '') ??
+            DateTime.fromMillisecondsSinceEpoch(0);
+        return right.compareTo(left);
+      });
+      return merged;
+    }
+    return repository.getMessages(
+      currentUnitId: _selectedUnitId,
+      tab: _selectedTab,
+      folderId: _selectedScope == 'shared' ? _selectedFolderId : null,
+      scope: _selectedScope == 'dm' ? 'direct' : 'shared',
+    );
   }
 
   Future<void> _loadFolders() async {
@@ -40,17 +98,41 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
       _loadingFolders = true;
     });
     try {
-      final result = await ref
-          .read(routeDataRepositoryProvider)
-          .listActiveFolders();
+      final repository = ref.read(routeDataRepositoryProvider);
+      final result = await repository.listActiveFolders();
+      final sharedMessages = await repository.getMessages(
+        currentUnitId: _selectedUnitId,
+        tab: 'current',
+        scope: 'shared',
+      );
+      final unreadCounts = <String, int>{};
+      for (final message in sharedMessages) {
+        final folderId = message['folder_id']?.toString() ?? '';
+        if (folderId.isEmpty) continue;
+        final isRead =
+            _readOverrides[message['id']?.toString() ?? ''] ??
+            (message['isRead'] == true);
+        if (!isRead) {
+          unreadCounts.update(folderId, (value) => value + 1, ifAbsent: () => 1);
+        }
+      }
       if (!mounted) return;
       setState(() {
-        _folders = result;
+        _folders = result
+            .where(
+              (row) =>
+                  _selectedUnitId == null ||
+                  _selectedUnitId!.isEmpty ||
+                  row['unit_id']?.toString() == _selectedUnitId,
+            )
+            .toList(growable: false);
+        _folderUnreadCounts = unreadCounts;
       });
     } catch (_) {
       if (!mounted) return;
       setState(() {
         _folders = const [];
+        _folderUnreadCounts = const {};
       });
     } finally {
       if (mounted) {
@@ -62,6 +144,7 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
   }
 
   Future<void> _refresh() async {
+    await _loadFolders();
     setState(() {
       _future = _load();
     });
@@ -74,15 +157,19 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
     final bodyController = TextEditingController();
     final repository = ref.read(routeDataRepositoryProvider);
     List<Map<String, dynamic>> folders = const [];
+    List<Map<String, dynamic>> users = const [];
     try {
       folders = await repository.listActiveFolders();
+      users = await repository.listActiveUsers();
     } catch (_) {
       folders = const [];
+      users = const [];
     }
     if (!mounted) return;
 
     String? selectedFolderId;
     String? selectedTemplateId;
+    final selectedRecipientUserIds = <String>{};
     var templates = <Map<String, dynamic>>[];
     var loadingTemplates = false;
     final selectedFiles = <PlatformFile>[];
@@ -100,86 +187,136 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    DropdownButtonFormField<String?>(
-                      initialValue: selectedFolderId,
-                      decoration: InputDecoration(
-                        labelText: l10n.adminSelectFolder,
-                      ),
-                      items: [
-                        DropdownMenuItem<String?>(
-                          value: null,
-                          child: Text(l10n.noFolderSelected),
-                        ),
-                        for (final folder in folders)
-                          DropdownMenuItem<String?>(
-                            value: folder['id']?.toString(),
-                            child: Text(folder['name']?.toString() ?? '-'),
-                          ),
-                      ],
-                      onChanged: (value) async {
-                        setDialogState(() {
-                          selectedFolderId = value;
-                          selectedTemplateId = null;
-                          templates = <Map<String, dynamic>>[];
-                          loadingTemplates = value != null && value.isNotEmpty;
-                        });
-                        if (value == null || value.isEmpty) return;
-
-                        try {
-                          final loaded = await repository.listTemplates(value);
-                          setDialogState(() {
-                            templates = loaded;
-                            loadingTemplates = false;
-                          });
-                        } catch (_) {
-                          setDialogState(() {
-                            templates = <Map<String, dynamic>>[];
-                            loadingTemplates = false;
-                          });
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    if (loadingTemplates)
-                      const LinearProgressIndicator()
-                    else
+                    if (_selectedScope == 'shared')
                       DropdownButtonFormField<String?>(
-                        initialValue: selectedTemplateId,
-                        decoration: InputDecoration(labelText: l10n.templates),
+                        initialValue: selectedFolderId,
+                        decoration: InputDecoration(
+                          labelText: l10n.adminSelectFolder,
+                        ),
                         items: [
                           DropdownMenuItem<String?>(
                             value: null,
-                            child: Text(l10n.noTemplateSelected),
+                            child: Text(l10n.noFolderSelected),
                           ),
-                          for (final template in templates)
+                          for (final folder in folders)
                             DropdownMenuItem<String?>(
-                              value: template['id']?.toString(),
-                              child: Text(template['name']?.toString() ?? '-'),
+                              value: folder['id']?.toString(),
+                              child: Text(folder['name']?.toString() ?? '-'),
                             ),
                         ],
-                        onChanged: (value) {
+                        onChanged: (value) async {
                           setDialogState(() {
-                            selectedTemplateId = value;
+                            selectedFolderId = value;
+                            selectedTemplateId = null;
+                            templates = <Map<String, dynamic>>[];
+                            loadingTemplates =
+                                value != null && value.isNotEmpty;
                           });
                           if (value == null || value.isEmpty) return;
-                          final selected = templates.firstWhere(
-                            (item) => item['id']?.toString() == value,
-                            orElse: () => const <String, dynamic>{},
-                          );
-                          final templateTitle =
-                              selected['title_format']?.toString() ?? '';
-                          final templateBody =
-                              selected['body_format']?.toString() ?? '';
-                          setDialogState(() {
-                            if (templateTitle.isNotEmpty) {
-                              titleController.text = templateTitle;
-                            }
-                            if (templateBody.isNotEmpty) {
-                              bodyController.text = templateBody;
-                            }
-                          });
+
+                          try {
+                            final loaded = await repository.listTemplates(
+                              value,
+                            );
+                            setDialogState(() {
+                              templates = loaded;
+                              loadingTemplates = false;
+                            });
+                          } catch (_) {
+                            setDialogState(() {
+                              templates = <Map<String, dynamic>>[];
+                              loadingTemplates = false;
+                            });
+                          }
                         },
                       ),
+                    if (_selectedScope == 'dm') ...[
+                      const SizedBox(height: 12),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          '送信先ユーザー',
+                          style: Theme.of(context).textTheme.labelLarge,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          for (final user in users)
+                            FilterChip(
+                              label: Text(
+                                user['displayName']?.toString() ??
+                                    user['email']?.toString() ??
+                                    '-',
+                              ),
+                              selected: selectedRecipientUserIds.contains(
+                                user['userId']?.toString(),
+                              ),
+                              onSelected: (selected) {
+                                final userId = user['userId']?.toString();
+                                if (userId == null || userId.isEmpty) return;
+                                setDialogState(() {
+                                  if (selected) {
+                                    selectedRecipientUserIds.add(userId);
+                                  } else {
+                                    selectedRecipientUserIds.remove(userId);
+                                  }
+                                });
+                              },
+                            ),
+                        ],
+                      ),
+                    ],
+                    const SizedBox(height: 12),
+                    if (_selectedScope == 'shared')
+                      if (loadingTemplates)
+                        const LinearProgressIndicator()
+                      else
+                        DropdownButtonFormField<String?>(
+                          initialValue: selectedTemplateId,
+                          decoration: InputDecoration(
+                            labelText: l10n.templates,
+                          ),
+                          items: [
+                            DropdownMenuItem<String?>(
+                              value: null,
+                              child: Text(l10n.noTemplateSelected),
+                            ),
+                            for (final template in templates)
+                              DropdownMenuItem<String?>(
+                                value: template['id']?.toString(),
+                                child: Text(
+                                  template['name']?.toString() ?? '-',
+                                ),
+                              ),
+                          ],
+                          onChanged: (value) {
+                            setDialogState(() {
+                              selectedTemplateId = value;
+                            });
+                            if (value == null || value.isEmpty) return;
+                            final selected = templates.firstWhere(
+                              (item) => item['id']?.toString() == value,
+                              orElse: () => const <String, dynamic>{},
+                            );
+                            final templateTitle =
+                                selected['title_format']?.toString() ?? '';
+                            final templateBody =
+                                selected['body_format']?.toString() ?? '';
+                            setDialogState(() {
+                              if (templateTitle.isNotEmpty) {
+                                titleController.text = templateTitle;
+                              }
+                              if (templateBody.isNotEmpty) {
+                                bodyController.text = templateBody;
+                              }
+                            });
+                          },
+                        )
+                    else
+                      const Text('個人メッセージではフォルダと定型文は使いません。'),
                     const SizedBox(height: 12),
                     TextField(
                       controller: titleController,
@@ -263,10 +400,58 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
         return;
       }
 
+      if (_selectedScope == 'dm' && selectedRecipientUserIds.isEmpty) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('個人メッセージの送信先を選択してください。')));
+        return;
+      }
+
+      if (!mounted) return;
+      final confirmation = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('送信内容の確認'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '送信先種別: ${_selectedScope == 'dm' ? '個人メッセージ' : '共有メッセージ'}',
+              ),
+              Text('対象ユニット: ${_selectedUnitId ?? '未指定'}'),
+              Text(
+                'フォルダ: ${_selectedScope == 'dm' ? '対象外' : (selectedFolderId ?? '未指定')}',
+              ),
+              Text(
+                '宛先人数: ${_selectedScope == 'dm' ? selectedRecipientUserIds.length : 0}',
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('戻る'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('送信する'),
+            ),
+          ],
+        ),
+      );
+      if (confirmation != true) return;
+
       final createdMessage = await repository.addNewMessage(
         title: title,
         body: bodyController.text.trim(),
-        folderId: selectedFolderId,
+        scope: _selectedScope == 'dm' ? 'direct' : 'shared',
+        unitId: _selectedUnitId,
+        folderId: _selectedScope == 'dm' ? null : selectedFolderId,
+        recipientUserIds: _selectedScope == 'dm'
+            ? selectedRecipientUserIds.toList(growable: false)
+            : null,
       );
       if (selectedFiles.isNotEmpty) {
         final messageId = createdMessage['id']?.toString() ?? '';
@@ -319,7 +504,9 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
       final storagePath = 'attachments/$objectPath';
 
       try {
-        await supabase.storage.from('attachments').uploadBinary(
+        await supabase.storage
+            .from('attachments')
+            .uploadBinary(
               objectPath,
               bytes,
               fileOptions: FileOptions(
@@ -396,9 +583,7 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
     setState(() {
       _readOverrides[messageId] = result['isRead'] == true;
     });
-    if (_unreadOnly && result['isRead'] == true) {
-      await _refresh();
-    }
+    await _loadFolders();
   }
 
   Future<void> _markSelectedRead() async {
@@ -444,9 +629,19 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
     });
   }
 
-  void _setUnreadOnly(bool unreadOnly) {
+  void _setScope(String scope) {
     setState(() {
-      _unreadOnly = unreadOnly;
+      _selectedScope = scope;
+      if (scope == 'dm' || scope == 'all') {
+        _selectedFolderId = null;
+      }
+      _future = _load();
+    });
+  }
+
+  void _setTab(String tab) {
+    setState(() {
+      _selectedTab = tab;
       _future = _load();
     });
   }
@@ -463,9 +658,9 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
       if (uri == null) throw Exception('invalid_url');
       final launched = await ref.read(externalUrlLauncherProvider).launch(uri);
       if (!launched && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.attachmentOpenFailed)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.attachmentOpenFailed)));
       }
     } catch (_) {
       if (!mounted) return;
@@ -475,34 +670,102 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
     }
   }
 
+  Future<void> _changeCurrentUnit(String? unitId) async {
+    if (unitId == null || unitId.isEmpty) return;
+    await ref.read(routeDataRepositoryProvider).changeCurrentUnit(unitId);
+    ref.invalidate(bootstrapDataProvider);
+    setState(() {
+      _selectedUnitId = unitId;
+      _selectedTab = 'current';
+      _selectedFolderId = null;
+    });
+    await _loadFolders();
+    await _refresh();
+  }
+
   Widget _buildFilters(AppLocalizations l10n) {
+    final currentUnit = ref.watch(currentUnitProvider);
+    final availableUnits = ref.watch(availableUnitsProvider);
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          DropdownButtonFormField<String?>(
-            initialValue: _selectedFolderId,
-            decoration: InputDecoration(labelText: l10n.messageFolderFilter),
-            items: [
-              DropdownMenuItem<String?>(
-                value: null,
-                child: Text(l10n.noFolderSelected),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              ChoiceChip(
+                label: const Text('ALL'),
+                selected: _selectedScope == 'all',
+                onSelected: (_) => _setScope('all'),
               ),
-              for (final folder in _folders)
-                DropdownMenuItem<String?>(
-                  value: folder['id']?.toString(),
-                  child: Text(folder['name']?.toString() ?? '-'),
-                ),
+              ChoiceChip(
+                label: const Text('Message'),
+                selected: _selectedScope == 'shared',
+                onSelected: (_) => _setScope('shared'),
+              ),
+              ChoiceChip(
+                label: const Text('DM'),
+                selected: _selectedScope == 'dm',
+                onSelected: (_) => _setScope('dm'),
+              ),
             ],
-            onChanged: _loadingFolders ? null : _setFolderFilter,
           ),
-          const SizedBox(height: 8),
-          FilterChip(
-            label: Text(l10n.messageUnreadOnly),
-            selected: _unreadOnly,
-            onSelected: _setUnreadOnly,
-          ),
+          if (_selectedScope == 'shared') ...[
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                ChoiceChip(
+                  label: Text(
+                    '現在地ユニット: ${currentUnit?['name']?.toString() ?? '未設定'}',
+                  ),
+                  selected: _selectedTab == 'current',
+                  onSelected: (_) => _setTab('current'),
+                ),
+                ChoiceChip(
+                  label: const Text('他ユニット'),
+                  selected: _selectedTab == 'other',
+                  onSelected: (_) => _setTab('other'),
+                ),
+              ],
+            ),
+            if (_selectedTab == 'current' && _selectedFolderId != null) ...[
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: () => _setFolderFilter(null),
+                  icon: const Icon(Icons.arrow_back),
+                  label: const Text('フォルダ一覧へ戻る'),
+                ),
+              ),
+            ],
+            if (_selectedTab == 'other') ...[
+              const SizedBox(height: 8),
+              Card(
+                child: Column(
+                  children: [
+                    for (final unit in availableUnits)
+                      if (unit['id']?.toString() != _selectedUnitId)
+                        ListTile(
+                          leading: const Icon(Icons.account_tree_outlined),
+                          title: Text(
+                            unit['pathText']?.toString() ??
+                                unit['name']?.toString() ??
+                                '-',
+                          ),
+                          onTap: () =>
+                              _changeCurrentUnit(unit['id']?.toString()),
+                        ),
+                  ],
+                ),
+              ),
+            ],
+          ],
           if (_selectedMessageIds.isNotEmpty) ...[
             const SizedBox(height: 12),
             Row(
@@ -538,20 +801,70 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
     final isPinned = message['is_pinned'] == true;
     final title = message['title']?.toString() ?? '-';
     final body = message['body']?.toString() ?? '';
+    final isDirect =
+        message['isDirect'] == true ||
+        message['message_scope']?.toString() == 'direct';
     final selecting = _selectedMessageIds.isNotEmpty;
     final selected = _selectedMessageIds.contains(messageId);
 
     return Card(
+      color: isRead
+          ? Theme.of(context).colorScheme.surface
+          : Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.34),
+      shape: RoundedRectangleBorder(
+        side: BorderSide(
+          color: isRead
+              ? Theme.of(context).dividerColor.withValues(alpha: 0.2)
+              : Theme.of(context).colorScheme.primary.withValues(alpha: 0.55),
+          width: isRead ? 1 : 2,
+        ),
+        borderRadius: BorderRadius.circular(20),
+      ),
       child: ListTile(
         onTap: messageId.isEmpty
             ? null
             : selecting
-                ? () => _toggleSelection(messageId)
-                : () => _openDetails(messageId: messageId, title: title),
-        onLongPress: messageId.isEmpty ? null : () => _toggleSelection(messageId),
+            ? () => _toggleSelection(messageId)
+            : () => _openDetails(messageId: messageId, title: title),
+        onLongPress: messageId.isEmpty
+            ? null
+            : () => _toggleSelection(messageId),
         title: Row(
           children: [
-            Expanded(child: Text(title)),
+            Expanded(
+              child: Row(
+                children: [
+                  Flexible(child: Text(title)),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isRead
+                          ? Theme.of(context).colorScheme.surfaceContainerHighest
+                          : Theme.of(context).colorScheme.primary,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      isRead ? '既読' : '未読',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: isRead
+                            ? Theme.of(context).colorScheme.onSurfaceVariant
+                            : Theme.of(context).colorScheme.onPrimary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (isDirect)
+              const Padding(
+                padding: EdgeInsets.only(left: 8),
+                child: Icon(Icons.mail_outline, size: 18),
+              ),
             if (isPinned)
               const Padding(
                 padding: EdgeInsets.only(left: 8),
@@ -663,6 +976,81 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
             }
 
             final rows = snapshot.data ?? const [];
+            if (_selectedScope == 'shared' &&
+                _selectedTab == 'current' &&
+                _selectedFolderId == null) {
+              return ListView(
+                padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
+                children: [
+                  _buildFilters(l10n),
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '現在地ユニットのフォルダ',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 8),
+                          if (_loadingFolders)
+                            const Center(child: CircularProgressIndicator())
+                          else if (_folders.isEmpty)
+                            const Text('表示できるフォルダはありません。')
+                          else
+                            ..._folders.map(
+                              (folder) {
+                                final folderId = folder['id']?.toString() ?? '';
+                                final unreadCount =
+                                    _folderUnreadCounts[folderId] ?? 0;
+                                return ListTile(
+                                  leading: const Icon(Icons.folder_outlined),
+                                  title: Text(folder['name']?.toString() ?? '-'),
+                                  subtitle: Text(
+                                    folder['is_public'] == true ? '公開' : '限定',
+                                  ),
+                                  trailing: unreadCount > 0
+                                      ? Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 4,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.error,
+                                            borderRadius: BorderRadius.circular(
+                                              999,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            unreadCount.toString(),
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .labelSmall
+                                                ?.copyWith(
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .onError,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                          ),
+                                        )
+                                      : null,
+                                  onTap: () =>
+                                      _setFolderFilter(folder['id']?.toString()),
+                                );
+                              },
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            }
+
             if (rows.isEmpty) {
               return ListView(
                 children: [
@@ -1052,15 +1440,17 @@ class _MessageDetailSheetState extends ConsumerState<_MessageDetailSheet> {
                             return ListTile(
                               dense: true,
                               contentPadding: EdgeInsets.zero,
-                              title: Text(author?.isNotEmpty == true ? author! : fallback),
+                              title: Text(
+                                author?.isNotEmpty == true ? author! : fallback,
+                              ),
                               subtitle: Text(comment['body']?.toString() ?? ''),
                               trailing: createdAt.isEmpty
                                   ? null
                                   : Text(
                                       createdAt,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall,
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodySmall,
                                     ),
                             );
                           },

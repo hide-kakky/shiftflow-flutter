@@ -40,6 +40,7 @@ class RouteDataRepository {
     String? description,
     DateTime? dueAt,
     String? priority,
+    String? unitId,
     List<String>? assigneeUserIds,
   }) async {
     final result = await _apiClient.invokeRoute(
@@ -50,6 +51,7 @@ class RouteDataRepository {
           'description': description,
           'dueAtMs': dueAt?.millisecondsSinceEpoch,
           'priority': priority,
+          'unitId': unitId,
           'assigneeUserIds': assigneeUserIds,
         },
       ],
@@ -64,6 +66,7 @@ class RouteDataRepository {
     String? status,
     DateTime? dueAt,
     String? priority,
+    String? unitId,
     List<String>? assigneeUserIds,
   }) async {
     final result = await _apiClient.invokeRoute(
@@ -76,6 +79,7 @@ class RouteDataRepository {
           'status': status,
           'dueAtMs': dueAt?.millisecondsSinceEpoch,
           'priority': priority,
+          'unitId': unitId,
           'assigneeUserIds': assigneeUserIds,
         },
       ],
@@ -93,13 +97,24 @@ class RouteDataRepository {
   }
 
   Future<List<Map<String, dynamic>>> getMessages({
+    String? currentUnitId,
+    String tab = 'current',
     String? folderId,
+    String scope = 'shared',
     bool unreadOnly = false,
+    String? keyword,
   }) async {
     final result = await _apiClient.invokeRoute(
       'getMessages',
       args: [
-        {'folderId': folderId, 'unreadOnly': unreadOnly},
+        {
+          'currentUnitId': currentUnitId,
+          'tab': tab,
+          'folderId': folderId,
+          'scope': scope,
+          'unreadOnly': unreadOnly,
+          'keyword': keyword,
+        },
       ],
     );
     return _asListOfMap(result);
@@ -116,12 +131,22 @@ class RouteDataRepository {
   Future<Map<String, dynamic>> addNewMessage({
     required String title,
     required String body,
+    String scope = 'shared',
+    String? unitId,
     String? folderId,
+    List<String>? recipientUserIds,
   }) async {
     final result = await _apiClient.invokeRoute(
       'addNewMessage',
       args: [
-        {'title': title, 'body': body, 'folderId': folderId},
+        {
+          'title': title,
+          'body': body,
+          'scope': scope,
+          'unitId': unitId,
+          'folderId': folderId,
+          'recipientUserIds': recipientUserIds,
+        },
       ],
     );
     return _asMap(result);
@@ -286,6 +311,8 @@ class RouteDataRepository {
     String? theme,
     String? language,
     String? imageUrl,
+    String? currentOrganizationId,
+    String? currentUnitId,
   }) async {
     final result = await _apiClient.invokeRoute(
       'saveUserSettings',
@@ -295,7 +322,185 @@ class RouteDataRepository {
           ...?theme == null ? null : {'theme': theme},
           ...?language == null ? null : {'language': language},
           ...?imageUrl == null ? null : {'imageUrl': imageUrl},
+          ...?currentOrganizationId == null
+              ? null
+              : {'currentOrganizationId': currentOrganizationId},
+          ...?currentUnitId == null ? null : {'currentUnitId': currentUnitId},
         },
+      ],
+    );
+    return _asMap(result);
+  }
+
+  Future<List<Map<String, dynamic>>> searchOrganizationsByCode(
+    String keyword,
+  ) async {
+    final result = await _apiClient.invokeRoute(
+      'searchOrganizationsByCode',
+      args: [
+        {'keyword': keyword},
+      ],
+    );
+    return _asListOfMap(result);
+  }
+
+  Future<Map<String, dynamic>> requestOrganizationJoin({
+    required String organizationId,
+    String? organizationCode,
+    String? requestMessage,
+  }) async {
+    final result = await _apiClient.invokeRoute(
+      'requestOrganizationJoin',
+      args: [
+        {
+          'organizationId': organizationId,
+          'organizationCode': organizationCode,
+          'requestMessage': requestMessage,
+        },
+      ],
+    );
+    return _asMap(result);
+  }
+
+  Future<List<Map<String, dynamic>>> listJoinRequests() async {
+    final result = await _apiClient.invokeRoute('listJoinRequests');
+    return _asListOfMap(result);
+  }
+
+  Future<Map<String, dynamic>> approveJoinRequest(String joinRequestId) async {
+    final result = await _apiClient.invokeRoute(
+      'approveJoinRequest',
+      args: [
+        {'joinRequestId': joinRequestId},
+      ],
+    );
+    return _asMap(result);
+  }
+
+  Future<Map<String, dynamic>> rejectJoinRequest(String joinRequestId) async {
+    final result = await _apiClient.invokeRoute(
+      'rejectJoinRequest',
+      args: [
+        {'joinRequestId': joinRequestId},
+      ],
+    );
+    return _asMap(result);
+  }
+
+  Future<Map<String, dynamic>> createOrganizationInvite({
+    String? unitId,
+    String? inviteLabel,
+    String role = 'member',
+    DateTime? expiresAt,
+  }) async {
+    final result = await _apiClient.invokeRoute(
+      'createOrganizationInvite',
+      args: [
+        {
+          'unitId': unitId,
+          'inviteLabel': inviteLabel,
+          'role': role,
+          'expiresAt': expiresAt?.toIso8601String(),
+        },
+      ],
+    );
+    return _asMap(result);
+  }
+
+  Future<List<Map<String, dynamic>>> listOrganizationInvites() async {
+    final result = await _apiClient.invokeRoute('listOrganizationInvites');
+    return _asListOfMap(result);
+  }
+
+  Future<Map<String, dynamic>> acceptOrganizationInvite(
+    String inviteToken,
+  ) async {
+    final result = await _apiClient.invokeRoute(
+      'acceptOrganizationInvite',
+      args: [
+        {'inviteToken': inviteToken},
+      ],
+    );
+    return _asMap(result);
+  }
+
+  Future<List<Map<String, dynamic>>> listUnits() async {
+    final result = await _apiClient.invokeRoute('listUnits');
+    return _asListOfMap(result);
+  }
+
+  Future<Map<String, dynamic>> createUnit({
+    required String name,
+    String? parentUnitId,
+    int sortOrder = 0,
+    bool isActive = true,
+  }) async {
+    final result = await _apiClient.invokeRoute(
+      'createUnit',
+      args: [
+        {
+          'name': name,
+          'parentUnitId': parentUnitId,
+          'sortOrder': sortOrder,
+          'isActive': isActive,
+        },
+      ],
+    );
+    return _asMap(result);
+  }
+
+  Future<Map<String, dynamic>> updateUnit({
+    required String unitId,
+    String? name,
+    String? parentUnitId,
+    int? sortOrder,
+    bool? isActive,
+  }) async {
+    final result = await _apiClient.invokeRoute(
+      'updateUnit',
+      args: [
+        {
+          'unitId': unitId,
+          ...?name == null ? null : {'name': name},
+          ...?parentUnitId == null ? null : {'parentUnitId': parentUnitId},
+          ...?sortOrder == null ? null : {'sortOrder': sortOrder},
+          ...?isActive == null ? null : {'isActive': isActive},
+        },
+      ],
+    );
+    return _asMap(result);
+  }
+
+  Future<Map<String, dynamic>> assignUnitMember({
+    required String unitId,
+    required String userId,
+    String role = 'member',
+    String status = 'active',
+  }) async {
+    final result = await _apiClient.invokeRoute(
+      'assignUnitMember',
+      args: [
+        {'unitId': unitId, 'userId': userId, 'role': role, 'status': status},
+      ],
+    );
+    return _asMap(result);
+  }
+
+  Future<List<Map<String, dynamic>>> listUnitMemberships(String unitId) async {
+    final result = await _apiClient.invokeRoute(
+      'listUnitMemberships',
+      args: [
+        {'unitId': unitId},
+      ],
+    );
+    return _asListOfMap(result);
+  }
+
+  Future<Map<String, dynamic>> changeCurrentUnit(String unitId) async {
+    final result = await _apiClient.invokeRoute(
+      'changeCurrentUnit',
+      args: [
+        {'unitId': unitId},
       ],
     );
     return _asMap(result);
@@ -304,6 +509,30 @@ class RouteDataRepository {
   Future<List<Map<String, dynamic>>> listActiveUsers() async {
     final result = await _apiClient.invokeRoute('listActiveUsers');
     return _asListOfMap(result);
+  }
+
+  Future<Map<String, dynamic>> searchContent({
+    required String query,
+    String tab = 'all',
+    String? currentUnitId,
+  }) async {
+    final result = await _apiClient.invokeRoute(
+      'searchContent',
+      args: [
+        {'query': query, 'tab': tab, 'currentUnitId': currentUnitId},
+      ],
+    );
+    return _asMap(result);
+  }
+
+  Future<Map<String, dynamic>> getUserProfile(String userId) async {
+    final result = await _apiClient.invokeRoute(
+      'getUserProfile',
+      args: [
+        {'userId': userId},
+      ],
+    );
+    return _asMap(result);
   }
 
   Future<Map<String, dynamic>> adminListUsers() async {

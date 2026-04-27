@@ -1,4 +1,4 @@
-# ShiftFlow Flutter 実装計画
+# ShiftFlow Flutter 実装計画 v1.1
 
 ## 0. 運用参照順（必須）
 1. `AGENTS.md`
@@ -6,45 +6,39 @@
 3. `docs/開発フロー.md`
 
 ## 1. ゴール
-1. ShiftFlow_PWA の業務機能を Flutter + Supabase で同等提供する。
-2. iOS/Android/Web で同一ユースケースを成立させる。
-3. 要件->設計->実装->テストの追跡可能性を文書で維持する。
+1. v1.1 要件を Flutter + Supabase で実装可能な形へ落とす。
+2. モバイル / PC で役割の異なる情報設計を成立させる。
+3. 要件 -> API -> DB -> 実装 -> テストの追跡可能性を文書で維持する。
 
-## 2. 直近の実装完了
-- Flutter骨格（Auth/Home/Tasks/Messages/Settings/Admin）
-- APIクライアント層と route repository
-- Supabase 初期マイグレーション + RLS + Storage policy
-- Edge Function `api` と通知系Functions
-- docs一式 + CI定義 + DBテスト雛形
-- GitHub Public repository: `https://github.com/hide-kakky/shiftflow-flutter`
-- Tasks 作成UIの拡張（優先度・期限・担当者選択）と API `addNewTask` の priority 保存対応
-- Tasks 添付ファイル対応（Storageアップロード・`attachments`/`task_attachments` 紐付け・一覧表示）
-- Messages 詳細UIの拡張（コメント一覧/追加・ピン切替・既読/未読ユーザー表示）
-- Messages 作成導線の拡張（フォルダ選択・テンプレート適用・添付アップロード）
-- Messages 一覧の拡張（フォルダフィルタ・未読のみ表示）
-- 通知失敗リトライ基盤（`notification_dispatch_logs.retry_count/next_retry_at` + `retry_failed_notifications`）
-- Admin 画面の操作導線拡張（Users更新/Organizations更新/Audit再読込）
-- Folders/Templates 管理導線の拡張（フォルダ作成・更新・アーカイブ、テンプレート作成）
-- Supabase 環境分離（dev/prod）と stateless migration 運用（`scripts/db_push.sh`）を整備
-- 基本UI導線のWidgetテスト追加（Auth/Home/Messages/Settings/Admin）
-- Settings の表示名編集
-- Tasks 一覧の `My / Created / All` 切替
-- Settings のプロフィール画像（表示/更新）
-- 画面遷移時にメニューバーを固定する ShellRoute 化
-- `ShiftFlow_PWA` 再精査と差分整理（`docs/PWA差分分析_2026-03-26.md`）
-- Home 画面を Notion 系デザインガイドを参考に再設計（概要カード / クイック導線 / フォーカス表示）
+## 2. 現在地
+- 基盤実装と旧導線ベースの主要画面は存在する。
+- v1.1 の中核は以下まで反映済み:
+  - `組織 -> ユニット -> フォルダ` の DB 増築
+  - `currentOrganization` / `currentUnit` の bootstrap 返却
+  - 参加申請 / 招待リンク / 承認待ちの API 基盤
+  - 個人メッセージ分離の API / DB 基盤
+  - モバイル段階表示 / PC分割表示の画面骨格
+- ただし、以下はまだ仕上げ段階に未到達:
+  - Auth / Participation の実機検証
+  - 新しいモバイル/PC ナビと検索/DM直遷移の実機確認
+  - `member` の権限境界が実機でも崩れないことの確認
+  - Integration / E2E の追加
+  - 運用文書への最終反映
 
 ## 3. 次の実装対象
-1. Auth導線の実機検証（admin/manager/member のロール別確認）
-2. `docs/E2Eシナリオ.md` の実施結果記録
-3. Widgetテストを補完する Integrationテストの追加（主要CUJ）
-4. DB/RLS / API 自動テスト拡充
+1. Auth / Participation 導線の実機検証
+2. 新しいナビ / 検索 / プロフィール / 個人チャットの実機検証
+3. `member` の currentUnit / フォルダ / メッセージ権限境界の実機確認
+4. Integration テスト追加
+5. E2E / 運用文書の反映
+6. Home / Participation の微調整
+7. リリース準備の確認
 
 ## 4. 認証テスト運用の再設計方針（TASUKI 参考）
 1. ログイン画面は「通常ユーザー向けUI」を維持し、`Test Login` のような文言を常設しない。
 2. QA用の補助導線は本番ビルドで無効化する（例: `kDebugMode` + `--dart-define` フラグで有効化）。
 3. テストユーザーは Supabase 側で管理し、アプリ側に固定パスワードやテスト専用表示を埋め込まない。
-4. 検証は「実運用と同じ操作」で行う（メール入力・Magic Link / Password 送信・通常遷移）。
+4. 検証は「実運用と同じ操作」で行う（メール入力・パスワード送信・通常遷移）。
 5. `TASUKI` 同様、ローカル環境で複数ロールのテストアカウントを再生成できるスクリプトを用意する。
 
 ## 5. 認証テスト運用タスク（完了済み）
@@ -60,6 +54,8 @@ flutter pub get
 flutter gen-l10n
 flutter analyze
 flutter test
+/bin/zsh -lc "SUPABASE_URL=http://127.0.0.1:55421 SUPABASE_ANON_KEY=... TEST_USER_PASSWORD='TestPass123!' deno run --allow-env --allow-net scripts/verify_v11_routes.ts"
+/bin/zsh -lc "SUPABASE_URL=http://127.0.0.1:55421 SUPABASE_ANON_KEY=... SUPABASE_SERVICE_ROLE_KEY=... SHIFTFLOW_ORGANIZATION_ID=11111111-1111-1111-1111-111111111111 TEST_USER_PASSWORD='TestPass123!' deno run --allow-env --allow-net scripts/verify_v11_access.ts"
 supabase db reset --local --yes
 supabase db lint --local --fail-on error
 ```

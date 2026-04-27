@@ -16,6 +16,7 @@ import 'package:shiftflow_flutter/features/messages/messages_screen.dart';
 import 'package:shiftflow_flutter/features/settings/settings_screen.dart';
 import 'package:shiftflow_flutter/features/shared/route_data_repository.dart';
 import 'package:shiftflow_flutter/features/shared/session_providers.dart';
+import 'package:shiftflow_flutter/features/shell/bootstrap_gate_screen.dart';
 import 'package:shiftflow_flutter/features/tasks/tasks_screen.dart';
 import 'package:shiftflow_flutter/l10n/generated/app_localizations.dart';
 
@@ -56,6 +57,11 @@ class _FakeRouteDataRepository extends RouteDataRepository {
     Map<String, Map<String, dynamic>>? taskDetails,
     List<Map<String, dynamic>>? users,
     Map<String, List<Map<String, dynamic>>>? templatesByFolder,
+    List<Map<String, dynamic>>? joinRequests,
+    List<Map<String, dynamic>>? units,
+    Map<String, List<Map<String, dynamic>>>? unitMembershipsByUnit,
+    List<Map<String, dynamic>>? invites,
+    Map<String, List<Map<String, dynamic>>>? searchResultsByKeyword,
     this.toggleReadResponse = const <String, dynamic>{'isRead': true},
   }) : _messages = List<Map<String, dynamic>>.from(messages ?? const []),
        _messageDetails = Map<String, Map<String, dynamic>>.from(
@@ -71,6 +77,17 @@ class _FakeRouteDataRepository extends RouteDataRepository {
          taskDetails ?? const {},
        ),
        _users = List<Map<String, dynamic>>.from(users ?? const []),
+       _joinRequests = List<Map<String, dynamic>>.from(
+         joinRequests ?? const [],
+       ),
+       _units = List<Map<String, dynamic>>.from(units ?? const []),
+       _unitMembershipsByUnit = Map<String, List<Map<String, dynamic>>>.from(
+         unitMembershipsByUnit ?? const {},
+       ),
+       _invites = List<Map<String, dynamic>>.from(invites ?? const []),
+       _searchResultsByKeyword = Map<String, List<Map<String, dynamic>>>.from(
+         searchResultsByKeyword ?? const {},
+       ),
        _templatesByFolder = Map<String, List<Map<String, dynamic>>>.from(
          templatesByFolder ?? const {},
        ),
@@ -88,6 +105,11 @@ class _FakeRouteDataRepository extends RouteDataRepository {
   final List<Map<String, dynamic>> _allTasks;
   final Map<String, Map<String, dynamic>> _taskDetails;
   final List<Map<String, dynamic>> _users;
+  final List<Map<String, dynamic>> _joinRequests;
+  final List<Map<String, dynamic>> _units;
+  final Map<String, List<Map<String, dynamic>>> _unitMembershipsByUnit;
+  final List<Map<String, dynamic>> _invites;
+  final Map<String, List<Map<String, dynamic>>> _searchResultsByKeyword;
   final Map<String, List<Map<String, dynamic>>> _templatesByFolder;
 
   final List<String> savedLanguages = <String>[];
@@ -103,8 +125,19 @@ class _FakeRouteDataRepository extends RouteDataRepository {
   final List<String> completedTaskIds = <String>[];
   final List<String> updatedTemplateIds = <String>[];
   final List<String> deletedTemplateIds = <String>[];
+  final List<String> approvedJoinRequestIds = <String>[];
+  final List<String> rejectedJoinRequestIds = <String>[];
+  final List<String> createdUnitNames = <String>[];
+  final List<String> updatedUnitIds = <String>[];
+  final List<Map<String, String>> assignedUnitMembers = <Map<String, String>>[];
+  final List<String> createdInviteLabels = <String>[];
+  final List<String> acceptedInviteTokens = <String>[];
+  final List<String> changedCurrentUnitIds = <String>[];
   final List<String?> requestedFolderIds = <String?>[];
   final List<bool> requestedUnreadOnly = <bool>[];
+  final List<Map<String, dynamic>> sentMessages = <Map<String, dynamic>>[];
+  final List<Map<String, String?>> requestedJoinPayloads =
+      <Map<String, String?>>[];
   int listMyTasksCalls = 0;
   int listCreatedTasksCalls = 0;
   int listAllTasksCalls = 0;
@@ -121,6 +154,8 @@ class _FakeRouteDataRepository extends RouteDataRepository {
     String? theme,
     String? language,
     String? imageUrl,
+    String? currentOrganizationId,
+    String? currentUnitId,
   }) async {
     if (language != null) {
       savedLanguages.add(language);
@@ -145,13 +180,23 @@ class _FakeRouteDataRepository extends RouteDataRepository {
 
   @override
   Future<List<Map<String, dynamic>>> getMessages({
+    String? currentUnitId,
+    String tab = 'current',
     String? folderId,
+    String scope = 'shared',
     bool unreadOnly = false,
+    String? keyword,
   }) async {
     requestedFolderIds.add(folderId);
     requestedUnreadOnly.add(unreadOnly);
     return _messages
         .where((message) {
+          final messageScope = message['message_scope']?.toString() ?? 'shared';
+          final matchesScope = switch (scope) {
+            'direct' => messageScope == 'direct',
+            'shared' => messageScope != 'direct',
+            _ => true,
+          };
           final messageFolderId = message['folder_id']?.toString();
           final matchesFolder =
               folderId == null ||
@@ -159,7 +204,7 @@ class _FakeRouteDataRepository extends RouteDataRepository {
               messageFolderId == folderId;
           final isRead = message['isRead'] == true;
           final matchesUnread = !unreadOnly || !isRead;
-          return matchesFolder && matchesUnread;
+          return matchesScope && matchesFolder && matchesUnread;
         })
         .map((row) => Map<String, dynamic>.from(row))
         .toList(growable: false);
@@ -182,7 +227,9 @@ class _FakeRouteDataRepository extends RouteDataRepository {
   }
 
   @override
-  Future<Map<String, dynamic>> markMemosReadBulk(List<String> messageIds) async {
+  Future<Map<String, dynamic>> markMemosReadBulk(
+    List<String> messageIds,
+  ) async {
     bulkReadRequests.add(List<String>.from(messageIds));
     for (final messageId in messageIds) {
       _replaceMessage(messageId, {'isRead': true});
@@ -255,6 +302,7 @@ class _FakeRouteDataRepository extends RouteDataRepository {
     String? status,
     DateTime? dueAt,
     String? priority,
+    String? unitId,
     List<String>? assigneeUserIds,
   }) async {
     updatedTaskIds.add(taskId);
@@ -275,7 +323,8 @@ class _FakeRouteDataRepository extends RouteDataRepository {
                       'user_id': id,
                       'users': {
                         'id': id,
-                        'display_name': _users
+                        'display_name':
+                            _users
                                 .firstWhere(
                                   (user) => user['userId'] == id,
                                   orElse: () => <String, dynamic>{},
@@ -314,6 +363,211 @@ class _FakeRouteDataRepository extends RouteDataRepository {
   }
 
   @override
+  Future<Map<String, dynamic>> addNewMessage({
+    required String title,
+    required String body,
+    String scope = 'shared',
+    String? unitId,
+    String? folderId,
+    List<String>? recipientUserIds,
+  }) async {
+    final message = <String, dynamic>{
+      'id': 'message-created-${sentMessages.length + 1}',
+      'organization_id': 'org-1',
+      'title': title,
+      'body': body,
+      'folder_id': folderId,
+      'unit_id': unitId,
+      'message_scope': scope,
+      'recipientUserIds': recipientUserIds ?? const <String>[],
+    };
+    sentMessages.add(message);
+    _messages.insert(0, Map<String, dynamic>.from(message));
+    return message;
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> listJoinRequests() async {
+    return List<Map<String, dynamic>>.from(_joinRequests);
+  }
+
+  @override
+  Future<Map<String, dynamic>> approveJoinRequest(String joinRequestId) async {
+    approvedJoinRequestIds.add(joinRequestId);
+    final index = _joinRequests.indexWhere((row) => row['id'] == joinRequestId);
+    if (index >= 0) {
+      _joinRequests[index] = {..._joinRequests[index], 'status': 'active'};
+      return _joinRequests[index];
+    }
+    return {'id': joinRequestId, 'status': 'active'};
+  }
+
+  @override
+  Future<Map<String, dynamic>> rejectJoinRequest(String joinRequestId) async {
+    rejectedJoinRequestIds.add(joinRequestId);
+    final index = _joinRequests.indexWhere((row) => row['id'] == joinRequestId);
+    if (index >= 0) {
+      _joinRequests[index] = {..._joinRequests[index], 'status': 'revoked'};
+      return _joinRequests[index];
+    }
+    return {'id': joinRequestId, 'status': 'revoked'};
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> listUnits() async {
+    return List<Map<String, dynamic>>.from(_units);
+  }
+
+  @override
+  Future<Map<String, dynamic>> createUnit({
+    required String name,
+    String? parentUnitId,
+    int sortOrder = 0,
+    bool isActive = true,
+  }) async {
+    createdUnitNames.add(name);
+    final unit = <String, dynamic>{
+      'id': 'unit-created-${_units.length + 1}',
+      'name': name,
+      'parent_unit_id': parentUnitId,
+      'path_text': parentUnitId == null ? name : '${parentUnitId}_$name',
+      'is_active': isActive,
+    };
+    _units.add(unit);
+    return unit;
+  }
+
+  @override
+  Future<Map<String, dynamic>> updateUnit({
+    required String unitId,
+    String? name,
+    String? parentUnitId,
+    int? sortOrder,
+    bool? isActive,
+  }) async {
+    updatedUnitIds.add(unitId);
+    final index = _units.indexWhere((row) => row['id'] == unitId);
+    if (index >= 0) {
+      _units[index] = {
+        ..._units[index],
+        ...?name == null ? null : {'name': name},
+        ...?parentUnitId == null ? null : {'parent_unit_id': parentUnitId},
+        ...?isActive == null ? null : {'is_active': isActive},
+      };
+      return _units[index];
+    }
+    return {'id': unitId};
+  }
+
+  @override
+  Future<Map<String, dynamic>> assignUnitMember({
+    required String unitId,
+    required String userId,
+    String role = 'member',
+    String status = 'active',
+  }) async {
+    assignedUnitMembers.add({
+      'unitId': unitId,
+      'userId': userId,
+      'role': role,
+      'status': status,
+    });
+    final members = _unitMembershipsByUnit[unitId] ?? <Map<String, dynamic>>[];
+    members.add({
+      'id': 'unit-membership-${members.length + 1}',
+      'unitId': unitId,
+      'userId': userId,
+      'role': role,
+      'status': status,
+      'displayName': _users.firstWhere(
+        (user) => user['userId'] == userId,
+        orElse: () => <String, dynamic>{},
+      )['displayName'],
+      'email': _users.firstWhere(
+        (user) => user['userId'] == userId,
+        orElse: () => <String, dynamic>{},
+      )['email'],
+    });
+    _unitMembershipsByUnit[unitId] = members;
+    return members.last;
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> listUnitMemberships(String unitId) async {
+    return List<Map<String, dynamic>>.from(
+      _unitMembershipsByUnit[unitId] ?? const <Map<String, dynamic>>[],
+    );
+  }
+
+  @override
+  Future<Map<String, dynamic>> createOrganizationInvite({
+    String? unitId,
+    String? inviteLabel,
+    String role = 'member',
+    DateTime? expiresAt,
+  }) async {
+    createdInviteLabels.add(inviteLabel ?? '');
+    final invite = <String, dynamic>{
+      'id': 'invite-${_invites.length + 1}',
+      'invite_label': inviteLabel,
+      'role': role,
+      'unit_id': unitId,
+      'invite_token': 'token-${_invites.length + 1}',
+      'expires_at': expiresAt?.toIso8601String(),
+      'accepted_at': null,
+    };
+    _invites.insert(0, invite);
+    return invite;
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> listOrganizationInvites() async {
+    return List<Map<String, dynamic>>.from(_invites);
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> searchOrganizationsByCode(
+    String keyword,
+  ) async {
+    return List<Map<String, dynamic>>.from(
+      _searchResultsByKeyword[keyword] ?? const <Map<String, dynamic>>[],
+    );
+  }
+
+  @override
+  Future<Map<String, dynamic>> requestOrganizationJoin({
+    required String organizationId,
+    String? organizationCode,
+    String? requestMessage,
+  }) async {
+    requestedJoinPayloads.add({
+      'organizationId': organizationId,
+      'organizationCode': organizationCode,
+      'requestMessage': requestMessage,
+    });
+    return {
+      'organization_id': organizationId,
+      'requested_code': organizationCode,
+      'request_message': requestMessage,
+      'status': 'pending',
+    };
+  }
+
+  @override
+  Future<Map<String, dynamic>> acceptOrganizationInvite(
+    String inviteToken,
+  ) async {
+    acceptedInviteTokens.add(inviteToken);
+    return {'invite_token': inviteToken, 'status': 'active'};
+  }
+
+  @override
+  Future<Map<String, dynamic>> changeCurrentUnit(String unitId) async {
+    changedCurrentUnitIds.add(unitId);
+    return {'success': true, 'unitId': unitId};
+  }
+
+  @override
   Future<List<Map<String, dynamic>>> listTemplates(String folderId) async {
     return List<Map<String, dynamic>>.from(
       _templatesByFolder[folderId] ?? const <Map<String, dynamic>>[],
@@ -329,7 +583,9 @@ class _FakeRouteDataRepository extends RouteDataRepository {
   }) async {
     updatedTemplateIds.add(templateId);
     for (final entry in _templatesByFolder.entries) {
-      final index = entry.value.indexWhere((template) => template['id'] == templateId);
+      final index = entry.value.indexWhere(
+        (template) => template['id'] == templateId,
+      );
       if (index >= 0) {
         entry.value[index] = {
           ...entry.value[index],
@@ -358,10 +614,7 @@ class _FakeRouteDataRepository extends RouteDataRepository {
     for (final list in [_myTasks, _createdTasks, _allTasks]) {
       final index = list.indexWhere((task) => task['id'] == taskId);
       if (index >= 0) {
-        list[index] = {
-          ...list[index],
-          ...updated,
-        };
+        list[index] = {...list[index], ...updated};
       }
     }
   }
@@ -369,16 +622,10 @@ class _FakeRouteDataRepository extends RouteDataRepository {
   void _replaceMessage(String messageId, Map<String, dynamic> updated) {
     final index = _messages.indexWhere((message) => message['id'] == messageId);
     if (index >= 0) {
-      _messages[index] = {
-        ..._messages[index],
-        ...updated,
-      };
+      _messages[index] = {..._messages[index], ...updated};
     }
     if (_messageDetails.containsKey(messageId)) {
-      _messageDetails[messageId] = {
-        ..._messageDetails[messageId]!,
-        ...updated,
-      };
+      _messageDetails[messageId] = {..._messageDetails[messageId]!, ...updated};
     }
   }
 }
@@ -461,7 +708,11 @@ void main() {
       bootstrapData: const {},
     );
     final container = ProviderContainer(
-      overrides: [routeDataRepositoryProvider.overrideWithValue(repo)],
+      overrides: [
+        routeDataRepositoryProvider.overrideWithValue(repo),
+        bootstrapDataProvider.overrideWith((ref) async => repo.bootstrapData),
+        userSettingsProvider.overrideWith((ref) async => repo.userSettings),
+      ],
     );
     addTearDown(container.dispose);
 
@@ -472,8 +723,82 @@ void main() {
     expect(find.text('4'), findsWidgets);
     expect(find.text('未読メッセージ'), findsWidgets);
     expect(find.text('2'), findsWidgets);
-    expect(find.text('保留中ユーザー'), findsWidgets);
+    expect(find.text('承認待ち'), findsWidgets);
     expect(find.text('1'), findsWidgets);
+  });
+
+  testWidgets('HomeScreen shows current organization, unit and admin summary', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1400, 1200);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    final repo = _FakeRouteDataRepository(
+      homeContent: const {
+        'overview': {
+          'openTaskCount': 3,
+          'unreadMessageCount': 5,
+          'pendingUserCount': 2,
+        },
+        'blocks': {
+          'tasks': [
+            {'id': 'task-1', 'title': '朝会準備', 'priority': 'high'},
+          ],
+          'messages': [
+            {'id': 'msg-1', 'title': '本日の連絡', 'body': '確認お願いします'},
+          ],
+          'folders': [
+            {'id': 'folder-1', 'name': '全体', 'is_public': true},
+          ],
+          'units': [
+            {'id': 'unit-1', 'name': '本部', 'path_text': '本部'},
+          ],
+          'adminSummary': {
+            'openTaskCount': 3,
+            'unreadMessageCount': 5,
+            'pendingUserCount': 2,
+          },
+        },
+      },
+      userSettings: const {
+        'name': 'Tester',
+        'imageUrl': '',
+        'role': 'admin',
+        'organizationRole': 'admin',
+        'theme': 'system',
+        'language': 'ja',
+        'email': 'tester@example.com',
+      },
+      bootstrapData: const {
+        'participation': {
+          'status': 'active',
+          'canUseApp': true,
+          'organizationRole': 'admin',
+          'unitRole': 'manager',
+        },
+        'currentOrganization': {'id': 'org-1', 'name': 'ShiftFlow Cafe'},
+        'currentUnit': {'id': 'unit-1', 'name': '本部'},
+      },
+    );
+    final container = ProviderContainer(
+      overrides: [
+        routeDataRepositoryProvider.overrideWithValue(repo),
+        bootstrapDataProvider.overrideWith((ref) async => repo.bootstrapData),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    await _pumpScreen(tester, container: container, child: const HomeScreen());
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('現在の組織: ShiftFlow Cafe'), findsOneWidget);
+    expect(find.textContaining('現在地ユニット: 本部'), findsOneWidget);
+    expect(find.text('管理要約'), findsOneWidget);
+    expect(find.text('承認待ち'), findsWidgets);
   });
 
   testWidgets('MessagesScreen updates read icon after toggle action', (
@@ -492,7 +817,10 @@ void main() {
       toggleReadResponse: const {'isRead': true},
     );
     final container = ProviderContainer(
-      overrides: [routeDataRepositoryProvider.overrideWithValue(repo)],
+      overrides: [
+        routeDataRepositoryProvider.overrideWithValue(repo),
+        bootstrapDataProvider.overrideWith((ref) async => repo.bootstrapData),
+      ],
     );
     addTearDown(container.dispose);
 
@@ -512,13 +840,19 @@ void main() {
     expect(find.byIcon(Icons.mark_email_read_outlined), findsOneWidget);
   });
 
-  testWidgets('MessagesScreen filters by folder and unread only', (
+  testWidgets('MessagesScreen filters by folder', (
     tester,
   ) async {
     final repo = _FakeRouteDataRepository(
+      bootstrapData: const {
+        'currentUnit': {'id': 'unit-1', 'name': '新宿店'},
+        'availableUnits': [
+          {'id': 'unit-1', 'name': '新宿店', 'pathText': '本部 / 新宿店'},
+        ],
+      },
       folders: const [
-        {'id': 'folder-1', 'name': '連絡'},
-        {'id': 'folder-2', 'name': '運用'},
+        {'id': 'folder-1', 'name': '連絡', 'unit_id': 'unit-1'},
+        {'id': 'folder-2', 'name': '運用', 'unit_id': 'unit-1'},
       ],
       messages: const [
         {
@@ -526,6 +860,7 @@ void main() {
           'title': '未読メッセージ',
           'body': '未読',
           'isRead': false,
+          'message_scope': 'shared',
           'folder_id': 'folder-1',
         },
         {
@@ -533,6 +868,7 @@ void main() {
           'title': '既読メッセージ',
           'body': '既読',
           'isRead': true,
+          'message_scope': 'shared',
           'folder_id': 'folder-1',
         },
         {
@@ -540,12 +876,16 @@ void main() {
           'title': '別フォルダ',
           'body': '未読',
           'isRead': false,
+          'message_scope': 'shared',
           'folder_id': 'folder-2',
         },
       ],
     );
     final container = ProviderContainer(
-      overrides: [routeDataRepositoryProvider.overrideWithValue(repo)],
+      overrides: [
+        routeDataRepositoryProvider.overrideWithValue(repo),
+        bootstrapDataProvider.overrideWith((ref) async => repo.bootstrapData),
+      ],
     );
     addTearDown(container.dispose);
 
@@ -556,11 +896,12 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    expect(find.text('ALL'), findsOneWidget);
     expect(find.text('未読メッセージ'), findsOneWidget);
     expect(find.text('既読メッセージ'), findsOneWidget);
     expect(find.text('別フォルダ'), findsOneWidget);
 
-    await tester.tap(find.byType(DropdownButtonFormField<String?>).first);
+    await tester.tap(find.text('Message'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('連絡').last);
     await tester.pumpAndSettle();
@@ -569,11 +910,6 @@ void main() {
     expect(find.text('既読メッセージ'), findsOneWidget);
     expect(find.text('別フォルダ'), findsNothing);
 
-    await tester.tap(find.text('未読のみ'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('未読メッセージ'), findsOneWidget);
-    expect(find.text('既読メッセージ'), findsNothing);
   });
 
   testWidgets('TasksScreen switches scope between My, Created, All', (
@@ -606,7 +942,10 @@ void main() {
       ],
     );
     final container = ProviderContainer(
-      overrides: [routeDataRepositoryProvider.overrideWithValue(repo)],
+      overrides: [
+        routeDataRepositoryProvider.overrideWithValue(repo),
+        bootstrapDataProvider.overrideWith((ref) async => repo.bootstrapData),
+      ],
     );
     addTearDown(container.dispose);
 
@@ -660,7 +999,10 @@ void main() {
       ],
     );
     final container = ProviderContainer(
-      overrides: [routeDataRepositoryProvider.overrideWithValue(repo)],
+      overrides: [
+        routeDataRepositoryProvider.overrideWithValue(repo),
+        bootstrapDataProvider.overrideWith((ref) async => repo.bootstrapData),
+      ],
     );
     addTearDown(container.dispose);
 
@@ -747,7 +1089,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(repo.downloadAttachmentIds, ['attachment-1']);
-    expect(launcher.launchedUris.single.toString(), 'https://example.com/attachment-1');
+    expect(
+      launcher.launchedUris.single.toString(),
+      'https://example.com/attachment-1',
+    );
   });
 
   testWidgets('SettingsScreen saves profile, language and theme', (
@@ -805,22 +1150,15 @@ void main() {
   testWidgets('MessagesScreen marks selected messages as read', (tester) async {
     final repo = _FakeRouteDataRepository(
       messages: const [
-        {
-          'id': 'message-1',
-          'title': '未読1',
-          'body': 'body',
-          'isRead': false,
-        },
-        {
-          'id': 'message-2',
-          'title': '未読2',
-          'body': 'body',
-          'isRead': false,
-        },
+        {'id': 'message-1', 'title': '未読1', 'body': 'body', 'isRead': false},
+        {'id': 'message-2', 'title': '未読2', 'body': 'body', 'isRead': false},
       ],
     );
     final container = ProviderContainer(
-      overrides: [routeDataRepositoryProvider.overrideWithValue(repo)],
+      overrides: [
+        routeDataRepositoryProvider.overrideWithValue(repo),
+        bootstrapDataProvider.overrideWith((ref) async => repo.bootstrapData),
+      ],
     );
     addTearDown(container.dispose);
 
@@ -848,12 +1186,7 @@ void main() {
   ) async {
     final repo = _FakeRouteDataRepository(
       messages: const [
-        {
-          'id': 'message-1',
-          'title': '連絡',
-          'body': '一覧本文',
-          'isRead': false,
-        },
+        {'id': 'message-1', 'title': '連絡', 'body': '一覧本文', 'isRead': false},
       ],
       messageDetails: const {
         'message-1': {
@@ -931,11 +1264,7 @@ void main() {
     await _pumpScreen(tester, container: container, child: const AdminScreen());
     await tester.pumpAndSettle();
 
-    await tester.drag(find.byType(TabBarView), const Offset(-600, 0));
-    await tester.pumpAndSettle();
-    await tester.drag(find.byType(TabBarView), const Offset(-600, 0));
-    await tester.pumpAndSettle();
-    await tester.drag(find.byType(TabBarView), const Offset(-600, 0));
+    await tester.tap(find.text('定型文'));
     await tester.pumpAndSettle();
     expect(find.text('朝会'), findsOneWidget);
 
@@ -969,5 +1298,235 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('権限がありません。'), findsOneWidget);
+  });
+
+  testWidgets('AdminScreen approves join requests and creates invites', (
+    tester,
+  ) async {
+    final repo = _FakeRouteDataRepository(
+      joinRequests: const [
+        {
+          'id': 'jr-1',
+          'status': 'pending',
+          'requested_code': 'SHIFT-001',
+          'request_message': '参加したいです',
+          'users': {'email': 'staff@example.com', 'display_name': 'スタッフ'},
+        },
+      ],
+      units: const [
+        {'id': 'unit-1', 'name': '本部', 'path_text': '本部', 'is_active': true},
+      ],
+    );
+    final container = ProviderContainer(
+      overrides: [
+        routeDataRepositoryProvider.overrideWithValue(repo),
+        isManagerOrAdminProvider.overrideWith((ref) => true),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    await _pumpScreen(tester, container: container, child: const AdminScreen());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('参加申請'));
+    await tester.pumpAndSettle();
+    expect(find.text('スタッフ'), findsOneWidget);
+    await tester.tap(find.text('承認'));
+    await tester.pumpAndSettle();
+    expect(repo.approvedJoinRequestIds, ['jr-1']);
+
+    await tester.ensureVisible(find.text('招待'));
+    await tester.tap(find.text('招待'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('招待を作成'));
+    await tester.pumpAndSettle();
+    final inviteDialog = find.byType(AlertDialog).last;
+    final inviteFields = find.descendant(
+      of: inviteDialog,
+      matching: find.byType(TextField),
+    );
+    await tester.enterText(inviteFields.first, '店舗マネージャー向け');
+    await tester.tap(find.text('作成').last);
+    await tester.pumpAndSettle();
+
+    expect(repo.createdInviteLabels, ['店舗マネージャー向け']);
+  });
+
+  testWidgets('ParticipationScreen searches organizations and requests join', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(900, 1400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    final repo = _FakeRouteDataRepository(
+      bootstrapData: const {
+        'participation': {
+          'status': 'unaffiliated',
+          'canUseApp': false,
+          'organizationRole': 'guest',
+          'unitRole': 'none',
+        },
+        'availableOrganizations': [],
+        'availableUnits': [],
+      },
+      searchResultsByKeyword: const {
+        'SHIFT': [
+          {
+            'id': 'org-1',
+            'name': 'ShiftFlow Cafe',
+            'organization_code': 'SHIFT',
+          },
+        ],
+      },
+    );
+    final container = ProviderContainer(
+      overrides: [
+        routeDataRepositoryProvider.overrideWithValue(repo),
+        bootstrapDataProvider.overrideWith((ref) async => repo.bootstrapData),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    await _pumpScreen(
+      tester,
+      container: container,
+      child: const ParticipationScreen(),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField).at(0), 'SHIFT');
+    await tester.enterText(find.byType(TextField).at(1), 'よろしくお願いします');
+    await tester.ensureVisible(find.text('組織を検索'));
+    await tester.tap(find.text('組織を検索'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('ShiftFlow Cafe'), findsOneWidget);
+
+    await tester.tap(find.text('参加申請'));
+    await tester.pumpAndSettle();
+
+    expect(repo.requestedJoinPayloads, hasLength(1));
+    expect(repo.requestedJoinPayloads.first['organizationId'], 'org-1');
+    expect(repo.requestedJoinPayloads.first['organizationCode'], 'SHIFT');
+  });
+
+  testWidgets('ParticipationScreen accepts invite token', (tester) async {
+    tester.view.physicalSize = const Size(900, 1400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    final repo = _FakeRouteDataRepository(
+      bootstrapData: const {
+        'participation': {
+          'status': 'revoked',
+          'canUseApp': false,
+          'organizationRole': 'member',
+          'unitRole': 'none',
+        },
+        'availableOrganizations': [],
+        'availableUnits': [],
+      },
+    );
+    final container = ProviderContainer(
+      overrides: [
+        routeDataRepositoryProvider.overrideWithValue(repo),
+        bootstrapDataProvider.overrideWith((ref) async => repo.bootstrapData),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    await _pumpScreen(
+      tester,
+      container: container,
+      child: const ParticipationScreen(),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField).last, 'invite-token-123');
+    await tester.ensureVisible(find.text('招待を受諾'));
+    await tester.tap(find.text('招待を受諾'));
+    await tester.pumpAndSettle();
+
+    expect(repo.acceptedInviteTokens, ['invite-token-123']);
+  });
+
+  testWidgets('MessagesScreen confirms DM send with multiple recipients', (
+    tester,
+  ) async {
+    final repo = _FakeRouteDataRepository(
+      bootstrapData: const {
+        'participation': {
+          'status': 'active',
+          'canUseApp': true,
+          'organizationRole': 'member',
+          'unitRole': 'member',
+        },
+        'currentOrganization': {'id': 'org-1', 'name': 'ShiftFlow Demo Org'},
+        'currentUnit': {'id': 'unit-1', 'name': '本部'},
+        'availableUnits': [
+          {
+            'id': 'unit-1',
+            'name': '本部',
+            'pathText': '本部',
+            'isCurrent': true,
+            'role': 'member',
+          },
+        ],
+      },
+      users: const [
+        {
+          'userId': 'user-1',
+          'displayName': '田中',
+          'email': 'tanaka@example.com',
+        },
+        {'userId': 'user-2', 'displayName': '佐藤', 'email': 'sato@example.com'},
+      ],
+    );
+    final container = ProviderContainer(
+      overrides: [routeDataRepositoryProvider.overrideWithValue(repo)],
+    );
+    addTearDown(container.dispose);
+
+    await _pumpScreen(
+      tester,
+      container: container,
+      child: const MessagesScreen(),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('DM'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+
+    final createDialog = find.byType(AlertDialog).last;
+    await tester.tap(
+      find.descendant(of: createDialog, matching: find.text('田中')),
+    );
+    await tester.tap(
+      find.descendant(of: createDialog, matching: find.text('佐藤')),
+    );
+    final dialogFields = find.descendant(
+      of: createDialog,
+      matching: find.byType(TextField),
+    );
+    await tester.enterText(dialogFields.first, 'DM確認');
+    await tester.enterText(dialogFields.last, '複数宛先テスト');
+    await tester.tap(find.text('保存').last);
+    await tester.pumpAndSettle();
+    expect(find.text('送信内容の確認'), findsOneWidget);
+    await tester.tap(find.text('送信する'));
+    await tester.pumpAndSettle();
+
+    expect(repo.sentMessages, hasLength(1));
+    expect(repo.sentMessages.first['message_scope'], 'direct');
+    expect(repo.sentMessages.first['recipientUserIds'], ['user-1', 'user-2']);
   });
 }

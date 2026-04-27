@@ -1,92 +1,120 @@
-# SHIFTFLOW Flutter Architecture
+# SHIFTFLOW Flutter Architecture v1.1
 
 ## 1. 全体像
 - クライアント: Flutter（iOS/Android/Web）
 - BFF/API: Supabase Edge Function `api`
-- 認証: Supabase Auth（Magic Link / Password）
+- 認証: Supabase Auth（Password。Magic Link は履歴扱い）
 - DB: Supabase Postgres（RLS有効）
 - Storage: Supabase Storage（`profiles`, `attachments`）
 
-## 2. レイヤー構成
+## 2. アプリシェル
+- 認証状態と参加状態を分離して扱う。
+- 主な状態:
+  - 未認証
+  - 認証済み未参加
+  - 参加申請中
+  - active
+  - suspended
+  - revoked
+- `active` のみ主要業務シェルへ遷移する。
+- `未参加 / 申請中 / suspended / revoked` は状態別案内画面へ遷移する。
+
+## 3. グローバル文脈
+- `currentOrganization`
+- `currentUnit`
+- `organizationState`
+- `availableOrganizations`
+- `availableUnits`
+- `navigationCapabilities`
+- `badgeCounts`
+
+これらは bootstrap 取得後にグローバル Provider へ保持する。
+
+## 4. レイヤー構成
 1. Presentation
-- 画面: `Auth`, `Home`, `Tasks`, `Messages`, `Settings`, `Admin`
-- `go_router` で遷移、ログイン状態でガード
+- 画面:
+  - Auth / Participation
+  - Home
+  - Tasks
+  - Messages
+  - Settings
+  - Admin
+- モバイルと PC でレイアウトを分岐する
 
 2. Application
-- Riverpod Provider/Controller で画面状態を管理
-- 画面ごとのユースケースを関数化
+- Riverpod Provider/Controller で状態管理
+- `currentOrganization` / `currentUnit` の切替をアプリ横断で扱う
+- DM と共有メッセージは状態を分離する
 
 3. Data
 - `ApiClient` が `supabase.functions.invoke('api')` を実行
-- `RouteDataRepository` が route名を隠蔽しUIへDTOを返す
+- Repository は route 名を隠蔽し DTO を返す
 
 4. Backend
-- `supabase/functions/api/index.ts` が routeディスパッチ
-- DBアクセスは service role client で実行、アプリ権限は明示的に検証
+- route ディスパッチ
+- DBアクセス
+- 文脈検証
+- RLS / 権限検証
 
-## 3. ディレクトリ設計
-```text
-lib/
-  core/
-    api/
-    config/
-    providers/
-  features/
-    auth/
-    home/
-    tasks/
-    messages/
-    settings/
-    admin/
-    shared/
-  l10n/
-supabase/
-  migrations/
-  functions/
-  tests/
-```
+## 5. 画面責務
+### Home
+- モバイル:
+  - すぐ確認すべき実データを少数表示
+- PC:
+  - 俯瞰/比較/補助情報を同時表示
 
-## 4. 認証・認可フロー
-1. ユーザーは Magic Link または Password でログインする
-2. Supabase Auth がセッションを作成・保持する
-3. アプリ起動時は Supabase の保持セッションを参照し、未認証時のみ `/auth` を表示する
-4. セッション作成後、アプリは `users` と `memberships` からアクセス文脈を解決する
-5. route実行前に `role/status/org` を検証する
-6. `onAuthStateChange` でルーターを再評価し、サインアウトや失効時は保護ルートから外す
+### Messages
+- `currentUnit` を前提に表示する
+- タブ:
+  - 全て
+  - 個人
+  - 主要フォルダ
+  - 上位ユニット
+  - 下位ユニット
 
-## 5. ルーティング
+### Admin
+- モバイル:
+  - 段階表示
+- PC:
+  - 分割表示
+
+## 6. ルーティング
 - `/auth`
+- `/participation`
 - `/home`
 - `/tasks`
 - `/messages`
 - `/settings`
 - `/admin`
 
-未ログイン時は `/auth` にリダイレクト。
-ログイン後の主要画面は `ShellRoute` 配下で保持し、下部メニューが画面遷移アニメーションに巻き込まれない構成とする。
-有効セッションが残っている場合は `/auth` を経由せず `/home` へ戻す。
+未ログイン時は `/auth`。
+認証済みだが未参加/申請中などは `/participation`。
+主要画面は `ShellRoute` 配下で保持し、モバイルでは下部ナビ + 中央 FAB を維持する。
 
-## 6. 例外処理方針
-- APIは `{ ok, code, reason, result }` 形式を返す。
-- Flutter側は `ApiException` に集約し、UIに簡潔なエラー表示を行う。
-- 監査対象操作は `audit_logs` に記録する。
+## 7. レイアウト分岐ポイント
+- Home
+- Messages
+- Admin
+- 一覧 + 詳細の分割表示が必要な画面
 
-## 7. i18n
+モバイルでは段階表示、PCでは一覧/詳細/補助情報の分割表示を基本とする。
+
+## 8. 例外処理
+- API は `{ ok, code, reason, result }`
+- UI は `ApiException` に集約する
+- 状態別表示:
+  - 0件
+  - 通信失敗
+  - 権限不足
+  - 承認待ち
+  - suspended / revoked
+
+## 9. i18n
 - ARB: `lib/l10n/app_ja.arb`, `lib/l10n/app_en.arb`
 - 生成: `flutter gen-l10n`
 - 言語設定はローカル保存 + `saveUserSettings` でサーバ同期
 
-## 7.1 セッション保持とローカル設定の境界
-- 認証セッションは Supabase Auth が保持する
-- `theme_mode` と `app_locale` は `SharedPreferences` に保存する
-- 認証セッションが切れても、表示テーマと言語はローカル設定として保持する
-- 逆に、言語やテーマを変更しても認証セッションは再作成しない
-
-## 8. PWA差分の扱い
-- 現状差分は [PWA差分分析_2026-03-26.md](./PWA差分分析_2026-03-26.md) で管理する。
-- 特に `Messages` の作成導線、`Tasks` の複数一覧、`Settings` のプロフィール画像は未完了として追跡する。
-
-## 9. 関連文書
+## 10. 関連文書
+- [要件定義_v1.1_草案.md](./要件定義_v1.1_草案.md)
 - [API定義.md](./API定義.md)
 - [データベーススキーマ.md](./データベーススキーマ.md)
-- [セットアップガイド.md](./セットアップガイド.md)

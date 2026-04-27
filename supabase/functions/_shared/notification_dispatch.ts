@@ -1,7 +1,13 @@
 import { isTokenInvalidError, sendFcmMessage } from "./fcm.ts";
 import { createServiceClient } from "./supabase.ts";
 
-type DispatchEvent = "new_message" | "new_task_assigned" | "task_due_tomorrow";
+type DispatchEvent =
+  | "new_message"
+  | "new_direct_message"
+  | "new_task_assigned"
+  | "task_due_tomorrow"
+  | "join_request_approved"
+  | "organization_invite_accepted";
 
 type QueueRow = {
   id: string;
@@ -78,6 +84,38 @@ async function resolveNotificationPayload(
 ) {
   if (row.event_type === "new_message") {
     return resolveMessageContent(service, row.source_id);
+  }
+  if (row.event_type === "new_direct_message") {
+    const content = await resolveMessageContent(service, row.source_id);
+    if (!content) return null;
+    return {
+      ...content,
+      title: content.title.replace("新規メッセージ", "個人メッセージ"),
+      data: {
+        ...content.data,
+        eventType: "new_direct_message",
+      },
+    };
+  }
+  if (row.event_type === "join_request_approved") {
+    return {
+      title: "参加申請が承認されました",
+      body: "ShiftFlow を利用できる状態になりました。",
+      data: {
+        eventType: "join_request_approved",
+        sourceId: row.source_id,
+      },
+    };
+  }
+  if (row.event_type === "organization_invite_accepted") {
+    return {
+      title: "組織招待が受理されました",
+      body: "新しい組織での利用準備が整いました。",
+      data: {
+        eventType: "organization_invite_accepted",
+        sourceId: row.source_id,
+      },
+    };
   }
   return resolveTaskContent(service, row.source_id, row.event_type);
 }

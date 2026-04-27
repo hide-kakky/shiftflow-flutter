@@ -23,8 +23,40 @@ class _MockUser extends Mock implements User {}
 class _MockSession extends Mock implements Session {}
 
 class _FakeRouteDataRepository extends RouteDataRepository {
-  _FakeRouteDataRepository()
-      : super(ApiClient(_MockSupabaseClient()));
+  _FakeRouteDataRepository({
+    this.bootstrapData = const {
+      'participation': {
+        'status': 'active',
+        'canUseApp': true,
+        'organizationRole': 'member',
+        'unitRole': 'member',
+      },
+      'currentOrganization': {'id': 'org-1', 'name': 'ShiftFlow Cafe'},
+      'currentUnit': {'id': 'unit-1', 'name': '本部'},
+      'availableOrganizations': [],
+      'availableUnits': [],
+      'navigation': {
+        'home': true,
+        'tasks': true,
+        'messages': true,
+        'admin': false,
+        'settings': true,
+      },
+      'badges': {
+        'allUnreadMessages': 1,
+        'currentUnitUnreadMessages': 1,
+        'openTasks': 2,
+        'pendingJoinRequests': 0,
+      },
+      'overview': {
+        'openTaskCount': 2,
+        'unreadMessageCount': 1,
+        'pendingUserCount': 0,
+      },
+    },
+  }) : super(ApiClient(_MockSupabaseClient()));
+
+  final Map<String, dynamic> bootstrapData;
 
   @override
   Future<Map<String, dynamic>> getHomeContent() async {
@@ -50,7 +82,7 @@ class _FakeRouteDataRepository extends RouteDataRepository {
   }
 
   @override
-  Future<Map<String, dynamic>> getBootstrapData() async => const {};
+  Future<Map<String, dynamic>> getBootstrapData() async => bootstrapData;
 }
 
 Future<void> _pumpRouter(
@@ -89,14 +121,16 @@ void main() {
     when(() => client.auth).thenReturn(auth);
     when(() => auth.currentSession).thenReturn(null);
     when(() => auth.currentUser).thenReturn(null);
-    when(() => auth.onAuthStateChange).thenAnswer(
-      (_) => const Stream<AuthState>.empty(),
-    );
+    when(
+      () => auth.onAuthStateChange,
+    ).thenAnswer((_) => const Stream<AuthState>.empty());
 
     final container = ProviderContainer(
       overrides: [
         supabaseClientProvider.overrideWithValue(client),
-        routeDataRepositoryProvider.overrideWithValue(_FakeRouteDataRepository()),
+        routeDataRepositoryProvider.overrideWithValue(
+          _FakeRouteDataRepository(),
+        ),
       ],
     );
     addTearDown(container.dispose);
@@ -118,14 +152,16 @@ void main() {
     when(() => auth.currentSession).thenReturn(session);
     when(() => auth.currentUser).thenReturn(user);
     when(() => user.email).thenReturn('tester@example.com');
-    when(() => auth.onAuthStateChange).thenAnswer(
-      (_) => const Stream<AuthState>.empty(),
-    );
+    when(
+      () => auth.onAuthStateChange,
+    ).thenAnswer((_) => const Stream<AuthState>.empty());
 
     final container = ProviderContainer(
       overrides: [
         supabaseClientProvider.overrideWithValue(client),
-        routeDataRepositoryProvider.overrideWithValue(_FakeRouteDataRepository()),
+        routeDataRepositoryProvider.overrideWithValue(
+          _FakeRouteDataRepository(),
+        ),
       ],
     );
     addTearDown(container.dispose);
@@ -134,6 +170,67 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('対応中のタスク'), findsWidgets);
+  });
+
+  testWidgets('redirects authenticated pending users to /participation', (
+    tester,
+  ) async {
+    final client = _MockSupabaseClient();
+    final auth = _MockGoTrueClient();
+    final session = _MockSession();
+    final user = _MockUser();
+    when(() => client.auth).thenReturn(auth);
+    when(() => auth.currentSession).thenReturn(session);
+    when(() => auth.currentUser).thenReturn(user);
+    when(() => user.email).thenReturn('tester@example.com');
+    when(
+      () => auth.onAuthStateChange,
+    ).thenAnswer((_) => const Stream<AuthState>.empty());
+
+    final container = ProviderContainer(
+      overrides: [
+        supabaseClientProvider.overrideWithValue(client),
+        routeDataRepositoryProvider.overrideWithValue(
+          _FakeRouteDataRepository(
+            bootstrapData: const {
+              'participation': {
+                'status': 'pending',
+                'canUseApp': false,
+                'organizationRole': 'member',
+                'unitRole': 'none',
+              },
+              'currentOrganization': {'id': 'org-1', 'name': 'ShiftFlow Cafe'},
+              'availableOrganizations': [],
+              'availableUnits': [],
+              'navigation': {
+                'home': false,
+                'tasks': false,
+                'messages': false,
+                'admin': false,
+                'settings': true,
+              },
+              'badges': {
+                'allUnreadMessages': 0,
+                'currentUnitUnreadMessages': 0,
+                'openTasks': 0,
+                'pendingJoinRequests': 0,
+              },
+              'overview': {
+                'openTaskCount': 0,
+                'unreadMessageCount': 0,
+                'pendingUserCount': 0,
+              },
+            },
+          ),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    await _pumpRouter(tester, container: container);
+    await tester.pumpAndSettle();
+
+    expect(find.text('参加申請の承認待ちです'), findsOneWidget);
   });
 
   testWidgets('re-evaluates router when auth state changes', (tester) async {
@@ -148,13 +245,17 @@ void main() {
     when(() => client.auth).thenReturn(auth);
     when(() => auth.currentSession).thenAnswer((_) => currentSession);
     when(() => auth.currentUser).thenAnswer((_) => currentUser);
-    when(() => auth.onAuthStateChange).thenAnswer((_) => authStateController.stream);
+    when(
+      () => auth.onAuthStateChange,
+    ).thenAnswer((_) => authStateController.stream);
     when(() => user.email).thenReturn('tester@example.com');
 
     final container = ProviderContainer(
       overrides: [
         supabaseClientProvider.overrideWithValue(client),
-        routeDataRepositoryProvider.overrideWithValue(_FakeRouteDataRepository()),
+        routeDataRepositoryProvider.overrideWithValue(
+          _FakeRouteDataRepository(),
+        ),
       ],
     );
     addTearDown(() async {
